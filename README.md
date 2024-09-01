@@ -1,29 +1,48 @@
-# Create T3 App
+# MindTab
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+**MindTab** is a lightweight and intuitive Chrome extension designed to make goal tracking and micro journaling as effortless as possible. Set as your default new tab, MindTab seamlessly integrates into your daily browsing experience, providing a clutter-free environment to stay focused on what matters most.
 
-## What's next? How do I make an app with this?
+## 🚀 Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- **Streamlined Goal Tracking**: Easily set, view, and update your goals right from your new tab.
+- **Micro Journaling**: Capture your thoughts, ideas, and reflections in a minimalist journaling space.
+- **Unbloated Experience**: MindTab is designed to be simple and effective, without unnecessary features or distractions.
+- **Seamless Integration**: Installed as a Chrome extension, MindTab becomes your new tab, always accessible whenever you open a new browser window.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## 🛠️ Getting Started
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+MindTab is currently in development. Once released, you can install it from the Chrome Web Store and begin using it right away. Stay tuned for updates and new features as we build and refine the app.
 
-## Learn More
+### Installation
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+_This section will be updated once the extension is available on the Chrome Web Store._
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## 📝 Roadmap
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- [ ] Core functionality for goal tracking
+- [ ] Micro journaling capabilities
+- [ ] Customizable settings and themes
+- [ ] User authentication and data sync across devices
+- [ ] Analytics and progress tracking
 
-## How do I deploy this?
+## 🤝 Contributing
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+We welcome contributions! Please check back later for details on how you can contribute to the development of MindTab.
+
+## 📄 License
+
+MindTab is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## 👥 Community and Support
+
+For any questions, suggestions, or to stay up-to-date with the latest news, please join our community:
+
+- **Twitter**: [@sushant_codes](https://x.com/sushant_codes)
+
+## 📢 Disclaimer
+
+This README is a placeholder and will be updated as MindTab continues to develop. Stay tuned for more content and updates!
+
+---
+
+Thanks for checking out MindTab! We're excited to help you achieve your goals and capture your thoughts in the most efficient way possible.
