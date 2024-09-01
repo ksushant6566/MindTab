@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["trackio_*"],
+  tablesFilter: ["mindmap_*"],
 } satisfies Config;
