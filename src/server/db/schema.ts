@@ -2,11 +2,13 @@ import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
+  pgEnum,
   pgTableCreator,
   primaryKey,
   serial,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -39,6 +41,192 @@ export const posts = createTable(
     nameIndex: index("name_idx").on(example.name),
   }),
 );
+
+export const goalStatusEnum = pgEnum("goal_status", [
+  "pending",
+  "in_progress",
+  "completed",
+]);
+
+export const goalPriorityEnum = pgEnum("goal_priority", [
+  "low",
+  "medium",
+  "high",
+]);
+
+export const goalImpactEnum = pgEnum("goal_impact", ["low", "medium", "high"]);
+
+export const goalCategoryEnum = pgEnum("goal_category", [
+  "health",
+  "finance",
+  "career",
+  "relationships",
+  "personal_growth",
+]);
+
+export const goalTypeEnum = pgEnum("goal_type", [
+  "one_time",
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+]);
+
+export const goals = createTable(
+  "goal",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 256 }),
+    description: text("description"),
+    status: goalStatusEnum("status").default("pending").notNull(),
+    priority: goalPriorityEnum("priority").default("medium").notNull(),
+    impact: goalImpactEnum("impact").default("medium").notNull(),
+    category: goalCategoryEnum("category").default("health").notNull(),
+    type: goalTypeEnum("type").default("one_time").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (goal) => ({
+    userTitleIndex: uniqueIndex("user_title_idx").on(goal.userId, goal.title),
+  }),
+);
+
+export const habitFrequencyEnum = pgEnum("habit_frequency", [
+  "daily",
+  "weekly",
+]);
+
+export const habits = createTable(
+  "habit",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 256 }),
+    description: text("description"),
+    frequency: habitFrequencyEnum("frequency").default("daily").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (habit) => ({
+    userTitleIndex: uniqueIndex("user_title_idx").on(habit.userId, habit.title),
+  }),
+);
+
+export const habitTrackerEnum = pgEnum("habit_tracker", [
+  "daily",
+  "weekly",
+  "monthly",
+]);
+
+export const habitTrackerStatusEnum = pgEnum("habit_tracker_status", [
+  "pending",
+  "completed",
+]);
+
+export const habitTracker = createTable(
+  "habit_tracker",
+  {
+    id: serial("id").primaryKey(),
+    habitId: integer("habit_id")
+      .notNull()
+      .references(() => habits.id),
+    status: habitTrackerStatusEnum("status").default("pending").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (habitTracker) => ({
+    habitIdIdx: index("habit_id_idx").on(habitTracker.habitId),
+    userIdIdx: index("user_id_idx").on(habitTracker.userId),
+  }),
+);
+
+export const habitTrackerRelations = relations(habitTracker, ({ one }) => ({
+  habit: one(habits, {
+    fields: [habitTracker.habitId],
+    references: [habits.id],
+  }),
+  user: one(users, { fields: [habitTracker.userId], references: [users.id] }),
+}));
+
+export const journal = createTable(
+  "journal",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 256 }),
+    content: text("content"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+      () => new Date(),
+    ),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (journal) => ({
+    userTitleIndex: uniqueIndex("user_title_idx").on(
+      journal.userId,
+      journal.title,
+    ),
+  }),
+);
+
+export const journalRelations = relations(journal, ({ one }) => ({
+  user: one(users, { fields: [journal.userId], references: [users.id] }),
+}));
+
+/*{
+white space
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+white space
+}*/
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 })
