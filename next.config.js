@@ -5,6 +5,15 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  images: {
+    remotePatterns: [
+      { hostname: "avatars.githubusercontent.com" },
+      { hostname: "lh3.googleusercontent.com" },
+      { hostname: "res.cloudinary.com" },
+      { hostname: "avatars.example.com" },
+    ],
+  },
+};
 
 export default config;
