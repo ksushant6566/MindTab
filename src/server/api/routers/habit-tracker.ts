@@ -7,7 +7,7 @@ import {
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-export const habitsRouter = createTRPCRouter({
+export const habitTrackerRouter = createTRPCRouter({
   create: protectedProcedure
     .input(CreateHabitTrackerDto)
     .mutation(async ({ ctx, input }) => {
