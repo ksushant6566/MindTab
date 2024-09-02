@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "mindmap_goal" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "mindmap_habit_tracker" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"habit_id" integer NOT NULL,
+	"habit_ids" uuid NOT NULL,
 	"status" "habit_tracker_status" DEFAULT 'pending' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp with time zone,
@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS "mindmap_journal" (
 	"user_id" varchar(255) NOT NULL
 );
 --> statement-breakpoint
+DROP TABLE "mindmap_post";--> statement-breakpoint
 ALTER TABLE "mindmap_user" ADD COLUMN "created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL;--> statement-breakpoint
 ALTER TABLE "mindmap_user" ADD COLUMN "updated_at" timestamp with time zone;--> statement-breakpoint
 DO $$ BEGIN
@@ -97,7 +98,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "mindmap_habit_tracker" ADD CONSTRAINT "mindmap_habit_tracker_habit_id_mindmap_habit_id_fk" FOREIGN KEY ("habit_id") REFERENCES "public"."mindmap_habit"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "mindmap_habit_tracker" ADD CONSTRAINT "mindmap_habit_tracker_habit_ids_mindmap_habit_id_fk" FOREIGN KEY ("habit_ids") REFERENCES "public"."mindmap_habit"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -122,7 +123,7 @@ END $$;
 --> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "goal_title_user_id_unique_idx" ON "mindmap_goal" USING btree ("user_id","title");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "goal_user_id_idx" ON "mindmap_goal" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "habit_tracker_habit_id_user_id_idx" ON "mindmap_habit_tracker" USING btree ("habit_id","user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "habit_tracker_habit_id_user_id_idx" ON "mindmap_habit_tracker" USING btree ("habit_ids","user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "habit_title_user_id_unique_idx" ON "mindmap_habit" USING btree ("user_id","title");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "habit_user_id_idx" ON "mindmap_habit" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "journal_title_user_id_unique_idx" ON "mindmap_journal" USING btree ("user_id","title");--> statement-breakpoint

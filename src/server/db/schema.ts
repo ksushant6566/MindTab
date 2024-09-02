@@ -5,7 +5,6 @@ import {
   pgEnum,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
   uniqueIndex,
@@ -21,27 +20,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const createTable = pgTableCreator((name) => `mindmap_${name}`);
-
-export const posts = createTable(
-  "post",
-  {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("created_by", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (example) => ({
-    createdByIdIdx: index("created_by_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
 
 export const goalStatusEnum = pgEnum("goal_status", [
   "pending",
@@ -149,7 +127,7 @@ export const habitTracker = createTable(
   "habit_tracker",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    habitId: integer("habit_id")
+    habitId: uuid("habit_id")
       .notNull()
       .references(() => habits.id),
     status: habitTrackerStatusEnum("status").default("pending").notNull(),

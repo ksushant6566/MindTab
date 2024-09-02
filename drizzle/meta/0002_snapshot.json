@@ -1,6 +1,6 @@
 {
-  "id": "fafcc8c4-b33b-451a-bcf9-c8e743b9179a",
-  "prevId": "1a8aa85f-7a4d-400f-b1a0-a9616caba1b2",
+  "id": "8963ed49-ece2-4738-a53a-f21ff004f9cc",
+  "prevId": "fafcc8c4-b33b-451a-bcf9-c8e743b9179a",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -268,8 +268,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "habit_ids": {
-          "name": "habit_ids",
+        "habit_id": {
+          "name": "habit_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -307,7 +307,7 @@
           "name": "habit_tracker_habit_id_user_id_idx",
           "columns": [
             {
-              "expression": "habit_ids",
+              "expression": "habit_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -326,12 +326,12 @@
         }
       },
       "foreignKeys": {
-        "mindmap_habit_tracker_habit_ids_mindmap_habit_id_fk": {
-          "name": "mindmap_habit_tracker_habit_ids_mindmap_habit_id_fk",
+        "mindmap_habit_tracker_habit_id_mindmap_habit_id_fk": {
+          "name": "mindmap_habit_tracker_habit_id_mindmap_habit_id_fk",
           "tableFrom": "mindmap_habit_tracker",
           "tableTo": "mindmap_habit",
           "columnsFrom": [
-            "habit_ids"
+            "habit_id"
           ],
           "columnsTo": [
             "id"
