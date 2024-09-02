@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
@@ -75,7 +76,7 @@ export const goalTypeEnum = pgEnum("goal_type", [
 export const goals = createTable(
   "goal",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     title: varchar("title", { length: 256 }),
     description: text("description"),
     status: goalStatusEnum("status").default("pending").notNull(),
@@ -94,7 +95,11 @@ export const goals = createTable(
       .references(() => users.id),
   },
   (goal) => ({
-    userTitleIndex: uniqueIndex("user_title_idx").on(goal.userId, goal.title),
+    userTitleIndex: uniqueIndex("goal_title_user_id_unique_idx").on(
+      goal.userId,
+      goal.title,
+    ),
+    userIdIdx: index("goal_user_id_idx").on(goal.userId),
   }),
 );
 
@@ -106,7 +111,7 @@ export const habitFrequencyEnum = pgEnum("habit_frequency", [
 export const habits = createTable(
   "habit",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     title: varchar("title", { length: 256 }),
     description: text("description"),
     frequency: habitFrequencyEnum("frequency").default("daily").notNull(),
@@ -121,7 +126,11 @@ export const habits = createTable(
       .references(() => users.id),
   },
   (habit) => ({
-    userTitleIndex: uniqueIndex("user_title_idx").on(habit.userId, habit.title),
+    userTitleIndex: uniqueIndex("habit_title_user_id_unique_idx").on(
+      habit.userId,
+      habit.title,
+    ),
+    userIdIdx: index("habit_user_id_idx").on(habit.userId),
   }),
 );
 
@@ -139,7 +148,7 @@ export const habitTrackerStatusEnum = pgEnum("habit_tracker_status", [
 export const habitTracker = createTable(
   "habit_tracker",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     habitId: integer("habit_id")
       .notNull()
       .references(() => habits.id),
@@ -155,8 +164,10 @@ export const habitTracker = createTable(
       .references(() => users.id),
   },
   (habitTracker) => ({
-    habitIdIdx: index("habit_id_idx").on(habitTracker.habitId),
-    userIdIdx: index("user_id_idx").on(habitTracker.userId),
+    habitIdUserIdIdx: index("habit_tracker_habit_id_user_id_idx").on(
+      habitTracker.habitId,
+      habitTracker.userId,
+    ),
   }),
 );
 
@@ -171,7 +182,7 @@ export const habitTrackerRelations = relations(habitTracker, ({ one }) => ({
 export const journal = createTable(
   "journal",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
     title: varchar("title", { length: 256 }),
     content: text("content"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -185,10 +196,11 @@ export const journal = createTable(
       .references(() => users.id),
   },
   (journal) => ({
-    userTitleIndex: uniqueIndex("user_title_idx").on(
+    userTitleIndex: uniqueIndex("journal_title_user_id_unique_idx").on(
       journal.userId,
       journal.title,
     ),
+    userIdIdx: index("journal_user_id_idx").on(journal.userId),
   }),
 );
 
@@ -240,6 +252,12 @@ export const users = createTable("user", {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+    () => new Date(),
+  ),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
