@@ -8,7 +8,7 @@ import {
 
 export const CreateGoalDto = z.object({
   title: z.string().min(1),
-  description: z.string().min(1),
+  description: z.string().optional(),
   priority: z.enum(goalPriorityEnum.enumValues),
   impact: z.enum(goalImpactEnum.enumValues),
   category: z.enum(goalCategoryEnum.enumValues),
