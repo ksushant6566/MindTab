@@ -8,10 +8,16 @@ export default async function Component() {
   return (
     <div className="h-screen w-screen space-y-8 p-14 px-20">
       <Header />
-      <div className="grid grid-cols-3 gap-6">
-        <Goals />
-        <Habits />
-        <Journals />
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-4">
+          <Goals />
+        </div>
+        <div className="col-span-5">
+          <Habits />
+        </div>
+        <div className="col-span-3">
+          <Journals />
+        </div>
       </div>
     </div>
   );

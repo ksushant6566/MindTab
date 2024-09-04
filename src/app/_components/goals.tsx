@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
-import { Plus } from "lucide-react";
+import { Edit3, Loader2, Plus, Trash2 } from "lucide-react";
 import { goalTypeEnum } from "~/server/db/schema";
+import { Checkbox } from "~/components/ui/checkbox";
+import { CheckedState } from "@radix-ui/react-checkbox";
 
 export const Goals: React.FC = () => {
   const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery();
@@ -14,13 +16,27 @@ export const Goals: React.FC = () => {
         refetch();
       },
     });
-  const { mutate: updateGoal, isPending: isUpdatingGoal } =
-    api.goals.update.useMutation();
-  const { mutate: deleteGoal, isPending: isDeletingGoal } =
-    api.goals.delete.useMutation();
+  const {
+    mutate: updateGoal,
+    isPending: isUpdatingGoal,
+    variables: updateGoalVariables,
+  } = api.goals.update.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+  const {
+    mutate: deleteGoal,
+    isPending: isDeletingGoal,
+    variables: deleteGoalVariables,
+  } = api.goals.delete.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
 
   const [selectedGoalType, setSelectedGoalType] =
-    useState<(typeof goalTypeEnum.enumValues)[number]>("weekly");
+    useState<(typeof goalTypeEnum.enumValues)[number]>("daily");
 
   const onCreateGoal = () => {
     createGoal({
@@ -33,12 +49,19 @@ export const Goals: React.FC = () => {
     });
   };
 
-  // const onUpdateGoal = (goal: Goal) => {
-  //   updateGoal(goal);
-  // };
+  const toggleGoalStatus = (goalId: string, checked: CheckedState) => {
+    updateGoal({
+      id: goalId,
+      status: checked ? "completed" : "pending",
+    });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    deleteGoal({ id: goalId });
+  };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-6xl font-thin">
@@ -89,20 +112,63 @@ export const Goals: React.FC = () => {
           >
             Weekly
           </Button>
+          <Button
+            size="sm"
+            className="w-20 text-xs"
+            variant={selectedGoalType === "daily" ? "default" : "outline"}
+            onClick={() => setSelectedGoalType("daily")}
+          >
+            Daily
+          </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2 pr-4">
         {goals?.map((goal, i) => (
-          <div key={goal.id} className="flex items-center gap-2">
-            <span className="font-medium">{i + 1}.</span>
-            <div className="flex flex-col space-y-0.5">
-              <h3 className="text-base">
-                <span>{goal.title}</span>
-              </h3>
+          <div key={goal.id} className="group flex justify-between gap-2 py-3">
+            <div className="flex items-start gap-3">
+              {isUpdatingGoal && goal.id === updateGoalVariables?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Checkbox
+                  id={goal.id}
+                  className="h-4 w-4 rounded-full"
+                  checked={goal.status === "completed"}
+                  onCheckedChange={(checked) =>
+                    toggleGoalStatus(goal.id, checked)
+                  }
+                />
+              )}
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor={goal.id}
+                  className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${goal.status === "completed" ? "line-through" : ""}`}
+                >
+                  {goal.title}
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  {goal.description}
+                </p>
+              </div>
+            </div>
+            <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-2 group-hover:opacity-100">
+              <Button size="sm" variant="ghost" className="">
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hover:bg-red-900 active:bg-red-900"
+                onClick={() => handleDeleteGoal(goal.id)}
+                disabled={isDeletingGoal && deleteGoalVariables?.id === goal.id}
+                loading={isDeletingGoal && deleteGoalVariables?.id === goal.id}
+                hideContentWhenLoading
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         ))}
-        <div>
+        <div className="">
           <Button
             onClick={onCreateGoal}
             disabled={isCreatingGoal}
@@ -110,7 +176,7 @@ export const Goals: React.FC = () => {
             size={"sm"}
             className="flex items-center gap-2 text-sm font-normal"
           >
-            Add Goal <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" /> Add Goal
           </Button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import {
   goalImpactEnum,
   goalCategoryEnum,
   goalTypeEnum,
+  goalStatusEnum,
 } from "~/server/db/schema";
 
 export const CreateGoalDto = z.object({
@@ -17,4 +18,5 @@ export const CreateGoalDto = z.object({
 
 export const UpdateGoalDto = CreateGoalDto.partial().extend({
   id: z.string().uuid(),
+  status: z.enum(goalStatusEnum.enumValues),
 });
