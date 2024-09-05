@@ -215,7 +215,7 @@ export const Goals: React.FC = () => {
                           />
                           {goal.impact}
                         </span>
-                        <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300 text-muted-foreground">
+                        <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300">
                           {goal.category}
                         </span>
                       </div>
