@@ -25,5 +25,5 @@ export const CreateGoalDto = ZInsertGoal.omit({ userId: true });
 
 export const UpdateGoalDto = CreateGoalDto.partial().extend({
   id: z.string().uuid(),
-  status: z.enum(goalStatusEnum.enumValues),
+  status: z.enum(goalStatusEnum.enumValues).optional(),
 });
