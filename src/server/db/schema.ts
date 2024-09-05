@@ -28,9 +28,10 @@ export const goalStatusEnum = pgEnum("goal_status", [
 ]);
 
 export const goalPriorityEnum = pgEnum("goal_priority", [
-  "low",
-  "medium",
-  "high",
+  "priority_1",
+  "priority_2",
+  "priority_3",
+  "priority_4",
 ]);
 
 export const goalImpactEnum = pgEnum("goal_impact", ["low", "medium", "high"]);
@@ -40,7 +41,8 @@ export const goalCategoryEnum = pgEnum("goal_category", [
   "finance",
   "career",
   "relationships",
-  "personal_growth",
+  "personal",
+  "work",
 ]);
 
 export const goalTypeEnum = pgEnum("goal_type", [
@@ -58,7 +60,9 @@ export const goals = createTable(
     title: varchar("title", { length: 256 }),
     description: text("description"),
     status: goalStatusEnum("status").default("pending").notNull(),
-    priority: goalPriorityEnum("priority").default("medium").notNull(),
+    priority: goalPriorityEnum("priority")
+      .default(goalPriorityEnum.enumValues[0])
+      .notNull(),
     impact: goalImpactEnum("impact").default("medium").notNull(),
     category: goalCategoryEnum("category").default("health").notNull(),
     type: goalTypeEnum("type").default("one_time").notNull(),

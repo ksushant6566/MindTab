@@ -22,6 +22,20 @@
       "when": 1725258931899,
       "tag": "0002_sweet_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1725546943271,
+      "tag": "0003_complex_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1725546965642,
+      "tag": "0004_keen_ironclad",
+      "breakpoints": true
     }
   ]
 }
