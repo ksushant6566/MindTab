@@ -221,7 +221,7 @@ export const Goals: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-2 group-hover:opacity-100">
+                  <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-1 group-hover:opacity-100">
                     <Button
                       size="sm"
                       variant="ghost"

@@ -1,11 +1,5 @@
 import { z } from "zod";
-import {
-  goalPriorityEnum,
-  goalImpactEnum,
-  goalCategoryEnum,
-  goalTypeEnum,
-  goalStatusEnum,
-} from "~/server/db/schema";
+import { goalStatusEnum } from "~/server/db/schema";
 
 import { createInsertSchema } from "drizzle-zod";
 import { goals } from "~/server/db/schema";
