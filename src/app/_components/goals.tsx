@@ -195,6 +195,27 @@ export const Goals: React.FC = () => {
                         {goal.description}
                       </p>
                     )}
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="flex items-center gap-1 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground">
+                        <Flag
+                          className="h-3 w-3"
+                          color={priorityColors[goal.priority]}
+                          fill={priorityColors[goal.priority]}
+                        />
+                        P{goal.priority.split("_")[1]}
+                      </span>
+                      <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground text-yellow-300">
+                        <Zap
+                          className="mr-1 h-3 w-3"
+                          color={"gold"}
+                          fill={"gold"}
+                        />
+                        {goal.impact}
+                      </span>
+                      <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300 text-muted-foreground">
+                        {goal.category}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-2 group-hover:opacity-100">

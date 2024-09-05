@@ -1,7 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { goals } from "~/server/db/schema";
 import { CreateGoalDto, UpdateGoalDto } from "../dtos/goals";
-import { eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 export const goalsRouter = createTRPCRouter({
@@ -36,6 +36,7 @@ export const goalsRouter = createTRPCRouter({
     return await ctx.db
       .select()
       .from(goals)
-      .where(eq(goals.userId, ctx.session.user.id));
+      .where(eq(goals.userId, ctx.session.user.id))
+      .orderBy(asc(goals.priority), desc(goals.createdAt));
   }),
 });
