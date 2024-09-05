@@ -13,6 +13,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CreateGoal } from "./create-goal";
 import { EditGoal } from "./edit-goal";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 const priorityColors = {
   priority_1: "red",
@@ -88,7 +89,7 @@ export const Goals: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 pb-10">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-6xl font-thin">
@@ -118,7 +119,7 @@ export const Goals: React.FC = () => {
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "yearly" ? "default" : "outline"}
+            variant={selectedGoalType === "yearly" ? "default" : "secondary"}
             onClick={() => setSelectedGoalType("yearly")}
           >
             Yearly
@@ -126,7 +127,7 @@ export const Goals: React.FC = () => {
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "monthly" ? "default" : "outline"}
+            variant={selectedGoalType === "monthly" ? "default" : "secondary"}
             onClick={() => setSelectedGoalType("monthly")}
           >
             Monthly
@@ -134,7 +135,7 @@ export const Goals: React.FC = () => {
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "weekly" ? "default" : "outline"}
+            variant={selectedGoalType === "weekly" ? "default" : "secondary"}
             onClick={() => setSelectedGoalType("weekly")}
           >
             Weekly
@@ -142,7 +143,7 @@ export const Goals: React.FC = () => {
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "daily" ? "default" : "outline"}
+            variant={selectedGoalType === "daily" ? "default" : "secondary"}
             onClick={() => setSelectedGoalType("daily")}
           >
             Daily
@@ -156,6 +157,25 @@ export const Goals: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-2 pr-4">
+            {isCreateGoalOpen ? (
+              <CreateGoal
+                onSave={onCreateGoal}
+                onCancel={onCancelCreateGoal}
+                // defaultValues={}
+              />
+            ) : (
+              <div className="-mb-2 -ml-2 flex justify-start">
+                <Button
+                  onClick={() => setIsCreateGoalOpen(true)}
+                  disabled={isCreatingGoal}
+                  variant="ghost"
+                  size={"sm"}
+                  className="flex items-center gap-2 text-sm font-normal"
+                >
+                  <Plus className="h-4 w-4" /> Add Goal
+                </Button>
+              </div>
+            )}
             {goals?.map((goal, i) =>
               editGoalId === goal.id ? (
                 <EditGoal
@@ -248,25 +268,6 @@ export const Goals: React.FC = () => {
                 </div>
               ),
             )}
-          </div>
-        )}
-        {isCreateGoalOpen ? (
-          <CreateGoal
-            onSave={onCreateGoal}
-            onCancel={onCancelCreateGoal}
-            // defaultValues={}
-          />
-        ) : (
-          <div className="">
-            <Button
-              onClick={() => setIsCreateGoalOpen(true)}
-              disabled={isCreatingGoal}
-              variant="ghost"
-              size={"sm"}
-              className="flex items-center gap-2 text-sm font-normal"
-            >
-              <Plus className="h-4 w-4" /> Add Goal
-            </Button>
           </div>
         )}
       </div>
