@@ -1,9 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
-import { Edit3, Flag, Loader2, Plus, Trash2, Zap } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  Flag,
+  Loader2,
+  Plus,
+  Trash2,
+  Zap,
+} from "lucide-react";
 import { goalTypeEnum } from "~/server/db/schema";
 import { Checkbox } from "~/components/ui/checkbox";
 
@@ -13,7 +23,6 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CreateGoal } from "./create-goal";
 import { EditGoal } from "./edit-goal";
-import { ScrollArea } from "~/components/ui/scroll-area";
 
 const priorityColors = {
   priority_1: "red",
@@ -89,7 +98,7 @@ export const Goals: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 pb-10">
+    <div className="space-y-4 pb-16">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-6xl font-thin">
@@ -108,12 +117,6 @@ export const Goals: React.FC = () => {
             })}
           </h1>
         </div>
-
-        {/* <div className="flex flex-col gap-2">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-medium">Goals</h1>
-          </div>
-        </div> */}
 
         <div className="flex flex-row-reverse justify-end gap-2">
           <Button
@@ -271,6 +274,7 @@ export const Goals: React.FC = () => {
           </div>
         )}
       </div>
+      <div className="fixed bottom-0 left-0 flex h-16 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
     </div>
   );
 };
