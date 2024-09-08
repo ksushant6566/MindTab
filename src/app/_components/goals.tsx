@@ -1,8 +1,5 @@
-"use client";
+'use client'
 
-import React, { useRef, useState } from "react";
-import { Button } from "~/components/ui/button";
-import { api } from "~/trpc/react";
 import {
   ChevronDown,
   ChevronLeft,
@@ -13,107 +10,110 @@ import {
   Plus,
   Trash2,
   Zap,
-} from "lucide-react";
-import { goalTypeEnum } from "~/server/db/schema";
-import { Checkbox } from "~/components/ui/checkbox";
+} from 'lucide-react'
+import React, { useRef, useState } from 'react'
+import { Button } from '~/components/ui/button'
+import { Checkbox } from '~/components/ui/checkbox'
+import { goalTypeEnum } from '~/server/db/schema'
+import { api } from '~/trpc/react'
 
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { goals } from "~/server/db/schema";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
-import { CreateGoal } from "./create-goal";
-import { EditGoal } from "./edit-goal";
+import { CheckedState } from '@radix-ui/react-checkbox'
+import { createInsertSchema } from 'drizzle-zod'
+import { z } from 'zod'
+import { goals } from '~/server/db/schema'
+import { CreateGoal } from './create-goal'
+import { EditGoal } from './edit-goal'
 
 const priorityColors = {
-  priority_1: "red",
-  priority_2: "yellow",
-  priority_3: "green",
-  priority_4: "white",
-};
+  priority_1: 'red',
+  priority_2: 'yellow',
+  priority_3: 'green',
+  priority_4: 'white',
+}
 
-const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
+const ZInsertGoal = createInsertSchema(goals).omit({ userId: true })
 
 export const Goals: React.FC = () => {
-  const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery();
+  const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery()
   const { mutate: createGoal, isPending: isCreatingGoal } =
     api.goals.create.useMutation({
       onSuccess: () => {
-        refetch();
+        refetch()
       },
-    });
+    })
   const {
     mutate: updateGoal,
     isPending: isUpdatingGoal,
     variables: updateGoalVariables,
   } = api.goals.update.useMutation({
     onSuccess: () => {
-      refetch();
+      refetch()
     },
-  });
+  })
   const {
     mutate: deleteGoal,
     isPending: isDeletingGoal,
     variables: deleteGoalVariables,
   } = api.goals.delete.useMutation({
     onSuccess: () => {
-      refetch();
+      refetch()
     },
-  });
+  })
 
   const [selectedGoalType, setSelectedGoalType] =
-    useState<(typeof goalTypeEnum.enumValues)[number]>("daily");
+    useState<(typeof goalTypeEnum.enumValues)[number]>('daily')
 
-  const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
-  const [editGoalId, setEditGoalId] = useState<string | null>(null);
+  const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false)
+  const [editGoalId, setEditGoalId] = useState<string | null>(null)
 
   const onCreateGoal = (goal: z.infer<typeof ZInsertGoal>) => {
-    createGoal(goal);
-    setIsCreateGoalOpen(false);
-  };
+    createGoal(goal)
+    setIsCreateGoalOpen(false)
+  }
 
   const onCancelCreateGoal = () => {
-    setIsCreateGoalOpen(false);
-  };
+    setIsCreateGoalOpen(false)
+  }
 
   const toggleGoalStatus = (goalId: string, checked: CheckedState) => {
     updateGoal({
       id: goalId,
-      status: checked ? "completed" : "pending",
-    });
-  };
+      status: checked ? 'completed' : 'pending',
+    })
+  }
 
   const handleDeleteGoal = (goalId: string) => {
-    deleteGoal({ id: goalId });
-  };
+    deleteGoal({ id: goalId })
+  }
 
   const onSaveEditGoal = (goal: z.infer<typeof ZInsertGoal>) => {
-    if (!editGoalId) return;
+    if (!editGoalId) return
 
-    updateGoal({ ...goal, id: editGoalId });
-    setEditGoalId(null);
-  };
+    updateGoal({ ...goal, id: editGoalId })
+    setEditGoalId(null)
+  }
 
   const onCancelEditGoal = () => {
-    setEditGoalId(null);
-  };
+    setEditGoalId(null)
+  }
 
   return (
     <div className="space-y-4 pb-16">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-6xl font-thin">
-            {new Date().toLocaleTimeString("en-IN", {
-              minute: "numeric",
-              hour: "numeric",
+            {new Date().toLocaleTimeString('en-IN', {
+              minute: 'numeric',
+              hour: 'numeric',
               hour12: false,
             })}
           </h1>
           <h1 className="text-xl font-medium">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-              year: "numeric",
+            {new Date().toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
             })}
           </h1>
         </div>
@@ -122,32 +122,32 @@ export const Goals: React.FC = () => {
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "yearly" ? "default" : "secondary"}
-            onClick={() => setSelectedGoalType("yearly")}
+            variant={selectedGoalType === 'yearly' ? 'default' : 'secondary'}
+            onClick={() => setSelectedGoalType('yearly')}
           >
             Yearly
           </Button>
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "monthly" ? "default" : "secondary"}
-            onClick={() => setSelectedGoalType("monthly")}
+            variant={selectedGoalType === 'monthly' ? 'default' : 'secondary'}
+            onClick={() => setSelectedGoalType('monthly')}
           >
             Monthly
           </Button>
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "weekly" ? "default" : "secondary"}
-            onClick={() => setSelectedGoalType("weekly")}
+            variant={selectedGoalType === 'weekly' ? 'default' : 'secondary'}
+            onClick={() => setSelectedGoalType('weekly')}
           >
             Weekly
           </Button>
           <Button
             size="sm"
             className="w-20 text-xs"
-            variant={selectedGoalType === "daily" ? "default" : "secondary"}
-            onClick={() => setSelectedGoalType("daily")}
+            variant={selectedGoalType === 'daily' ? 'default' : 'secondary'}
+            onClick={() => setSelectedGoalType('daily')}
           >
             Daily
           </Button>
@@ -172,7 +172,7 @@ export const Goals: React.FC = () => {
                   onClick={() => setIsCreateGoalOpen(true)}
                   disabled={isCreatingGoal}
                   variant="ghost"
-                  size={"sm"}
+                  size={'sm'}
                   className="flex items-center gap-2 text-sm font-normal"
                 >
                   <Plus className="h-4 w-4" /> Add Goal
@@ -199,7 +199,7 @@ export const Goals: React.FC = () => {
                       <Checkbox
                         id={goal.id}
                         className="h-4 w-4 rounded-full"
-                        checked={goal.status === "completed"}
+                        checked={goal.status === 'completed'}
                         onCheckedChange={(checked) =>
                           toggleGoalStatus(goal.id, checked)
                         }
@@ -208,14 +208,14 @@ export const Goals: React.FC = () => {
                     <div className="grid gap-1.5 leading-none">
                       <label
                         htmlFor={goal.id}
-                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${goal.status === "completed" ? "line-through" : ""}`}
+                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${goal.status === 'completed' ? 'line-through' : ''}`}
                       >
                         {goal.title}
                       </label>
                       {goal.description && (
                         <p
                           className={`text-sm text-muted-foreground ${
-                            goal.status === "completed" ? "line-through" : ""
+                            goal.status === 'completed' ? 'line-through' : ''
                           } `}
                         >
                           {goal.description}
@@ -228,13 +228,13 @@ export const Goals: React.FC = () => {
                             color={priorityColors[goal.priority]}
                             fill={priorityColors[goal.priority]}
                           />
-                          P{goal.priority.split("_")[1]}
+                          P{goal.priority.split('_')[1]}
                         </span>
                         <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground text-yellow-300">
                           <Zap
                             className="mr-1 h-3 w-3"
-                            color={"gold"}
-                            fill={"gold"}
+                            color={'gold'}
+                            fill={'gold'}
                           />
                           {goal.impact}
                         </span>
@@ -276,5 +276,5 @@ export const Goals: React.FC = () => {
       </div>
       <div className="fixed bottom-0 left-0 flex h-16 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
     </div>
-  );
-};
+  )
+}

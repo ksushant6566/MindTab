@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export const Journals: React.FC = () => {
   return (
@@ -6,5 +6,5 @@ export const Journals: React.FC = () => {
       <h2>Journal</h2>
       {/* Add your journal-related content here */}
     </div>
-  );
-};
+  )
+}

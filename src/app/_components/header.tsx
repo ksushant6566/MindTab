@@ -1,11 +1,11 @@
-import React from "react";
-import { getServerAuthSession } from "~/server/auth";
-import Link from "next/link";
-import Image from "next/image";
-import { ModeToggle } from "./theme-toggle";
+import Image from 'next/image'
+import Link from 'next/link'
+import React from 'react'
+import { getServerAuthSession } from '~/server/auth'
+import { ModeToggle } from './theme-toggle'
 
 export const Header = async () => {
-  const session = await getServerAuthSession();
+  const session = await getServerAuthSession()
 
   return (
     <div className="flex w-full items-center justify-between">
@@ -28,14 +28,14 @@ export const Header = async () => {
       <div className="flex items-center gap-4">
         {!session && (
           <Link
-            href={session ? "/api/auth/signout" : "/api/auth/signin"}
+            href={session ? '/api/auth/signout' : '/api/auth/signin'}
             className="rounded-full bg-white/10 px-6 py-2 text-sm font-medium no-underline transition hover:bg-white/20"
           >
-            {session ? "Sign out" : "Sign in"}
+            {session ? 'Sign out' : 'Sign in'}
           </Link>
         )}
         <ModeToggle />
       </div>
     </div>
-  );
-};
+  )
+}

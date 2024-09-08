@@ -1,47 +1,47 @@
-"use client";
+'use client'
 
-import { createInsertSchema } from "drizzle-zod";
-import { Flag, Zap } from "lucide-react";
-import React from "react";
-import { z } from "zod";
-import { Button } from "~/components/ui/button";
+import { createInsertSchema } from 'drizzle-zod'
+import { Flag, Zap } from 'lucide-react'
+import React from 'react'
+import { z } from 'zod'
+import { Button } from '~/components/ui/button'
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-  SelectLabel,
-} from "~/components/ui/select";
+} from '~/components/ui/select'
 import {
   goalCategoryEnum,
   goalImpactEnum,
   goalPriorityEnum,
-  goals,
   goalTypeEnum,
-} from "~/server/db/schema";
+  goals,
+} from '~/server/db/schema'
 
 const priorityColors = {
-  priority_1: "red",
-  priority_2: "yellow",
-  priority_3: "green",
-  priority_4: "white",
-};
+  priority_1: 'red',
+  priority_2: 'yellow',
+  priority_3: 'green',
+  priority_4: 'white',
+}
 
 const impactNumber = {
   low: 1,
   medium: 2,
   high: 3,
-};
+}
 
 type CreateGoalProps = {
-  onSave: (goal: z.infer<typeof ZInsertGoal>) => void;
-  onCancel: () => void;
-  defaultValues?: Partial<z.infer<typeof ZInsertGoal>>;
-};
+  onSave: (goal: z.infer<typeof ZInsertGoal>) => void
+  onCancel: () => void
+  defaultValues?: Partial<z.infer<typeof ZInsertGoal>>
+}
 
-const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
+const ZInsertGoal = createInsertSchema(goals).omit({ userId: true })
 
 export const CreateGoal: React.FC<CreateGoalProps> = ({
   onSave,
@@ -55,22 +55,22 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
     impact: defaultValues?.impact || goalImpactEnum.enumValues[1],
     category: defaultValues?.category || goalCategoryEnum.enumValues[0],
     type: defaultValues?.type || goalTypeEnum.enumValues[0],
-    status: "pending",
-  });
+    status: 'pending',
+  })
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
+    e.preventDefault()
+    onSave(formData)
+  }
 
   return (
     <form
@@ -83,7 +83,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
           id="title"
           name="title"
           placeholder="Goal name"
-          value={formData.title || ""}
+          value={formData.title || ''}
           onChange={handleChange}
           required
           className="w-full bg-inherit text-base font-semibold focus:border-none focus:outline-none"
@@ -92,14 +92,14 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
           id="description"
           name="description"
           placeholder="Description"
-          value={formData.description || ""}
+          value={formData.description || ''}
           onChange={handleChange}
           className="w-full resize-none overflow-hidden bg-inherit text-sm font-normal focus:border-none focus:outline-none"
-          style={{ height: "auto" }}
+          style={{ height: 'auto' }}
           onInput={(e) => {
-            const target = e.target as HTMLTextAreaElement;
-            target.style.height = "auto";
-            target.style.height = `${target.scrollHeight}px`;
+            const target = e.target as HTMLTextAreaElement
+            target.style.height = 'auto'
+            target.style.height = `${target.scrollHeight}px`
           }}
         />
       </div>
@@ -129,7 +129,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     ]
                   }
                 />
-                P{formData.priority?.split("_")[1]}
+                P{formData.priority?.split('_')[1]}
               </span>
             </SelectValue>
           </SelectTrigger>
@@ -143,7 +143,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                       color={priorityColors[value]}
                       fill={priorityColors[value]}
                     />
-                    {value.replace("_", " ")}
+                    {value.replace('_', ' ')}
                   </span>
                 </SelectItem>
               ))}
@@ -210,7 +210,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
           <SelectTrigger className="size-8 w-fit focus:ring-0">
             <SelectValue placeholder="Category">
               <span className="mr-0.5 flex text-xs capitalize">
-                {formData.category?.replace("_", " ")}
+                {formData.category?.replace('_', ' ')}
               </span>
             </SelectValue>
           </SelectTrigger>
@@ -222,7 +222,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                   <SelectItem value={value} className="">
                     <span className="flex items-center gap-0 capitalize">
                       <span className="mr-1 text-sm">
-                        {value.replace("_", " ")}
+                        {value.replace('_', ' ')}
                       </span>
                     </span>
                   </SelectItem>
@@ -244,7 +244,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
           <SelectTrigger className="size-8 w-fit focus:ring-0">
             <SelectValue placeholder="Type">
               <span className="mr-0.5 flex text-xs capitalize">
-                {formData.type?.replace("_", " ")}
+                {formData.type?.replace('_', ' ')}
               </span>
             </SelectValue>
           </SelectTrigger>
@@ -254,7 +254,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                 <SelectItem value={value} className="">
                   <span className="flex items-center gap-0 capitalize">
                     <span className="mr-1 text-sm">
-                      {value.replace("_", " ")}
+                      {value.replace('_', ' ')}
                     </span>
                   </span>
                 </SelectItem>
@@ -279,5 +279,5 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
         </Button>
       </div>
     </form>
-  );
-};
+  )
+}

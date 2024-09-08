@@ -1,5 +1,5 @@
-import Home from "~/app/_components/home";
-import { HydrateClient } from "~/trpc/server";
+import Home from '~/app/_components/home'
+import { HydrateClient } from '~/trpc/server'
 
 export default async function App() {
   return (
@@ -8,5 +8,5 @@ export default async function App() {
         <Home />
       </main>
     </HydrateClient>
-  );
+  )
 }

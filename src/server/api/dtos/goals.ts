@@ -1,12 +1,12 @@
-import { z } from "zod";
-import { goalStatusEnum } from "~/server/db/schema";
+import { z } from 'zod'
+import { goalStatusEnum } from '~/server/db/schema'
 
-import { createInsertSchema } from "drizzle-zod";
-import { goals } from "~/server/db/schema";
+import { createInsertSchema } from 'drizzle-zod'
+import { goals } from '~/server/db/schema'
 
-const ZInsertGoal = createInsertSchema(goals);
+const ZInsertGoal = createInsertSchema(goals)
 
-export const CreateGoalDto = ZInsertGoal.omit({ userId: true });
+export const CreateGoalDto = ZInsertGoal.omit({ userId: true })
 
 // z.object({
 //   title: z.string().min(1),
@@ -20,4 +20,4 @@ export const CreateGoalDto = ZInsertGoal.omit({ userId: true });
 export const UpdateGoalDto = CreateGoalDto.partial().extend({
   id: z.string().uuid(),
   status: z.enum(goalStatusEnum.enumValues).optional(),
-});
+})

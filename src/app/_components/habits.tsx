@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 export const Habits: React.FC = () => {
   return (
@@ -6,5 +6,5 @@ export const Habits: React.FC = () => {
       <h2>Habits</h2>
       {/* Add your habits-related content here */}
     </div>
-  );
-};
+  )
+}

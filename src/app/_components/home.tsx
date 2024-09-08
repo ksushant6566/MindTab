@@ -1,8 +1,8 @@
-import React from "react";
-import { Goals } from "./goals";
-import { Habits } from "./habits";
-import { Journals } from "./jounal";
-import { Header } from "./header";
+import React from 'react'
+import { Goals } from './goals'
+import { Habits } from './habits'
+import { Header } from './header'
+import { Journals } from './jounal'
 
 export default async function Component() {
   return (
@@ -20,5 +20,5 @@ export default async function Component() {
         </div>
       </div>
     </div>
-  );
+  )
 }

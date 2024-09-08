@@ -1,16 +1,16 @@
-import "~/styles/globals.css";
+import '~/styles/globals.css'
 
-import { GeistSans } from "geist/font/sans";
-import { type Metadata } from "next";
+import { GeistSans } from 'geist/font/sans'
+import { type Metadata } from 'next'
 
-import { TRPCReactProvider } from "~/trpc/react";
-import { ThemeProvider } from "~/app/_components/theme-provider";
+import { ThemeProvider } from '~/app/_components/theme-provider'
+import { TRPCReactProvider } from '~/trpc/react'
 
 export const metadata: Metadata = {
-  title: "MindTab",
-  description: "MindTab",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
+  title: 'MindTab',
+  description: 'MindTab',
+  icons: [{ rel: 'icon', url: '/favicon.ico' }],
+}
 
 export default function RootLayout({
   children,
@@ -28,5 +28,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
