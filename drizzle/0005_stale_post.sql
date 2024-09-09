@@ -1,0 +1,1 @@
+ALTER TABLE "mindmap_goal" ALTER COLUMN "type" SET DEFAULT 'daily';
