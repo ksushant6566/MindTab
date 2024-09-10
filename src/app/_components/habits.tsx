@@ -202,7 +202,7 @@ const HabitTable: React.FC = () => {
                                                         }
                                                     >
                                                         <Plus className="h-4 w-4 mr-1" />
-                                                        Create habit
+                                                        Add habit
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -228,7 +228,7 @@ const HabitTable: React.FC = () => {
                                     hideContentWhenLoading={true}
                                 >
                                     <Plus className="h-4 w-4 mr-1" />
-                                    Create habit
+                                    Add habit
                                 </Button>
                             )}
                         </div>
