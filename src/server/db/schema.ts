@@ -134,7 +134,7 @@ export const habitTracker = createTable(
         id: uuid("id").primaryKey().defaultRandom(),
         habitId: uuid("habit_id")
             .notNull()
-            .references(() => habits.id),
+            .references(() => habits.id, { onDelete: "cascade" }),
         status: habitTrackerStatusEnum("status").default("pending").notNull(),
         createdAt: timestamp("created_at", { withTimezone: true })
             .default(sql`CURRENT_TIMESTAMP`)

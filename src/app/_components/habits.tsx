@@ -11,36 +11,40 @@ import {
 } from "~/components/ui/table";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
-import { RotateCcw } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { api } from "~/trpc/react";
+import { habits } from "~/server/db/schema";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+import { CreateHabit } from "./create-habit";
 
-interface Habit {
-    id: string;
-    title: string;
-}
+const ZInsertHabit = createInsertSchema(habits).omit({
+    userId: true,
+    id: true,
+});
 
 const HabitTable: React.FC = () => {
-    const [habits, setHabits] = useState<Habit[]>([
-        { id: "1", title: "Exercise" },
-        { id: "2", title: "Read" },
-        { id: "3", title: "Meditate" },
-        { id: "4", title: "Gym" },
-        { id: "6", title: "Reading" },
-        { id: "7", title: "Writing" },
-        { id: "8", title: "Coding" },
-        { id: "9", title: "Cooking" },
-        { id: "10", title: "Yoga" },
-    ]);
+    const { data: habits, isLoading, refetch } = api.habits.getAll.useQuery();
+
+    const { mutate: createHabit, isPending: isCreatingHabit } =
+        api.habits.create.useMutation({
+            onSuccess: () => {
+                refetch();
+            },
+        });
 
     const containerRef = useRef<HTMLDivElement>(null);
     const currentWeekRef = useRef<HTMLDivElement>(null);
-    const [showScrollButton, setShowScrollButton] = useState(false);
     const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const [isCreateHabitOpen, setIsCreateHabitOpen] = useState(false);
 
     useEffect(() => {
         if (containerRef.current && currentWeekRef.current) {
@@ -91,6 +95,11 @@ const HabitTable: React.FC = () => {
 
     const getCurrentDay = () => {
         return new Date().getDay() || 7; // Sunday is 0, so we change it to 7
+    };
+
+    const handleCreateHabit = async (habit: z.infer<typeof ZInsertHabit>) => {
+        await createHabit(habit);
+        setIsCreateHabitOpen(false);
     };
 
     const currentWeek = getCurrentWeek();
@@ -148,7 +157,7 @@ const HabitTable: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {habits.map((habit) => (
+                                    {habits?.map((habit) => (
                                         <TableRow
                                             key={habit.id}
                                             className="border-none"
@@ -176,8 +185,52 @@ const HabitTable: React.FC = () => {
                                             )}
                                         </TableRow>
                                     ))}
+                                    {habits?.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={8}>
+                                                <div className="flex flex-col items-center justify-center gap-2 -mt-2">
+                                                    <span className="text-base">
+                                                        No habits found
+                                                    </span>
+                                                    <Button
+                                                        size={"sm"}
+                                                        variant={"secondary"}
+                                                        onClick={() =>
+                                                            setIsCreateHabitOpen(
+                                                                true
+                                                            )
+                                                        }
+                                                    >
+                                                        <Plus className="h-4 w-4 mr-1" />
+                                                        Create habit
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
+                            {isCreateHabitOpen ? (
+                                <div className="mt-4">
+                                    <CreateHabit
+                                        onSave={handleCreateHabit}
+                                        onCancel={() =>
+                                            setIsCreateHabitOpen(false)
+                                        }
+                                    />
+                                </div>
+                            ) : (
+                                <Button
+                                    onClick={() => setIsCreateHabitOpen(true)}
+                                    variant={"ghost"}
+                                    loading={isCreatingHabit}
+                                    className={`mt-2 ${isCreatingHabit ? "mr-2" : ""}`}
+                                    hideContentWhenLoading={true}
+                                >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Create habit
+                                </Button>
+                            )}
                         </div>
                     );
                 })}
