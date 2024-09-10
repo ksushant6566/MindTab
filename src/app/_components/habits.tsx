@@ -162,7 +162,7 @@ const HabitTable: React.FC = () => {
                                             key={habit.id}
                                             className="border-none"
                                         >
-                                            <TableCell className="font-medium">
+                                            <TableCell className="font-medium overflow-hidden text-ellipsis text-nowrap">
                                                 {habit.title}
                                             </TableCell>
                                             {Array.from(
@@ -192,45 +192,36 @@ const HabitTable: React.FC = () => {
                                                     <span className="text-base">
                                                         No habits found
                                                     </span>
-                                                    <Button
-                                                        size={"sm"}
-                                                        variant={"secondary"}
-                                                        onClick={() =>
-                                                            setIsCreateHabitOpen(
-                                                                true
-                                                            )
-                                                        }
-                                                    >
-                                                        <Plus className="h-4 w-4 mr-1" />
-                                                        Add habit
-                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
                             </Table>
-                            {isCreateHabitOpen ? (
-                                <div className="mt-4">
-                                    <CreateHabit
-                                        onSave={handleCreateHabit}
-                                        onCancel={() =>
-                                            setIsCreateHabitOpen(false)
+                            {isCurrentWeek &&
+                                (isCreateHabitOpen ? (
+                                    <div className="mt-4">
+                                        <CreateHabit
+                                            onSave={handleCreateHabit}
+                                            onCancel={() =>
+                                                setIsCreateHabitOpen(false)
+                                            }
+                                        />
+                                    </div>
+                                ) : (
+                                    <Button
+                                        onClick={() =>
+                                            setIsCreateHabitOpen(true)
                                         }
-                                    />
-                                </div>
-                            ) : (
-                                <Button
-                                    onClick={() => setIsCreateHabitOpen(true)}
-                                    variant={"ghost"}
-                                    loading={isCreatingHabit}
-                                    className={`mt-2 ${isCreatingHabit ? "mr-2" : ""}`}
-                                    hideContentWhenLoading={true}
-                                >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Add habit
-                                </Button>
-                            )}
+                                        variant={"ghost"}
+                                        loading={isCreatingHabit}
+                                        className={`mt-2 ${isCreatingHabit ? "mr-2" : ""}`}
+                                        hideContentWhenLoading={true}
+                                    >
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        Add habit
+                                    </Button>
+                                ))}
                         </div>
                     );
                 })}

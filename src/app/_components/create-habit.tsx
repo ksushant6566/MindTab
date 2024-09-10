@@ -46,7 +46,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
                     type="text"
                     id="title"
                     name="title"
-                    placeholder="Habit name"
+                    placeholder="Habit"
                     value={formData.title || ""}
                     onChange={handleChange}
                     required
@@ -78,7 +78,7 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
                     Cancel
                 </Button>
                 <Button size={"sm"} type="submit" className="h-8 text-xs">
-                    Create
+                    Add habit
                 </Button>
             </div>
         </form>
