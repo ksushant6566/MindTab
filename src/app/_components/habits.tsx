@@ -300,8 +300,8 @@ const HabitTable: React.FC = () => {
                                                             </TableCell>
                                                         )
                                                     )}
-                                                    <TableCell className="relative p-0">
-                                                        <div className="flex absolute gap-0 group-hover:visible right-0 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
+                                                    <TableCell className="relative p-0 ">
+                                                        <div className="flex absolute gap-0 group-hover:visible right-4 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
                                                             <Button
                                                                 size="sm"
                                                                 variant="ghost"
