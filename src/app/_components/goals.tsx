@@ -13,6 +13,7 @@ import { z } from "zod";
 import { goals } from "~/server/db/schema";
 import { CreateGoal } from "./create-goal";
 import { EditGoal } from "./edit-goal";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 const priorityColors = {
     priority_1: "red",
@@ -88,7 +89,7 @@ export const Goals: React.FC = () => {
     };
 
     return (
-        <div className="space-y-4 pb-16">
+        <div className="space-y-4">
             <div className="flex flex-col space-y-4">
                 <div className="flex flex-col gap-1">
                     <h1 className="text-6xl font-thin">
@@ -185,136 +186,142 @@ export const Goals: React.FC = () => {
                                 </Button>
                             </div>
                         )}
-                        {goals
-                            ?.filter((goal) => goal.type === selectedGoalType)
-                            .map((goal, i) =>
-                                editGoalId === goal.id ? (
-                                    <EditGoal
-                                        key={goal.id}
-                                        goal={goal}
-                                        onSave={onSaveEditGoal}
-                                        onCancel={onCancelEditGoal}
-                                    />
-                                ) : (
-                                    <div
-                                        key={goal.id}
-                                        className="group flex justify-between gap-2 py-3"
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            {isUpdatingGoal &&
-                                            goal.id ===
-                                                updateGoalVariables?.id ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <Checkbox
-                                                    id={goal.id}
-                                                    className="h-4 w-4 rounded-full"
-                                                    checked={
-                                                        goal.status ===
-                                                        "completed"
-                                                    }
-                                                    onCheckedChange={(
-                                                        checked
-                                                    ) =>
-                                                        toggleGoalStatus(
-                                                            goal.id,
-                                                            checked
-                                                        )
-                                                    }
-                                                />
-                                            )}
-                                            <div className="grid gap-1.5 leading-none">
-                                                <label
-                                                    htmlFor={goal.id}
-                                                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${goal.status === "completed" ? "line-through" : ""}`}
-                                                >
-                                                    {goal.title}
-                                                </label>
-                                                {goal.description && (
-                                                    <p
-                                                        className={`text-sm text-muted-foreground ${
+                        <ScrollArea className="h-[calc(100vh-22rem)]">
+                            {goals
+                                ?.filter(
+                                    (goal) => goal.type === selectedGoalType
+                                )
+                                .map((goal, i) =>
+                                    editGoalId === goal.id ? (
+                                        <EditGoal
+                                            key={goal.id}
+                                            goal={goal}
+                                            onSave={onSaveEditGoal}
+                                            onCancel={onCancelEditGoal}
+                                        />
+                                    ) : (
+                                        <div
+                                            key={goal.id}
+                                            className="group flex justify-between gap-2 py-3"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                {isUpdatingGoal &&
+                                                goal.id ===
+                                                    updateGoalVariables?.id ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Checkbox
+                                                        id={goal.id}
+                                                        className="h-4 w-4 rounded-full"
+                                                        checked={
                                                             goal.status ===
                                                             "completed"
-                                                                ? "line-through"
-                                                                : ""
-                                                        } `}
-                                                    >
-                                                        {goal.description}
-                                                    </p>
-                                                )}
-                                                <div className="mt-1 flex items-center gap-2">
-                                                    <span className="flex items-center gap-1 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground">
-                                                        <Flag
-                                                            className="h-3 w-3"
-                                                            color={
-                                                                priorityColors[
-                                                                    goal
-                                                                        .priority
-                                                                ]
-                                                            }
-                                                            fill={
-                                                                priorityColors[
-                                                                    goal
-                                                                        .priority
-                                                                ]
-                                                            }
-                                                        />
-                                                        P
-                                                        {
-                                                            goal.priority.split(
-                                                                "_"
-                                                            )[1]
                                                         }
-                                                    </span>
-                                                    <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground text-yellow-300">
-                                                        <Zap
-                                                            className="mr-1 h-3 w-3"
-                                                            color={"gold"}
-                                                            fill={"gold"}
-                                                        />
-                                                        {goal.impact}
-                                                    </span>
-                                                    <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300">
-                                                        {goal.category}
-                                                    </span>
+                                                        onCheckedChange={(
+                                                            checked
+                                                        ) =>
+                                                            toggleGoalStatus(
+                                                                goal.id,
+                                                                checked
+                                                            )
+                                                        }
+                                                    />
+                                                )}
+                                                <div className="grid gap-1.5 leading-none">
+                                                    <label
+                                                        htmlFor={goal.id}
+                                                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${goal.status === "completed" ? "line-through" : ""}`}
+                                                    >
+                                                        {goal.title}
+                                                    </label>
+                                                    {goal.description && (
+                                                        <p
+                                                            className={`text-sm text-muted-foreground ${
+                                                                goal.status ===
+                                                                "completed"
+                                                                    ? "line-through"
+                                                                    : ""
+                                                            } `}
+                                                        >
+                                                            {goal.description}
+                                                        </p>
+                                                    )}
+                                                    <div className="mt-1 flex items-center gap-2">
+                                                        <span className="flex items-center gap-1 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground">
+                                                            <Flag
+                                                                className="h-3 w-3"
+                                                                color={
+                                                                    priorityColors[
+                                                                        goal
+                                                                            .priority
+                                                                    ]
+                                                                }
+                                                                fill={
+                                                                    priorityColors[
+                                                                        goal
+                                                                            .priority
+                                                                    ]
+                                                                }
+                                                            />
+                                                            P
+                                                            {
+                                                                goal.priority.split(
+                                                                    "_"
+                                                                )[1]
+                                                            }
+                                                        </span>
+                                                        <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground text-yellow-300">
+                                                            <Zap
+                                                                className="mr-1 h-3 w-3"
+                                                                color={"gold"}
+                                                                fill={"gold"}
+                                                            />
+                                                            {goal.impact}
+                                                        </span>
+                                                        <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300">
+                                                            {goal.category}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-1 group-hover:opacity-100">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() =>
+                                                        setEditGoalId(goal.id)
+                                                    }
+                                                >
+                                                    <Edit3 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="hover:bg-red-900 active:bg-red-900"
+                                                    onClick={() =>
+                                                        handleDeleteGoal(
+                                                            goal.id
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isDeletingGoal &&
+                                                        deleteGoalVariables?.id ===
+                                                            goal.id
+                                                    }
+                                                    loading={
+                                                        isDeletingGoal &&
+                                                        deleteGoalVariables?.id ===
+                                                            goal.id
+                                                    }
+                                                    hideContentWhenLoading
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <div className="flex -translate-y-6 gap-0 opacity-0 transition-all group-hover:-translate-y-1 group-hover:opacity-100">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() =>
-                                                    setEditGoalId(goal.id)
-                                                }
-                                            >
-                                                <Edit3 className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="hover:bg-red-900 active:bg-red-900"
-                                                onClick={() =>
-                                                    handleDeleteGoal(goal.id)
-                                                }
-                                                disabled={
-                                                    isDeletingGoal &&
-                                                    deleteGoalVariables?.id ===
-                                                        goal.id
-                                                }
-                                                loading={
-                                                    isDeletingGoal &&
-                                                    deleteGoalVariables?.id ===
-                                                        goal.id
-                                                }
-                                                hideContentWhenLoading
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )
-                            )}
+                                    )
+                                )}
+                        </ScrollArea>
                     </div>
                 )}
             </div>
