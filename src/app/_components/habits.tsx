@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/table";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
-import { Plus, RotateCcw } from "lucide-react";
+import { Plus, RotateCcw, Trash2 } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -30,7 +30,16 @@ const ZInsertHabit = createInsertSchema(habits).omit({
 });
 
 const HabitTable: React.FC = () => {
-    const { data: habits, isLoading, refetch } = api.habits.getAll.useQuery();
+    const { data: habits, refetch } = api.habits.getAll.useQuery();
+    const {
+        mutate: deleteHabit,
+        isPending: isDeletingHabit,
+        variables: deleteHabitVariables,
+    } = api.habits.delete.useMutation({
+        onSuccess: () => {
+            refetch();
+        },
+    });
 
     const { mutate: createHabit, isPending: isCreatingHabit } =
         api.habits.create.useMutation({
@@ -171,7 +180,7 @@ const HabitTable: React.FC = () => {
                                                 weekIndex && (
                                                 <TableRow
                                                     key={habit.id}
-                                                    className="border-none"
+                                                    className="border-none hover:bg-transparent group"
                                                 >
                                                     <TableCell className="font-medium overflow-hidden text-ellipsis text-nowrap">
                                                         {habit.title}
@@ -195,6 +204,31 @@ const HabitTable: React.FC = () => {
                                                             </TableCell>
                                                         )
                                                     )}
+                                                    <TableCell className="">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="hover:bg-red-900 active:bg-red-900 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 invisible transition-all opacity-0 -translate-y-6"
+                                                            onClick={() =>
+                                                                deleteHabit({
+                                                                    id: habit.id,
+                                                                })
+                                                            }
+                                                            disabled={
+                                                                isDeletingHabit &&
+                                                                deleteHabitVariables?.id ===
+                                                                    habit.id
+                                                            }
+                                                            loading={
+                                                                isDeletingHabit &&
+                                                                deleteHabitVariables?.id ===
+                                                                    habit.id
+                                                            }
+                                                            hideContentWhenLoading
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </TableCell>
                                                 </TableRow>
                                             )
                                     )}
