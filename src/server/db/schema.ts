@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+    date,
     index,
     integer,
     pgEnum,
@@ -137,6 +138,7 @@ export const habitTracker = createTable(
             .notNull()
             .references(() => habits.id, { onDelete: "cascade" }),
         status: habitTrackerStatusEnum("status").default("pending").notNull(),
+        date: date("date").notNull(),
         createdAt: timestamp("created_at", { withTimezone: true })
             .default(sql`CURRENT_TIMESTAMP`)
             .notNull(),
@@ -150,7 +152,12 @@ export const habitTracker = createTable(
     (habitTracker) => ({
         habitIdUserIdIdx: index("habit_tracker_habit_id_user_id_idx").on(
             habitTracker.habitId,
-            habitTracker.userId
+            habitTracker.userId,
+        ),
+        habitIdUserIdDateIdx: uniqueIndex("habit_tracker_habit_id_user_id_date_idx").on(
+            habitTracker.habitId,
+            habitTracker.userId,
+            habitTracker.date
         ),
     })
 );

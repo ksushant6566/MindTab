@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { habits } from "~/server/db/schema";
+import { habits, habitTracker } from "~/server/db/schema";
 import { CreateHabitDto, UpdateHabitDto } from "../dtos/habits";
 
 export const habitsRouter = createTRPCRouter({
@@ -59,4 +59,32 @@ export const habitsRouter = createTRPCRouter({
                 )
             );
     }),
+
+    trackHabit: protectedProcedure
+        .input(z.object({ habitId: z.string().uuid(), date: z.date() }))
+        .mutation(async ({ ctx, input }) => {
+            return await ctx.db
+                .insert(habitTracker)
+                .values({
+                    habitId: input.habitId,
+                    userId: ctx.session.user.id,
+                    status: "completed",
+                    date: input.date.toDateString(),
+                })
+                .onConflictDoUpdate({
+                    target: [habitTracker.habitId, habitTracker.userId, habitTracker.date],
+                    set: { status: "completed" },
+                })
+                .returning({
+                    id: habitTracker.id,
+                });
+        }),
+
+    untrackHabit: protectedProcedure
+        .input(z.object({ habitId: z.string().uuid(), date: z.date() }))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db
+                .delete(habitTracker)
+                .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date.toDateString())));
+        }),
 });
