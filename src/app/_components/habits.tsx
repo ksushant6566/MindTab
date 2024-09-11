@@ -146,7 +146,7 @@ const HabitTable: React.FC = () => {
                             <Table className="table-fixed habit-table">
                                 <TableHeader>
                                     <TableRow className="border-none">
-                                        <TableHead className="border-none w-[100px]">
+                                        <TableHead className="border-none w-[100px] ">
                                             Habit
                                         </TableHead>
                                         {[
@@ -204,11 +204,11 @@ const HabitTable: React.FC = () => {
                                                             </TableCell>
                                                         )
                                                     )}
-                                                    <TableCell className="">
+                                                    <TableCell className="relative">
                                                         <Button
                                                             size="sm"
                                                             variant="ghost"
-                                                            className="hover:bg-red-900 active:bg-red-900 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 invisible transition-all opacity-0 -translate-y-6"
+                                                            className="absolute hover:bg-red-900 active:bg-red-900 group-hover:visible -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0"
                                                             onClick={() =>
                                                                 deleteHabit({
                                                                     id: habit.id,
