@@ -12,10 +12,10 @@ export default async function Component() {
                 <div className="col-span-4">
                     <Goals />
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-5">
                     <Habits />
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-3">
                     <Journals />
                 </div>
             </div>

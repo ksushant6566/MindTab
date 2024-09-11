@@ -97,8 +97,15 @@ const HabitTable: React.FC = () => {
         return new Date().getDay() || 7; // Sunday is 0, so we change it to 7
     };
 
-    const handleCreateHabit = async (habit: z.infer<typeof ZInsertHabit>) => {
-        await createHabit(habit);
+    const getWeek = (date: Date) => {
+        const start = new Date(date.getFullYear(), 0, 1);
+        const diff = date.getTime() - start.getTime();
+        const oneWeek = 1000 * 60 * 60 * 24 * 7;
+        return Math.floor(diff / oneWeek);
+    };
+
+    const handleCreateHabit = (habit: z.infer<typeof ZInsertHabit>) => {
+        createHabit(habit);
         setIsCreateHabitOpen(false);
     };
 
@@ -157,34 +164,40 @@ const HabitTable: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {habits?.map((habit) => (
-                                        <TableRow
-                                            key={habit.id}
-                                            className="border-none"
-                                        >
-                                            <TableCell className="font-medium overflow-hidden text-ellipsis text-nowrap">
-                                                {habit.title}
-                                            </TableCell>
-                                            {Array.from(
-                                                { length: 7 },
-                                                (_, dayIndex) => (
-                                                    <TableCell
-                                                        key={`${habit.id}-${dayIndex}`}
-                                                        className="text-center p-0 px-1"
-                                                    >
-                                                        <Checkbox
-                                                            className="w-8 h-8 md:w-full md:h-11"
-                                                            disabled={
-                                                                !isCurrentWeek ||
-                                                                dayIndex + 1 !==
-                                                                    currentDay
-                                                            }
-                                                        />
+                                    {habits?.map(
+                                        (habit) =>
+                                            // a habit should only be shown if it was created in the current week or before
+                                            getWeek(habit.createdAt) <=
+                                                weekIndex && (
+                                                <TableRow
+                                                    key={habit.id}
+                                                    className="border-none"
+                                                >
+                                                    <TableCell className="font-medium overflow-hidden text-ellipsis text-nowrap">
+                                                        {habit.title}
                                                     </TableCell>
-                                                )
-                                            )}
-                                        </TableRow>
-                                    ))}
+                                                    {Array.from(
+                                                        { length: 7 },
+                                                        (_, dayIndex) => (
+                                                            <TableCell
+                                                                key={`${habit.id}-${dayIndex}`}
+                                                                className="text-center p-0 px-1"
+                                                            >
+                                                                <Checkbox
+                                                                    className="w-8 h-8 md:w-full md:h-11"
+                                                                    disabled={
+                                                                        !isCurrentWeek ||
+                                                                        dayIndex +
+                                                                            1 !==
+                                                                            currentDay
+                                                                    }
+                                                                />
+                                                            </TableCell>
+                                                        )
+                                                    )}
+                                                </TableRow>
+                                            )
+                                    )}
                                     {habits?.length === 0 && (
                                         <TableRow>
                                             <TableCell colSpan={8}>
