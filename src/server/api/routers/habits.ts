@@ -8,10 +8,16 @@ export const habitsRouter = createTRPCRouter({
     create: protectedProcedure
         .input(CreateHabitDto)
         .mutation(async ({ ctx, input }) => {
-            await ctx.db.insert(habits).values({
-                ...input,
-                userId: ctx.session.user.id,
-            });
+            await ctx.db
+                .insert(habits)
+                .values({
+                    ...input,
+                    userId: ctx.session.user.id,
+                })
+                .onConflictDoUpdate({
+                    target: [habits.title, habits.userId],
+                    set: { deletedAt: null },
+                });
         }),
 
     update: protectedProcedure
