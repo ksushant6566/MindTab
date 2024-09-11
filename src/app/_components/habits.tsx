@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/table";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Button } from "~/components/ui/button";
-import { Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Edit3, Plus, RotateCcw, Trash2 } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -23,6 +23,8 @@ import { habits } from "~/server/db/schema";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { CreateHabit } from "./create-habit";
+import { EditHabit } from "./edit-habit";
+import { Skeleton } from "~/components/ui/skeleton";
 
 const ZInsertHabit = createInsertSchema(habits).omit({
     userId: true,
@@ -48,12 +50,21 @@ const HabitTable: React.FC = () => {
             },
         });
 
+    const { mutate: updateHabit, isPending: isUpdatingHabit } =
+        api.habits.update.useMutation({
+            onSuccess: () => {
+                refetch();
+                setEditHabitId(null);
+            },
+        });
+
     const containerRef = useRef<HTMLDivElement>(null);
     const currentWeekRef = useRef<HTMLDivElement>(null);
     const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const [showScrollButton, setShowScrollButton] = useState(false);
     const [isCreateHabitOpen, setIsCreateHabitOpen] = useState(false);
+    const [editHabitId, setEditHabitId] = useState<string | null>(null);
 
     useEffect(() => {
         if (containerRef.current && currentWeekRef.current) {
@@ -118,8 +129,16 @@ const HabitTable: React.FC = () => {
         setIsCreateHabitOpen(false);
     };
 
+    const handleEditHabit = (habit: z.infer<typeof ZInsertHabit>) => {
+        if (editHabitId) {
+            updateHabit({ ...habit, id: editHabitId });
+        }
+    };
+
     const currentWeek = getCurrentWeek();
     const currentDay = getCurrentDay();
+
+    console.log(editHabitId);
 
     return (
         <div className="relative">
@@ -146,7 +165,7 @@ const HabitTable: React.FC = () => {
                             <Table className="table-fixed habit-table">
                                 <TableHeader>
                                     <TableRow className="border-none">
-                                        <TableHead className="border-none w-[100px] ">
+                                        <TableHead className="border-none w-[90px] ">
                                             Habit
                                         </TableHead>
                                         {[
@@ -177,7 +196,33 @@ const HabitTable: React.FC = () => {
                                         (habit) =>
                                             // a habit should only be shown if it was created in the current week or before
                                             getWeek(habit.createdAt) <=
-                                                weekIndex && (
+                                                weekIndex &&
+                                            (habit.id === editHabitId &&
+                                            weekIndex === currentWeek ? (
+                                                <TableRow className="border-none hover:bg-transparent group">
+                                                    <TableCell colSpan={8}>
+                                                        {isUpdatingHabit ? (
+                                                            <div className="flex gap-2 m-0 p-0">
+                                                                <Skeleton className="h-11 w-[25%]" />
+                                                                <Skeleton className="h-11 w-full" />
+                                                            </div>
+                                                        ) : (
+                                                            <EditHabit
+                                                                key={habit.id}
+                                                                habit={habit}
+                                                                onSave={
+                                                                    handleEditHabit
+                                                                }
+                                                                onCancel={() =>
+                                                                    setEditHabitId(
+                                                                        null
+                                                                    )
+                                                                }
+                                                            />
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
                                                 <TableRow
                                                     key={habit.id}
                                                     className="border-none hover:bg-transparent group"
@@ -204,33 +249,48 @@ const HabitTable: React.FC = () => {
                                                             </TableCell>
                                                         )
                                                     )}
-                                                    <TableCell className="relative">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            className="absolute hover:bg-red-900 active:bg-red-900 group-hover:visible -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0"
-                                                            onClick={() =>
-                                                                deleteHabit({
-                                                                    id: habit.id,
-                                                                })
-                                                            }
-                                                            disabled={
-                                                                isDeletingHabit &&
-                                                                deleteHabitVariables?.id ===
-                                                                    habit.id
-                                                            }
-                                                            loading={
-                                                                isDeletingHabit &&
-                                                                deleteHabitVariables?.id ===
-                                                                    habit.id
-                                                            }
-                                                            hideContentWhenLoading
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                    <TableCell className="relative p-0">
+                                                        <div className="flex absolute gap-0 group-hover:visible right-0 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                onClick={() =>
+                                                                    setEditHabitId(
+                                                                        habit.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Edit3 className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className=" hover:bg-red-900 active:bg-red-900"
+                                                                onClick={() =>
+                                                                    deleteHabit(
+                                                                        {
+                                                                            id: habit.id,
+                                                                        }
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    isDeletingHabit &&
+                                                                    deleteHabitVariables?.id ===
+                                                                        habit.id
+                                                                }
+                                                                loading={
+                                                                    isDeletingHabit &&
+                                                                    deleteHabitVariables?.id ===
+                                                                        habit.id
+                                                                }
+                                                                hideContentWhenLoading
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
                                                     </TableCell>
                                                 </TableRow>
-                                            )
+                                            ))
                                     )}
                                     {habits?.length === 0 && (
                                         <TableRow>
@@ -297,7 +357,7 @@ const HabitTable: React.FC = () => {
 
 export const Habits: React.FC = () => {
     return (
-        <div className="flex justify-center items-center relative ">
+        <div className="flex justify-center items-center relative">
             <HabitTable />
         </div>
     );
