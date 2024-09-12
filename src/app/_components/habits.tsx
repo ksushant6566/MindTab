@@ -49,17 +49,16 @@ const HabitTable: React.FC = () => {
 
   const {
     data: habitTracker,
-    isLoading: isLoadingHabitTracker,
     refetch: refetchHabitTracker,
   } = api.habitTracker.getAll.useQuery()
 
-  const { mutate: trackHabit, isPending: isTrackingHabit } = api.habits.trackHabit.useMutation({
+  const { mutate: trackHabit } = api.habits.trackHabit.useMutation({
     onSuccess: () => {
       refetchHabitTracker()
     },
   })
 
-  const { mutate: untrackHabit, isPending: isUnTrackingHabit } = api.habits.untrackHabit.useMutation({
+  const { mutate: untrackHabit } = api.habits.untrackHabit.useMutation({
     onSuccess: () => {
       refetchHabitTracker()
     },
