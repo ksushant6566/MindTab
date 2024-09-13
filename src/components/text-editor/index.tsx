@@ -1,9 +1,18 @@
-import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
-import { Bold, Code, Italic, List, ListOrdered, MessageSquareCode, MessageSquareQuote, Strikethrough } from 'lucide-react'
+import {
+  Bold,
+  Code,
+  Italic,
+  List,
+  ListOrdered,
+  MessageSquareCode,
+  MessageSquareQuote,
+  Strikethrough,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Separator } from '../ui/separator'
-import { useState, useEffect, useRef } from 'react'
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 
 type TipTapEditorProps = {
   content: string
@@ -90,29 +99,29 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
 
   return (
     <div ref={editorRef} className={`relative rounded-md px-2 py-3 ${editable ? 'border border-input' : ''}`}>
-      <div className='flex flex-col gap-0'>
-        <input 
-          type="text" 
-          id="title" 
-          placeholder='Title' 
+      <div className="flex flex-col gap-0">
+        <input
+          type="text"
+          id="title"
+          placeholder="Title"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className='bg-transparent border-none focus:border-none focus:outline-none text-xl font-semibold px-3 my-0'
+          className="bg-transparent border-none focus:border-none focus:outline-none text-xl font-semibold px-3 my-0"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              e.preventDefault();
-              editor?.commands.focus();
+              e.preventDefault()
+              editor?.commands.focus()
             }
           }}
           disabled={!editable}
         />
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           onKeyDown={(e) => {
             if (e.key === 'Backspace' && editor?.isEmpty) {
-              e.preventDefault();
-              const titleInput = document.getElementById('title') as HTMLInputElement;
-              titleInput?.focus();
+              e.preventDefault()
+              const titleInput = document.getElementById('title') as HTMLInputElement
+              titleInput?.focus()
             }
           }}
         />
@@ -122,7 +131,7 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
           ref={menuRef}
           style={{
             position: 'absolute',
-            top: `${menuPosition.y-15}px`,
+            top: `${menuPosition.y - 15}px`,
             left: `${menuPosition.x}px`,
             zIndex: 50,
             transform: 'translateY(-100%)',
@@ -140,35 +149,35 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) return null
 
   return (
-    <div className='flex gap-0 p-0 w-fit'>
+    <div className="flex gap-0 p-0 w-fit">
       <ToggleGroup type="multiple">
-        <ToggleGroupItem 
-          value="bold" 
+        <ToggleGroupItem
+          value="bold"
           aria-label="Toggle bold"
           onClick={() => editor.chain().focus().toggleBold().run()}
           data-state={editor.isActive('bold') ? 'on' : 'off'}
-          className='gap-0'
+          className="gap-0"
         >
           <Bold className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="italic" 
+        <ToggleGroupItem
+          value="italic"
           aria-label="Toggle italic"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           data-state={editor.isActive('italic') ? 'on' : 'off'}
         >
           <Italic className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="strike" 
+        <ToggleGroupItem
+          value="strike"
           aria-label="Toggle strikethrough"
           onClick={() => editor.chain().focus().toggleStrike().run()}
           data-state={editor.isActive('strike') ? 'on' : 'off'}
         >
           <Strikethrough className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="code" 
+        <ToggleGroupItem
+          value="code"
           aria-label="Toggle code"
           onClick={() => editor.chain().focus().toggleCode().run()}
           data-state={editor.isActive('code') ? 'on' : 'off'}
@@ -176,35 +185,42 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           <Code className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
-      <Separator orientation="vertical" className='h-full' />
-      <ToggleGroup type="single" value={editor.isActive('bulletList') ? 'bullet' : editor.isActive('orderedList') ? 'ordered' : ''}>
-        <ToggleGroupItem 
-          value="bullet" 
+      <Separator orientation="vertical" className="h-full" />
+      <ToggleGroup
+        type="single"
+        value={editor.isActive('bulletList') ? 'bullet' : editor.isActive('orderedList') ? 'ordered' : ''}
+      >
+        <ToggleGroupItem
+          value="bullet"
           aria-label="Toggle bullet list"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           <List className="h-4 w-4" />
         </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="ordered" 
+        <ToggleGroupItem
+          value="ordered"
           aria-label="Toggle ordered list"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
-      <Separator orientation="vertical" className='h-full' />
-      <ToggleGroup type="single" value={editor.isActive('blockquote') ? 'blockquote' : editor.isActive('codeBlock') ? 'codeBlock' : ''} className='gap-0'>
-        <ToggleGroupItem 
-          value="blockquote" 
+      <Separator orientation="vertical" className="h-full" />
+      <ToggleGroup
+        type="single"
+        value={editor.isActive('blockquote') ? 'blockquote' : editor.isActive('codeBlock') ? 'codeBlock' : ''}
+        className="gap-0"
+      >
+        <ToggleGroupItem
+          value="blockquote"
           aria-label="Toggle blockquote"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           data-state={editor.isActive('blockquote') ? 'on' : 'off'}
         >
           <MessageSquareQuote className="h-5 w-5" />
         </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="codeBlock" 
+        <ToggleGroupItem
+          value="codeBlock"
           aria-label="Toggle codeblock"
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
           data-state={editor.isActive('codeBlock') ? 'on' : 'off'}
