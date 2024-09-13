@@ -47,10 +47,7 @@ const HabitTable: React.FC = () => {
     },
   })
 
-  const {
-    data: habitTracker,
-    refetch: refetchHabitTracker,
-  } = api.habitTracker.getAll.useQuery()
+  const { data: habitTracker, refetch: refetchHabitTracker } = api.habitTracker.getAll.useQuery()
 
   const { mutate: trackHabit } = api.habits.trackHabit.useMutation({
     onSuccess: () => {
