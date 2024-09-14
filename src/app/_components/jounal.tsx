@@ -71,25 +71,48 @@ export const Journals: React.FC = () => {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      <ScrollArea className="h-[calc(100vh-13rem)] rounded-md p-4">
+      <ScrollArea className="h-[calc(100vh-16rem)]">
         {journals?.map((journal) => (
-          <div key={journal.id} className="mb-6">
-            <div className="p-3 pl-1 mb-1 rounded-lg border relative hover:shadow-md">
-              <TipTapEditor
-                content={journal.content ?? ''}
-                onChange={() => void {}}
-                title={journal.title ?? ''}
-                onTitleChange={() => void {}}
-                editable={false}
-              />
-              <div className="absolute bottom-0.5 right-0">
-                <Button variant="ghost" size={'sm'} onClick={() => handleEditJournal(journal.id)}>
+          <div
+            key={journal.id}
+            className="mb-6 p-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
+          >
+            <div className="">
+              <div className="max-h-48 overflow-y-hidden">
+                <TipTapEditor
+                  content={journal.content ?? ''}
+                  onChange={() => void {}}
+                  title={journal.title ?? ''}
+                  onTitleChange={() => void {}}
+                  editable={false}
+                />
+              </div>
+              {journal.content && journal.content.length > 300 && (
+                <div className="flex justify-end mt-2 mr-2">
+                  <Button variant="link" className="text-sm">
+                    Show more
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
+              <span className="text-xs text-muted-foreground">
+                {journal.createdAt.toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+              </span>
+              <div className="space-x-2">
+                <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
                   <Edit3 className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
-                  size={'sm'}
-                  className=" hover:bg-red-900 active:bg-red-900"
+                  size="sm"
+                  className="hover:bg-red-900 active:bg-red-900"
                   onClick={() => deleteJournal({ id: journal.id })}
                   disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
                   loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
@@ -99,24 +122,15 @@ export const Journals: React.FC = () => {
                 </Button>
               </div>
             </div>
-            <div className="text-end text-sm text-muted-foreground pr-2 pt-1">
-              {journal.createdAt.toLocaleString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-              })}
-            </div>
           </div>
         ))}
       </ScrollArea>
       <Dialog open={isCreateJournalOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px]">
+        <DialogContent className="sm:max-w-[1000px]">
           <DialogTitle>New note</DialogTitle>
           <DialogDescription>Create a new note to track your thoughts and ideas.</DialogDescription>
 
-          <div className="mt-4">
+          <div className="mt-4 max-h-[calc(100vh-16rem)] border border-input rounded-lg overflow-y-auto overflow-x-visible">
             <TipTapEditor content={content} onChange={handleEditorChange} title={title} onTitleChange={setTitle} />
           </div>
 
