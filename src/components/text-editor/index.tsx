@@ -98,8 +98,8 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
   }, [])
 
   return (
-    <div ref={editorRef} className={`relative rounded-md px-2 py-3`}>
-      <div className="flex flex-col gap-0">
+    <div ref={editorRef} className={`relative rounded-md px-2 py-3 w-full`}>
+      <div className="flex flex-col gap-0 w-full">
         <input
           type="text"
           id="title"
@@ -124,7 +124,7 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
               titleInput?.focus()
             }
           }}
-          className="-ml-1"
+          className="-ml-1 w-full"
         />
       </div>
       {isMenuVisible && editable && (

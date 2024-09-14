@@ -71,30 +71,28 @@ export const Journals: React.FC = () => {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      <ScrollArea className="h-[calc(100vh-16rem)]">
+      <div className="h-[calc(100vh-14rem)] overflow-y-auto custom-scrollbar">
         {journals?.map((journal) => (
           <div
             key={journal.id}
-            className="mb-6 p-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
+            className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
           >
-            <div className="">
-              <div className="max-h-48 overflow-y-hidden">
-                <TipTapEditor
-                  content={journal.content ?? ''}
-                  onChange={() => void {}}
-                  title={journal.title ?? ''}
-                  onTitleChange={() => void {}}
-                  editable={false}
-                />
-              </div>
-              {journal.content && journal.content.length > 300 && (
-                <div className="flex justify-end mt-2 mr-2">
-                  <Button variant="link" className="text-sm">
-                    Show more
-                  </Button>
-                </div>
-              )}
+            <div className="max-h-48 overflow-y-hidden">
+              <TipTapEditor
+                content={journal.content ?? ''}
+                onChange={() => void {}}
+                title={journal.title ?? ''}
+                onTitleChange={() => void {}}
+                editable={false}
+              />
             </div>
+            {journal.content && journal.content.length > 300 && (
+              <div className="flex justify-end mt-2 mr-2">
+                <Button variant="link" className="text-sm">
+                  Show more
+                </Button>
+              </div>
+            )}
             <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
               <span className="text-xs text-muted-foreground">
                 {journal.createdAt.toLocaleString('en-US', {
@@ -124,7 +122,7 @@ export const Journals: React.FC = () => {
             </div>
           </div>
         ))}
-      </ScrollArea>
+      </div>
       <Dialog open={isCreateJournalOpen} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[1000px]">
           <DialogTitle>New note</DialogTitle>
