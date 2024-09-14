@@ -10,20 +10,14 @@ export const metadata: Metadata = {
   title: 'MindTab',
   description: 'MindTab',
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
+  viewport: 'width=device-width, initial-scale=1.0',
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} `}>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </ThemeProvider>
       </body>
