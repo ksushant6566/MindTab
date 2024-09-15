@@ -32,7 +32,7 @@ export const Header = async () => {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-green-500"></div>
-          <p className="text-sm font-medium">2 days streak</p>
+          <p className="text-sm font-medium">0 days streak</p>
         </div>
       </div>
       </div>
