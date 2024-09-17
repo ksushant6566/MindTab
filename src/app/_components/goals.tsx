@@ -216,8 +216,8 @@ export const Goals: React.FC = () => {
                 </Button>
               </div>
             )}
-            <ScrollArea className="h-[calc(100vh-20rem)] overflow-y-auto">
-              <div className="flex flex-col gap-6 pr-4">
+            <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative">
+              <div className="flex flex-col gap-6 pr-4 pb-12">
               {goals
                 ?.filter((goal) => goal.type === selectedGoalType)
                 .map((goal) => (
@@ -239,6 +239,7 @@ export const Goals: React.FC = () => {
                   </div>
                 ))}
               </div>
+              <div className="absolute bottom-0 left-0 flex h-12 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
             </ScrollArea>
           </div>
         )}

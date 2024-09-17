@@ -8,9 +8,9 @@ export const Header = async () => {
   const session = await getServerAuthSession()
 
   return (
-    <div className="flex w-full justify-end items-center gap-4">
+    <div className="flex w-full justify-end items-center gap-6">
+      <CommandMenu />
       <div className="flex items-center gap-4">
-        <CommandMenu />
         <div className="relative ml-8 flex items-center">
           <div className="absolute left-0 top-0 flex h-10 w-10 -translate-x-[78%] -translate-y-[6%] items-center justify-center rounded-full bg-blue-800 cursor-pointer">
             <a href="https://mindtab.in" target="_blank">
