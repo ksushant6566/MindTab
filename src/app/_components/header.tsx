@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
 import { getServerAuthSession } from '~/server/auth'
-import { ModeToggle } from './theme-toggle'
 import { CommandMenu } from './command-menu'
 
 
@@ -39,9 +38,6 @@ export const Header = async () => {
           </div>
         </div>
       </div>
-      {/* <div>
-        <ModeToggle />
-      </div> */}
     </div>
   )
 }

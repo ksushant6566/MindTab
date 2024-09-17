@@ -142,8 +142,8 @@ export const CommandMenu = () => {
     <div className="flex items-center justify-center">
       <Button
         size={'sm'}
-        variant="secondary"
-        className="flex items-center justify-between text-sm text-muted-foreground font-light rounded-md gap-2 h-8 w-64"
+        variant="outline"
+        className="flex items-center justify-between text-sm text-muted-foreground font-light rounded-md gap-2 h-9 w-64"
         onClick={() => setOpen(true)}
       >
         Search... <span>⌘K</span>
