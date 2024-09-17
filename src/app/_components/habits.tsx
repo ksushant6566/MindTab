@@ -245,10 +245,10 @@ const HabitTable: React.FC = () => {
                             </TableCell>
                           ))}
                           <TableCell className="relative p-0 ">
-                            <div className="flex absolute gap-0 group-hover:visible right-4 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
-                              {/* <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
+                            <div className="flex absolute gap-0 group-hover:visible left-4 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
+                              <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
                                 <Edit3 className="h-4 w-4" />
-                              </Button> */}
+                              </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
