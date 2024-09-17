@@ -2,7 +2,7 @@
 
 import { CheckedState } from '@radix-ui/react-checkbox'
 import { createInsertSchema } from 'drizzle-zod'
-import { Edit3, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { Edit3, Plus, RotateCcw, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import React, { useState, useEffect, useRef } from 'react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
@@ -68,6 +68,7 @@ const HabitTable: React.FC = () => {
   const [showScrollButton, setShowScrollButton] = useState(false)
   const [isCreateHabitOpen, setIsCreateHabitOpen] = useState(false)
   const [editHabitId, setEditHabitId] = useState<string | null>(null)
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
 
   const [showConfetti, setShowConfetti] = useState(false)
 
@@ -84,6 +85,7 @@ const HabitTable: React.FC = () => {
         const containerRect = containerRef.current.getBoundingClientRect()
         const currentWeekRect = currentWeekRef.current.getBoundingClientRect()
         setShowScrollButton(currentWeekRect.top < containerRect.top || currentWeekRect.bottom > containerRect.bottom)
+        setScrollDirection(currentWeekRect.top < containerRect.top ? 'down' : 'up')
       }
     }
 
@@ -186,11 +188,13 @@ const HabitTable: React.FC = () => {
               <Table className="table-fixed habit-table">
                 <TableHeader>
                   <TableRow className="border-none">
-                    <TableHead className="border-none w-[90px] ">Habit</TableHead>
+                    <TableHead className="w-32">
+                      Habit
+                    </TableHead>
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
                       <TableHead
                         key={day}
-                        className={`text-center w-[50px] ${
+                        className={`text-center  ${
                           isCurrentWeek && index + 1 === currentDay ? 'text-primary' : ''
                         }`}
                       >
@@ -202,7 +206,7 @@ const HabitTable: React.FC = () => {
                 <TableBody>
                   {habits?.map(
                     (habit) =>
-                      // a habit should only be shown if it was created in the current week or before
+                      // a habit should only be visible if it was created in the current week or before
                       getWeek(habit.createdAt) <= weekIndex &&
                       (habit.id === editHabitId && weekIndex === currentWeek ? (
                         <TableRow className="border-none hover:bg-transparent group">
@@ -244,11 +248,11 @@ const HabitTable: React.FC = () => {
                               />
                             </TableCell>
                           ))}
-                          <TableCell className="relative p-0 ">
-                            <div className="flex absolute gap-0 group-hover:visible left-4 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
-                              <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
+                          <TableCell className="relative p-0" colSpan={1}>
+                            <div className="flex absolute gap-0 group-hover:visible left-2 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
+                              {/* <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
                                 <Edit3 className="h-4 w-4" />
-                              </Button>
+                              </Button> */}
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -308,7 +312,11 @@ const HabitTable: React.FC = () => {
                 size="icon"
                 variant="secondary"
               >
-                <RotateCcw className="h-4 w-4" />
+                {scrollDirection !== 'down' ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronUp className="h-4 w-4" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>Scroll to current week</TooltipContent>

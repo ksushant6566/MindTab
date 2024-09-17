@@ -39,9 +39,9 @@ export const Header = async () => {
           </div>
         </div>
       </div>
-      <div>
+      {/* <div>
         <ModeToggle />
-      </div>
+      </div> */}
     </div>
   )
 }

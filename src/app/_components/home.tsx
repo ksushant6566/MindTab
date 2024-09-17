@@ -16,18 +16,18 @@ export default async function Component() {
   )
 
   return (
-    <div className="h-screen w-screen flex flex-col items-center space-y-8 p-8">
+    <div className="h-screen w-screen flex flex-col items-center space-y-8 p-6 px-12 max-w-screen-2xl mx-auto">
       <Header />
-      <div className="max-w-screen-xl grid grid-cols-12 gap-0">
-        <div className="col-span-5 space-y-6">
+      <div className="max-w-screen-lg grid grid-cols-10 gap-2">
+        <div className="col-span-4">
           <Goals />
         </div>
-        {/* <div className="col-span-5">
+        <div className="col-span-6">
           <Habits />
-        </div> */}
-        <div className="col-span-5">
-          <Journals />
         </div>
+        {/* <div className="col-span-6">
+          <Journals />
+        </div> */}
       </div>
     </div>
   )
