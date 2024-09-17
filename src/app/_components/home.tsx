@@ -1,33 +1,30 @@
 import React from 'react'
 import { Goals } from './goals'
 import { Habits } from './habits'
-import { Header } from './header'
 import { Journals } from './jounal'
-import { getServerAuthSession } from '~/server/auth'
-import Auth from './auth'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+
 
 export default async function Component() {
 
-  const session = await getServerAuthSession()
-  const user = session?.user
-
-  if(!user) return (
-    <Auth />
-  )
-
   return (
-    <div className="h-screen w-screen flex flex-col items-center space-y-8 p-6 px-12 max-w-screen-2xl mx-auto">
-      <Header />
-      <div className="max-w-screen-lg grid grid-cols-10 gap-2">
-        <div className="col-span-4">
-          <Goals />
-        </div>
-        <div className="col-span-6">
-          <Habits />
-        </div>
-        {/* <div className="col-span-6">
-          <Journals />
-        </div> */}
+    <div className="max-w-screen-lg grid grid-cols-10 gap-2">
+      <div className="col-span-4">
+        <Goals />
+      </div>
+      <div className="col-span-6">
+        <Tabs defaultValue="habits">
+          <TabsList className='bg-transparent gap-2 px-0'>
+            <TabsTrigger value="habits" className='bg-secondary text-secondary-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground'>Habits</TabsTrigger>
+            <TabsTrigger value="journals" className='bg-secondary text-secondary-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground'>Notes</TabsTrigger>
+          </TabsList>
+          <TabsContent value="habits" className='pt-6'>
+            <Habits />
+          </TabsContent>
+          <TabsContent value="journals" className='pt-6'>
+            <Journals />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
