@@ -1,14 +1,14 @@
 'use client'
 
 import { Edit3, Plus, Trash2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { TipTapEditor } from '~/components/text-editor'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '~/components/ui/dialog'
 import { api } from '~/trpc/react'
+import { ScrollArea } from '~/components/ui/scroll-area'
 
 import '~/styles/text-editor.css'
-import { ScrollArea } from '~/components/ui/scroll-area'
 
 export const Journals: React.FC = () => {
   const { data: journals, refetch: refetchJournals } = api.journals.getAll.useQuery()
@@ -16,7 +16,7 @@ export const Journals: React.FC = () => {
   const { mutate: createJournal, isPending: isCreatingJournal } = api.journals.create.useMutation({
     onSuccess: () => {
       refetchJournals()
-      setIsCreateJournalOpen(false)
+      setIsJournalModalOpen(false)
       setContent('')
     },
   })
@@ -31,14 +31,36 @@ export const Journals: React.FC = () => {
     },
   })
 
-  const [isCreateJournalOpen, setIsCreateJournalOpen] = useState(false)
+  const [isCreateJournalOpen, setIsJournalModalOpen] = useState(false)
   const [content, setContent] = useState('')
   const [title, setTitle] = useState('')
+  const [overflowingJournals, setOverflowingJournals] = useState<Set<string>>(new Set())
+  const [mode, setMode] = useState<'create' | 'edit' | 'read' | null>(null)
+
+  const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+
+  const checkOverflow = useCallback(() => {
+    const newOverflowingJournals = new Set<string>()
+    Object.entries(contentRefs.current).forEach(([journalId, element]) => {
+      if (element && element.scrollHeight > element.clientHeight) {
+        newOverflowingJournals.add(journalId)
+      }
+    })
+    setOverflowingJournals(newOverflowingJournals)
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(checkOverflow, 0)
+    return () => clearTimeout(timer)
+  }, [journals, checkOverflow])
+
   const handleCreateJournal = () => {
-    setIsCreateJournalOpen(true)
+    setMode('create')
+    setIsJournalModalOpen(true)
   }
 
   const handleEditorChange = (value: string) => {
+    setMode('edit')
     setContent(value)
   }
 
@@ -49,18 +71,27 @@ export const Journals: React.FC = () => {
   }
 
   const onOpenChange = (open: boolean) => {
-    setIsCreateJournalOpen(open)
+    setIsJournalModalOpen(open)
 
     if (!open) {
       setContent('')
       setTitle('')
+      setMode(null)
     }
   }
 
   const handleEditJournal = (id: string) => {
     setContent(journals?.find((journal) => journal.id === id)?.content ?? '')
     setTitle(journals?.find((journal) => journal.id === id)?.title ?? '')
-    setIsCreateJournalOpen(true)
+    setMode('edit')
+    setIsJournalModalOpen(true)
+  }
+
+  const handleShowMore = (id: string) => {
+    setContent(journals?.find((journal) => journal.id === id)?.content ?? '')
+    setTitle(journals?.find((journal) => journal.id === id)?.title ?? '')
+    setMode('read')
+    setIsJournalModalOpen(true)
   }
 
   return (
@@ -71,75 +102,99 @@ export const Journals: React.FC = () => {
           <Plus className="h-4 w-4" />
         </Button>
       </div>
-      <div className="h-[calc(100vh-14rem)] overflow-y-auto custom-scrollbar">
-        {journals?.map((journal) => (
-          <div
-            key={journal.id}
-            className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <div className="max-h-48 overflow-y-hidden">
-              <TipTapEditor
-                content={journal.content ?? ''}
-                onChange={() => void {}}
-                title={journal.title ?? ''}
-                onTitleChange={() => void {}}
-                editable={false}
-              />
-            </div>
-            {journal.content && journal.content.length > 300 && (
-              <div className="flex justify-end mt-2 mr-2">
-                <Button variant="link" className="text-sm">
-                  Show more
-                </Button>
+      <ScrollArea className="h-[calc(100vh-14rem)]">
+        <div className='pr-4'>
+          {journals?.map((journal) => (
+            <div
+              key={journal.id}
+              className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
+            >
+              <div
+                className="max-h-56 overflow-y-hidden"
+                ref={(el) => {
+                  if (el) {
+                    contentRefs.current[journal.id] = el;
+                  }
+                }}
+              >
+                <TipTapEditor
+                  content={journal.content ?? ''}
+                  onChange={() => void {}}
+                  title={journal.title ?? ''}
+                  onTitleChange={() => void {}}
+                  editable={false}
+                />
               </div>
-            )}
-            <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
-              <span className="text-xs text-muted-foreground">
-                {journal.createdAt.toLocaleString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}
-              </span>
-              <div className="space-x-2">
-                <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
-                  <Edit3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="hover:bg-red-900 active:bg-red-900"
-                  onClick={() => deleteJournal({ id: journal.id })}
-                  disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                  loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                  hideContentWhenLoading
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              {overflowingJournals.has(journal.id) && (
+                <div className="flex justify-end -mt-2 mr-2" onClick={() => handleShowMore(journal.id)}>
+                  <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground">
+                    Show more
+                  </Button>
+                </div>
+              )}
+              <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
+                <span className="text-xs text-muted-foreground">
+                  {journal.createdAt.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                  })}
+                </span>
+                <div className="space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-red-900 active:bg-red-900"
+                    onClick={() => deleteJournal({ id: journal.id })}
+                    disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
+                    loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
+                    hideContentWhenLoading
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ScrollArea>
       <Dialog open={isCreateJournalOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[1000px]">
-          <DialogTitle>New note</DialogTitle>
-          <DialogDescription>Create a new note to track your thoughts and ideas.</DialogDescription>
+        <DialogContent className={`sm:max-w-[1000px] ${mode === 'read' ? "p-0" : ""}`}>
+          {
+            mode === 'create' ? (
+              <>
+                <DialogTitle>New note</DialogTitle>
+                <DialogDescription className='-mt-2'>Create a new note to track your thoughts and ideas.</DialogDescription>
+              </>
+            ) : mode === 'edit' ? (
+              <>
+                <DialogTitle>Edit note</DialogTitle>
+                <DialogDescription className='-mt-2'>Edit your note.</DialogDescription>
+              </>
+            ) : null
+          }
 
-          <div className="mt-4 max-h-[calc(100vh-16rem)] border border-input rounded-lg overflow-y-auto overflow-x-visible">
-            <TipTapEditor content={content} onChange={handleEditorChange} title={title} onTitleChange={setTitle} />
+          <div className="max-h-[calc(100vh-16rem)] border border-input rounded-lg overflow-y-auto overflow-x-visible">
+            <TipTapEditor content={content} onChange={handleEditorChange} title={title} onTitleChange={setTitle} editable={mode !== 'read'} />
           </div>
 
-          <DialogFooter>
-            <Button onClick={() => setIsCreateJournalOpen(false)} size={'sm'} variant="outline">
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} size={'sm'} disabled={isCreatingJournal || !title || !content}>
-              {isCreatingJournal ? 'Saving...' : 'Save'}
-            </Button>
-          </DialogFooter>
+          {
+            mode !== 'read' ? (
+              <DialogFooter>
+                <Button onClick={() => setIsJournalModalOpen(false)} size={'sm'} variant="outline">
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmit} size={'sm'} disabled={isCreatingJournal || !title || !content}>
+                  {isCreatingJournal ? 'Saving...' : 'Save'}
+                </Button>
+              </DialogFooter>
+            ) : null
+          }
         </DialogContent>
       </Dialog>
     </div>
