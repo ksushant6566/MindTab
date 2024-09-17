@@ -1,10 +1,13 @@
 'use client'
 
 import { signIn } from "next-auth/react"
+import { useLayoutEffect } from "react"
 
 export const AutoSignin = () => {
 
-    signIn('google', { callbackUrl: '/', redirect: true })
+    useLayoutEffect(() => {
+        signIn('google', { callbackUrl: '/', redirect: true })
+    }, [])
 
     return <div>Loading...</div>
 }
