@@ -217,7 +217,7 @@ export const Goals: React.FC = () => {
               </div>
             )}
             <ScrollArea className="h-[calc(100vh-20rem)] overflow-y-auto">
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 pr-4">
               {goals
                 ?.filter((goal) => goal.type === selectedGoalType)
                 .map((goal) => (
