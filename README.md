@@ -11,23 +11,32 @@
 
 ## 🛠️ Getting Started
 
-MindTab is currently in development. Once released, you can install it from the Chrome Web Store and begin using it right away. Stay tuned for updates and new features as we build and refine the app.
+MindTab is now available for installation! You can start using it right away to track your goals and journal your thoughts.
 
 ### Installation
 
-_This section will be updated once the extension is available on the Chrome Web Store._
+1. Visit the [MindTab Chrome Web Store page](https://chromewebstore.google.com/detail/mindtab/ndnegdefonikfckhbgmejdodebnbhjll).
+2. Click on "Add to Chrome" to install the extension.
+3. Once installed, open a new tab to start using MindTab!
+
+### Try It Online
+
+You can also try MindTab without installing the Chrome extension by visiting [mindtab.in](https://mindtab.in).
 
 ## 📝 Roadmap
 
-- [ ] Core functionality for goal tracking
-- [ ] Micro journaling capabilities
-- [ ] Customizable settings and themes
-- [ ] User authentication and data sync across devices
+- [x] Core functionality for goal tracking
+- [x] Micro journaling capabilities
+- [x] Customizable settings and themes
+- [x] User authentication and data sync across devices
 - [ ] Analytics and progress tracking
+- [ ] Ios shortcut
+- [ ] Android widget
+- [ ] Mobile App
 
 ## 🤝 Contributing
 
-We welcome contributions! Please check back later for details on how you can contribute to the development of MindTab.
+We welcome contributions! If you're interested in improving MindTab, please feel free to submit pull requests or open issues on our GitHub repository (link to be added soon).
 
 ## 📄 License
 
@@ -37,12 +46,12 @@ MindTab is licensed under the MIT License. See the [LICENSE](LICENSE) file for m
 
 For any questions, suggestions, or to stay up-to-date with the latest news, please join our community:
 
-- **Twitter**: [@sushant_codes](https://x.com/sushant_codes)
+- **Twitter**: [@sushant_codes](https://twitter.com/sushant_codes)
 
-## 📢 Disclaimer
+## 📢 Feedback
 
-This README is a placeholder and will be updated as MindTab continues to develop. Stay tuned for more content and updates!
+We're continuously working to improve MindTab. If you have any feedback or suggestions, please don't hesitate to reach out or leave a review on the Chrome Web Store.
 
 ---
 
-Thanks for checking out MindTab! We're excited to help you achieve your goals and capture your thoughts in the most efficient way possible.
+Thanks for checking out MindTab! We're excited to help you achieve your goals and capture your thoughts in the most efficient way possible. Happy goal-setting and journaling!
