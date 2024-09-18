@@ -36,7 +36,7 @@ You can also try MindTab without installing the Chrome extension by visiting [mi
 
 ## 🤝 Contributing
 
-We welcome contributions! If you're interested in improving MindTab, please feel free to submit pull requests or open issues on our GitHub repository (link to be added soon).
+We welcome contributions! If you're interested in improving MindTab, please feel free to submit pull requests or open issues on our GitHub repository.
 
 ## 📄 License
 
