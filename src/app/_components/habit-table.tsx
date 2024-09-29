@@ -194,7 +194,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                     if (startDate && endDate) {
                       const formatDate = (dateString: string) => {
                         const date = new Date(dateString);
-                        return date.toLocaleString('default', { day: '2-digit', month: 'long' });
+                        return date.toLocaleString('en-US', { day: '2-digit', month: 'long' });
                       };
                       return `${formatDate(startDate)} - ${formatDate(endDate)}`;
                     }
