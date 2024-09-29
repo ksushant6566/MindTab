@@ -160,7 +160,16 @@ export const Goals: React.FC = () => {
     },
   })
   const { mutate: deleteGoal, isPending: isDeletingGoal, variables: deleteGoalVariables } = api.goals.delete.useMutation({
-    onSuccess: () => refetch()
+    async onMutate(variables) {
+      await apiUtils.goals.getAll.cancel()
+      const previousGoals = apiUtils.goals.getAll.getData() ?? []
+      
+      apiUtils.goals.getAll.setData(undefined, previousGoals.filter(goal => goal.id !== variables.id))
+      return { previousGoals }
+    },
+    onError(error, variables, context) {
+      apiUtils.goals.getAll.setData(undefined, context?.previousGoals ?? [])
+    },
   })
 
   const [selectedGoalType, setSelectedGoalType] = useState<(typeof goalTypeEnum.enumValues)[number]>('daily')

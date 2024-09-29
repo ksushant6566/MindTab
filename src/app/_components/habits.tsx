@@ -14,8 +14,18 @@ export const Habits: React.FC = () => {
     isPending: isDeletingHabit,
     variables: deleteHabitVariables,
   } = api.habits.delete.useMutation({
-    onSuccess: () => {
-      refetchHabits()
+    async onMutate(variables) {
+      await apiUtils.habits.getAll.cancel()
+      const previousHabits = apiUtils.habits.getAll.getData() ?? []
+      
+      apiUtils.habits.getAll.setData(undefined, previousHabits.filter(habit => habit.id !== variables.id))
+      return { previousHabits }
+    },
+    onError(error, variables, context) {
+      apiUtils.habits.getAll.setData(undefined, context?.previousHabits ?? [])
+    },
+    onSettled() {
+      apiUtils.habits.getAll.invalidate()
     },
   })
 
