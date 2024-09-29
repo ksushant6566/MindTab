@@ -2,6 +2,7 @@ import Image from 'next/image'
 import React from 'react'
 import { getServerAuthSession } from '~/server/auth'
 import { CommandMenu } from './command-menu'
+import Streak from './streak'
 
 
 export const Header = async () => {
@@ -31,12 +32,7 @@ export const Header = async () => {
             <div className="z-10 h-10 w-10 rounded-full bg-slate-300" />
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <p className="text-sm font-medium">0 days streak</p>
-          </div>
-        </div>
+        <Streak />
       </div>
     </div>
   )
