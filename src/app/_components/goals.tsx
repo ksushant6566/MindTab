@@ -33,34 +33,26 @@ type TGoalProps = {
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onToggleStatus: (id: string, checked: CheckedState) => void
-  isUpdating: boolean
   isDeleting: boolean
-  updateVariables?: { id: string }
   deleteVariables?: { id: string }
 }
 
-const Goal: React.FC<TGoalProps> = ({ 
-  goal, 
-  onEdit, 
-  onDelete, 
-  onToggleStatus, 
-  isUpdating, 
-  isDeleting, 
-  updateVariables, 
-  deleteVariables 
+const Goal: React.FC<TGoalProps> = ({
+  goal,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  isDeleting,
+  deleteVariables
 }) => {
   return (
     <div className="group relative flex items-start gap-3">
-      {isUpdating && goal.id === updateVariables?.id ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Checkbox
-          id={goal.id}
-          className="h-4 w-4 rounded-full mt-0.5"
-          checked={goal.status === 'completed'}
-          onCheckedChange={(checked) => onToggleStatus(goal.id, checked)}
-        />
-      )}
+      <Checkbox
+        id={goal.id}
+        className="h-4 w-4 rounded-full mt-0.5"
+        checked={goal.status === 'completed'}
+        onCheckedChange={(checked) => onToggleStatus(goal.id, checked)}
+      />
       <div className="flex flex-col gap-1 max-w-full">
         <Label
           htmlFor={goal.id}
@@ -117,32 +109,54 @@ const Goal: React.FC<TGoalProps> = ({
 const Clock = () => {
   return (
     <div className="flex flex-col gap-1">
-          <h1 className="text-6xl font-thin">
-            {new Date().toLocaleTimeString('en-IN', {
-              minute: 'numeric',
-              hour: 'numeric',
-              hour12: false,
-            })}
-          </h1>
-          <h1 className="text-xl font-medium">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </h1>
-        </div>
+      <h1 className="text-6xl font-thin">
+        {new Date().toLocaleTimeString('en-IN', {
+          minute: 'numeric',
+          hour: 'numeric',
+          hour12: false,
+        })}
+      </h1>
+      <h1 className="text-xl font-medium">
+        {new Date().toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        })}
+      </h1>
+    </div>
   )
 }
 
 export const Goals: React.FC = () => {
+  const apiUtils = api.useUtils()
+
   const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery()
   const { mutate: createGoal, isPending: isCreatingGoal } = api.goals.create.useMutation({
     onSuccess: () => refetch()
   })
-  const { mutate: updateGoal, isPending: isUpdatingGoal, variables: updateGoalVariables } = api.goals.update.useMutation({
-    onSuccess: () => refetch()
+  const { mutate: updateGoal } = api.goals.update.useMutation({
+    async onMutate(variables) {
+      await apiUtils.goals.getAll.cancel()
+      const previousGoals = apiUtils.goals.getAll.getData()
+
+      const updatedGoals = previousGoals?.map((goal) => goal.id === variables.id ? {
+        ...goal,
+        ...variables
+      } : goal) as TGoal[]
+
+      apiUtils.goals.getAll.setData(undefined, updatedGoals)
+
+      return { previousGoals }
+    },
+
+    onError(error, variables, context) {
+      apiUtils.goals.getAll.setData(undefined, context?.previousGoals ?? [])
+    },
+
+    onSettled() {
+      apiUtils.goals.getAll.invalidate()
+    },
   })
   const { mutate: deleteGoal, isPending: isDeletingGoal, variables: deleteGoalVariables } = api.goals.delete.useMutation({
     onSuccess: () => refetch()
@@ -218,26 +232,24 @@ export const Goals: React.FC = () => {
             )}
             <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative">
               <div className="flex flex-col gap-6 pr-4 pb-12">
-              {goals
-                ?.filter((goal) => goal.type === selectedGoalType)
-                .map((goal) => (
-                  <div key={goal.id}>
-                    {editGoalId === goal.id ? (
-                      <EditGoal goal={goal} onSave={onSaveEditGoal} onCancel={onCancelEditGoal} />
-                    ) : (
-                      <Goal
-                        goal={goal}
-                        onEdit={setEditGoalId}
-                        onDelete={handleDeleteGoal}
-                        onToggleStatus={toggleGoalStatus}
-                        isUpdating={isUpdatingGoal}
-                        isDeleting={isDeletingGoal}
-                        updateVariables={updateGoalVariables}
-                        deleteVariables={deleteGoalVariables}
-                      />
-                    )}
-                  </div>
-                ))}
+                {goals
+                  ?.filter((goal) => goal.type === selectedGoalType)
+                  .map((goal) => (
+                    <div key={goal.id}>
+                      {editGoalId === goal.id ? (
+                        <EditGoal goal={goal} onSave={onSaveEditGoal} onCancel={onCancelEditGoal} />
+                      ) : (
+                        <Goal
+                          goal={goal}
+                          onEdit={setEditGoalId}
+                          onDelete={handleDeleteGoal}
+                          onToggleStatus={toggleGoalStatus}
+                          isDeleting={isDeletingGoal}
+                          deleteVariables={deleteGoalVariables}
+                        />
+                      )}
+                    </div>
+                  ))}
               </div>
               <div className="absolute bottom-0 left-0 flex h-12 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
             </ScrollArea>
