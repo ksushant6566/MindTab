@@ -182,10 +182,25 @@ export const HabitTable: React.FC<THabitTableProps> = ({
           const isCurrentWeek = weekIndex === currentWeek
           return (
             <div key={weekIndex} className="snap-start mb-16" ref={isCurrentWeek ? currentWeekRef : null}>
-              <h2 className="text-xl font-semibold mb-4">
-                Week {weekIndex + 1}
-                {isCurrentWeek && ' (Current)'}
-              </h2>
+              <div className="flex flex-col items-start gap-1 mb-4">
+                <h2 className="text-xl font-semibold">
+                  Week {weekIndex + 1}
+                  {isCurrentWeek && ' (Current)'}
+                </h2>
+                <div className="flex items-center justify-start gap-2 text-sm text-muted-foreground">
+                  {(() => {
+                    const startDate = getDateFromWeekAndDay(weekIndex, 1);
+                    const endDate = getDateFromWeekAndDay(weekIndex, 7);
+                    if (startDate && endDate) {
+                      const formatDate = (dateString: string) => {
+                        const date = new Date(dateString);
+                        return date.toLocaleString('default', { day: '2-digit', month: 'long' });
+                      };
+                      return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+                    }
+                  })()}
+                </div>
+              </div>
               <Table className="table-fixed habit-table">
                 <TableHeader>
                   <TableRow className="border-none">
@@ -195,9 +210,8 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
                       <TableHead
                         key={day}
-                        className={`text-center  ${
-                          isCurrentWeek && index + 1 === currentDay ? 'text-primary' : ''
-                        }`}
+                        className={`text-center  ${isCurrentWeek && index + 1 === currentDay ? 'text-primary' : ''
+                          }`}
                       >
                         {day}
                       </TableHead>
