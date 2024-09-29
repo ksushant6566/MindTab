@@ -1,7 +1,7 @@
 'use client'
 
 import { Edit3, Flag, Loader2, Plus, Trash2, Zap } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { goalTypeEnum, goals } from '~/server/db/schema'
@@ -16,6 +16,7 @@ import { ScrollArea } from '~/components/ui/scroll-area'
 import { Label } from '~/components/ui/label'
 
 import { InferSelectModel } from 'drizzle-orm'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 
 const priorityColors = {
   priority_1: 'red',
@@ -190,6 +191,29 @@ export const Goals: React.FC = () => {
 
   const onCancelEditGoal = () => setEditGoalId(null)
 
+  const priorityNumberMap = {
+    priority_1: 1,
+    priority_2: 2,
+    priority_3: 3,
+    priority_4: 4,
+  }
+
+  const getSortedPendingGoals = () => {
+    return goals?.filter((goal) => goal.status === 'pending').sort((a, b) => priorityNumberMap[a.priority] - priorityNumberMap[b.priority])
+  }
+
+  const getSortedCompletedGoals = () => {
+    return goals?.filter((goal) => goal.status === 'completed').sort((a, b) => new Date(b.updatedAt ?? '').getTime() - new Date(a.updatedAt ?? '').getTime())
+  }
+
+  const sortedPendingGoals = useMemo(() => {
+    return getSortedPendingGoals()?.filter((goal) => goal.type === selectedGoalType)
+  }, [goals, selectedGoalType])
+
+  const sortedCompletedGoals = useMemo(() => {
+    return getSortedCompletedGoals()?.filter((goal) => goal.type === selectedGoalType)
+  }, [goals, selectedGoalType])
+
   return (
     <div className="space-y-4">
       <Clock />
@@ -222,6 +246,7 @@ export const Goals: React.FC = () => {
                 <Button
                   onClick={() => setIsCreateGoalOpen(true)}
                   disabled={isCreatingGoal}
+                  loading={isCreatingGoal}
                   variant="ghost"
                   size="sm"
                   className="flex items-center gap-2 text-sm font-normal"
@@ -231,25 +256,49 @@ export const Goals: React.FC = () => {
               </div>
             )}
             <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative">
-              <div className="flex flex-col gap-6 pr-4 pb-12">
-                {goals
-                  ?.filter((goal) => goal.type === selectedGoalType)
-                  .map((goal) => (
-                    <div key={goal.id}>
-                      {editGoalId === goal.id ? (
-                        <EditGoal goal={goal} onSave={onSaveEditGoal} onCancel={onCancelEditGoal} />
-                      ) : (
-                        <Goal
-                          goal={goal}
-                          onEdit={setEditGoalId}
-                          onDelete={handleDeleteGoal}
-                          onToggleStatus={toggleGoalStatus}
-                          isDeleting={isDeletingGoal}
-                          deleteVariables={deleteGoalVariables}
-                        />
-                      )}
-                    </div>
-                  ))}
+              <div className="flex flex-col gap-0 pr-4 pb-12">
+                <Accordion type="single" collapsible defaultValue="pending">
+                  <AccordionItem value="pending">
+                    <AccordionTrigger className="text-sm font-medium">Pending</AccordionTrigger>
+                    <AccordionContent className="space-y-6">
+                      {sortedPendingGoals?.map((goal) => (
+                        <div key={goal.id}>
+                          {editGoalId === goal.id ? (
+                            <EditGoal goal={goal} onSave={onSaveEditGoal} onCancel={onCancelEditGoal} />
+                          ) : (
+                            <Goal
+                              goal={goal}
+                              onEdit={setEditGoalId}
+                              onDelete={handleDeleteGoal}
+                              onToggleStatus={toggleGoalStatus}
+                              isDeleting={isDeletingGoal}
+                              deleteVariables={deleteGoalVariables}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+                <Accordion type="single" collapsible defaultValue={sortedPendingGoals?.length ? undefined : 'completed'}>
+                  <AccordionItem value="completed">
+                    <AccordionTrigger className="text-sm font-medium">Completed</AccordionTrigger>
+                    <AccordionContent className="space-y-6">
+                      {sortedCompletedGoals?.map((goal) => (
+                        <div key={goal.id}>
+                          <Goal
+                            goal={goal}
+                            onEdit={setEditGoalId}
+                            onDelete={handleDeleteGoal}
+                            onToggleStatus={toggleGoalStatus}
+                            isDeleting={isDeletingGoal}
+                            deleteVariables={deleteGoalVariables}
+                          />
+                        </div>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               </div>
               <div className="absolute bottom-0 left-0 flex h-12 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
             </ScrollArea>

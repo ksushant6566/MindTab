@@ -11,7 +11,6 @@ import { Skeleton } from '~/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { habits, habitTracker } from '~/server/db/schema'
-import { api } from '~/trpc/react'
 import { CreateHabit } from './create-habit'
 import { EditHabit } from './edit-habit'
 
