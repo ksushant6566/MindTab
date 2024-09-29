@@ -216,7 +216,7 @@ export const Goals: React.FC = () => {
         ) : (
           <div className="flex flex-col gap-4 pr-4">
             {isCreateGoalOpen ? (
-              <CreateGoal onSave={onCreateGoal} onCancel={onCancelCreateGoal} />
+              <CreateGoal onSave={onCreateGoal} onCancel={onCancelCreateGoal} defaultValues={{ type: selectedGoalType }} />
             ) : (
               <div className="-mb-2 -ml-2 flex justify-start">
                 <Button
