@@ -3,12 +3,48 @@
 import React from 'react'
 import { api } from '~/trpc/react'
 import { HabitTable } from './habit-table'
+import { Skeleton } from '~/components/ui/skeleton'
+
+const HabitTableSkeleton = () => {
+  return (
+    <div className="flex flex-col gap-16 w-full max-h-[80vh] overflow-y-hidden">
+      {
+        Array.from({ length: 2 }).map((_, index) => (
+          <div className="flex flex-col gap-12 w-full py-3">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="w-44 h-10" />
+              <Skeleton className="w-44 h-4" />
+            </div>
+            <div className="flex flex-col gap-1.5 pl-2">
+              {
+                Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    <div className="flex gap-6 justify-start items-center">
+                      <Skeleton className="w-28 h-11" />
+                      <div className="flex gap-1.5">
+                        {
+                          Array.from({ length: 7 }).map((_, index) => (
+                            <Skeleton key={index} className="w-14 h-12" />
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  )
+}
 
 export const Habits: React.FC = () => {
 
   const apiUtils = api.useUtils()
 
-  const { data: habits, refetch: refetchHabits } = api.habits.getAll.useQuery()
+  const { data: habits, refetch: refetchHabits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery()
   const {
     mutate: deleteHabit,
     isPending: isDeletingHabit,
@@ -17,7 +53,7 @@ export const Habits: React.FC = () => {
     async onMutate(variables) {
       await apiUtils.habits.getAll.cancel()
       const previousHabits = apiUtils.habits.getAll.getData() ?? []
-      
+
       apiUtils.habits.getAll.setData(undefined, previousHabits.filter(habit => habit.id !== variables.id))
       return { previousHabits }
     },
@@ -41,7 +77,7 @@ export const Habits: React.FC = () => {
     },
   })
 
-  const { data: habitTracker, refetch: refetchHabitTracker } = api.habitTracker.getAll.useQuery()
+  const { data: habitTracker } = api.habitTracker.getAll.useQuery()
 
   const { mutate: trackHabit } = api.habits.trackHabit.useMutation({
     async onMutate(variables) {
@@ -107,19 +143,22 @@ export const Habits: React.FC = () => {
 
   return (
     <div className="flex justify-center items-center relative">
-      <HabitTable
-        habits={habits ?? []}
-        isCreatingHabit={isCreatingHabit}
-        isUpdatingHabit={isUpdatingHabit}
-        isDeletingHabit={isDeletingHabit}
-        deleteHabitVariables={deleteHabitVariables}
-        createHabit={createHabit}
-        updateHabit={updateHabit}
-        deleteHabit={deleteHabit}
-        trackHabit={trackHabit}
-        untrackHabit={untrackHabit}
-        habitTracker={habitTracker ?? []}
-      />
+      {
+        isFetchingHabits ? <HabitTableSkeleton /> :
+          <HabitTable
+            habits={habits ?? []}
+            isCreatingHabit={isCreatingHabit}
+            isUpdatingHabit={isUpdatingHabit}
+            isDeletingHabit={isDeletingHabit}
+            deleteHabitVariables={deleteHabitVariables}
+            createHabit={createHabit}
+            updateHabit={updateHabit}
+            deleteHabit={deleteHabit}
+            trackHabit={trackHabit}
+            untrackHabit={untrackHabit}
+            habitTracker={habitTracker ?? []}
+          />
+      }
     </div>
   )
 }

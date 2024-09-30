@@ -13,7 +13,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/comp
 import { habits, habitTracker } from '~/server/db/schema'
 import { CreateHabit } from './create-habit'
 import { EditHabit } from './edit-habit'
-
 import Confetti from 'react-confetti'
 import { InferSelectModel } from 'drizzle-orm'
 
@@ -75,7 +74,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     if (containerRef.current && currentWeekRef.current) {
       containerRef.current.scrollTo({
         top: currentWeekRef.current.offsetTop,
-        behavior: 'smooth',
+        behavior: 'instant',
       })
     }
 
