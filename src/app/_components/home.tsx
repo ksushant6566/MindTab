@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 export default async function Component() {
 
   return (
-    <div className="max-w-screen-lg grid grid-cols-10 gap-2">
+    <div className="max-w-screen-lg w-full grid grid-cols-10 gap-2">
       <div className="col-span-4">
         <Goals />
       </div>
