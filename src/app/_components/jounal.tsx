@@ -5,13 +5,38 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { TipTapEditor } from '~/components/text-editor'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '~/components/ui/dialog'
-import { api } from '~/trpc/react'
+import { Skeleton } from '~/components/ui/skeleton'
 import { ScrollArea } from '~/components/ui/scroll-area'
+import { api } from '~/trpc/react'
 
 import '~/styles/text-editor.css'
 
+const JournalSkeleton: React.FC = () => {
+  return (
+    <div className='pr-4 space-y-6'>
+      {[...Array(2)].map((_, index) => (
+        <div key={index} className="p-4 relative rounded-lg border shadow-sm space-y-4">
+          <div>
+            <Skeleton className="h-8 w-44" />
+          </div>
+          <Skeleton className="h-40 w-full rounded-t-lg" />
+          <div className="flex justify-between items-center">
+            <div className='flex flex-col justify-end'>
+              <Skeleton className="h-4 w-32 rounded-md inline-block" />
+            </div>
+            <div className="space-x-2">
+              <Skeleton className="h-8 w-32 rounded-md inline-block" />
+              <Skeleton className="h-8 w-32 rounded-md inline-block" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export const Journals: React.FC = () => {
-  const { data: journals, refetch: refetchJournals } = api.journals.getAll.useQuery()
+  const { data: journals, refetch: refetchJournals, isFetching: isFetchingJournals } = api.journals.getAll.useQuery()
 
   const { mutate: createJournal, isPending: isCreatingJournal } = api.journals.create.useMutation({
     onSuccess: () => {
@@ -103,65 +128,67 @@ export const Journals: React.FC = () => {
         </Button>
       </div>
       <ScrollArea className="h-[calc(100vh-14rem)]">
-        <div className='pr-4'>
-          {journals?.map((journal) => (
-            <div
-              key={journal.id}
-              className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
-            >
+        {isFetchingJournals ? <JournalSkeleton /> : (
+          <div className='pr-4'>
+            {journals?.map((journal) => (
               <div
-                className="max-h-56 overflow-y-hidden"
-                ref={(el) => {
-                  if (el) {
-                    contentRefs.current[journal.id] = el;
-                  }
-                }}
+                key={journal.id}
+                className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
               >
-                <TipTapEditor
-                  content={journal.content ?? ''}
-                  onChange={() => void {}}
-                  title={journal.title ?? ''}
-                  onTitleChange={() => void {}}
-                  editable={false}
-                />
-              </div>
-              {overflowingJournals.has(journal.id) && (
-                <div className="flex justify-end -mt-2 mr-2" onClick={() => handleShowMore(journal.id)}>
-                  <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground">
-                    Show more
-                  </Button>
+                <div
+                  className="max-h-56 overflow-y-hidden"
+                  ref={(el) => {
+                    if (el) {
+                      contentRefs.current[journal.id] = el;
+                    }
+                  }}
+                >
+                  <TipTapEditor
+                    content={journal.content ?? ''}
+                    onChange={() => void {}}
+                    title={journal.title ?? ''}
+                    onTitleChange={() => void {}}
+                    editable={false}
+                  />
                 </div>
-              )}
-              <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
-                <span className="text-xs text-muted-foreground">
-                  {journal.createdAt.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                  })}
-                </span>
-                <div className="space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-red-900 active:bg-red-900"
-                    onClick={() => deleteJournal({ id: journal.id })}
-                    disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                    loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                    hideContentWhenLoading
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                {overflowingJournals.has(journal.id) && (
+                  <div className="flex justify-end -mt-2 mr-2" onClick={() => handleShowMore(journal.id)}>
+                    <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground">
+                      Show more
+                    </Button>
+                  </div>
+                )}
+                <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
+                  <span className="text-xs text-muted-foreground">
+                    {journal.createdAt.toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric',
+                    })}
+                  </span>
+                  <div className="space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:bg-red-900 active:bg-red-900"
+                      onClick={() => deleteJournal({ id: journal.id })}
+                      disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
+                      loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
+                      hideContentWhenLoading
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </ScrollArea>
       <Dialog open={isCreateJournalOpen} onOpenChange={onOpenChange}>
         <DialogContent className={`sm:max-w-[1000px] ${mode === 'read' ? "p-0" : ""}`}>
