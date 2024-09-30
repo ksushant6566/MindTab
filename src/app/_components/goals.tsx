@@ -1,7 +1,7 @@
 'use client'
 
 import { Edit3, Flag, Loader2, Plus, Trash2, Zap } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { goalTypeEnum, goals } from '~/server/db/schema'
@@ -108,17 +108,27 @@ const Goal: React.FC<TGoalProps> = ({
 }
 
 const Clock = () => {
+
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div className="flex flex-col gap-1">
       <h1 className="text-6xl font-thin">
-        {new Date().toLocaleTimeString('en-IN', {
+        {time.toLocaleTimeString('en-IN', {
           minute: 'numeric',
           hour: 'numeric',
           hour12: false,
         })}
       </h1>
       <h1 className="text-xl font-medium">
-        {new Date().toLocaleDateString('en-US', {
+        {time.toLocaleDateString('en-US', {
           weekday: 'long',
           month: 'long',
           day: 'numeric',
