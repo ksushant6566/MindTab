@@ -1,0 +1,1 @@
+ALTER TABLE "mindmap_journal" ALTER COLUMN "title" SET NOT NULL;

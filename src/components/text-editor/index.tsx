@@ -16,13 +16,13 @@ import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
 
 type TipTapEditorProps = {
   content: string
-  onChange: (content: string) => void
+  onContentChange: (content: string) => void
   title: string
   onTitleChange: (title: string) => void
   editable?: boolean
 }
 
-export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable = true }: TipTapEditorProps) => {
+export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, editable = true }: TipTapEditorProps) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false)
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
   const editorRef = useRef<HTMLDivElement>(null)
@@ -34,7 +34,7 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
     content: content,
     shouldRerenderOnTransaction: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      onContentChange(editor.getHTML())
     },
     onSelectionUpdate: ({ editor }) => {
       if (selectionTimeoutRef.current) {
@@ -59,6 +59,7 @@ export const TipTapEditor = ({ content, onChange, title, onTitleChange, editable
       }, 200)
     },
     editable: editable,
+    immediatelyRender: false,
   })
 
   const getSelectionRect = (editor: Editor) => {

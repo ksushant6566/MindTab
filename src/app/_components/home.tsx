@@ -1,7 +1,7 @@
 import React from 'react'
 import { Goals } from './goals'
 import { Habits } from './habits'
-import { Journals } from './jounal'
+import { Journals } from './journals'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 
 

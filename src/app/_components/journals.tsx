@@ -10,6 +10,8 @@ import { ScrollArea } from '~/components/ui/scroll-area'
 import { api } from '~/trpc/react'
 
 import '~/styles/text-editor.css'
+import { JournalDialog } from './journal-dialog'
+import { CreateJournalDialog } from './create-journal-dialog'
 
 const JournalSkeleton: React.FC = () => {
   return (
@@ -38,14 +40,6 @@ const JournalSkeleton: React.FC = () => {
 export const Journals: React.FC = () => {
   const { data: journals, refetch: refetchJournals, isFetching: isFetchingJournals } = api.journals.getAll.useQuery()
 
-  const { mutate: createJournal, isPending: isCreatingJournal } = api.journals.create.useMutation({
-    onSuccess: () => {
-      refetchJournals()
-      setIsJournalModalOpen(false)
-      setContent('')
-    },
-  })
-
   const {
     mutate: deleteJournal,
     isPending: isDeletingJournal,
@@ -56,11 +50,12 @@ export const Journals: React.FC = () => {
     },
   })
 
-  const [isCreateJournalOpen, setIsJournalModalOpen] = useState(false)
-  const [content, setContent] = useState('')
-  const [title, setTitle] = useState('')
   const [overflowingJournals, setOverflowingJournals] = useState<Set<string>>(new Set())
-  const [mode, setMode] = useState<'create' | 'edit' | 'read' | null>(null)
+
+  const [mode, setMode] = useState<'edit' | 'view' | null>(null)
+  const [isJournalDialogOpen, setIsJournalDialogOpen] = useState(false)
+  const [isCreateJournalDialogOpen, setIsCreateJournalDialogOpen] = useState(false)
+  const [currentJournal, setCurrentJournal] = useState<{ id: string, title: string, content: string } | null>(null)
 
   const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
@@ -79,51 +74,58 @@ export const Journals: React.FC = () => {
     return () => clearTimeout(timer)
   }, [journals, checkOverflow])
 
-  const handleCreateJournal = () => {
-    setMode('create')
-    setIsJournalModalOpen(true)
+  const onCreateJournal = () => {
+    setIsCreateJournalDialogOpen(true)
   }
 
-  const handleEditorChange = (value: string) => {
-    setMode('edit')
-    setContent(value)
-  }
-
-  const handleSubmit = () => {
-    if (content.trim()) {
-      createJournal({ title: title, content: content })
-    }
-  }
-
-  const onOpenChange = (open: boolean) => {
-    setIsJournalModalOpen(open)
+  const onJournalDialogOpenChange = (open: boolean) => {
+    setIsJournalDialogOpen(open)
 
     if (!open) {
-      setContent('')
-      setTitle('')
+      setCurrentJournal(null)
       setMode(null)
     }
   }
 
-  const handleEditJournal = (id: string) => {
-    setContent(journals?.find((journal) => journal.id === id)?.content ?? '')
-    setTitle(journals?.find((journal) => journal.id === id)?.title ?? '')
-    setMode('edit')
-    setIsJournalModalOpen(true)
+  const onCreateJournalDialogOpenChange = (open: boolean) => {
+    setIsCreateJournalDialogOpen(open)
   }
 
-  const handleShowMore = (id: string) => {
-    setContent(journals?.find((journal) => journal.id === id)?.content ?? '')
-    setTitle(journals?.find((journal) => journal.id === id)?.title ?? '')
-    setMode('read')
-    setIsJournalModalOpen(true)
+  const onEditJournal = (id: string) => {
+    const journal = journals?.find((journal) => journal.id === id)
+    if (!journal) {
+      console.error('Invalid journal id')
+      return
+    }
+    setCurrentJournal({
+      id: journal.id,
+      title: journal.title,
+      content: journal.content,
+    })
+    setMode('edit')
+    setIsJournalDialogOpen(true)
+  }
+
+  const onShowMore = (id: string) => {
+    const journal = journals?.find((journal) => journal.id === id)
+    if (!journal) {
+      console.error('Invalid journal id')
+      return
+    }
+    setCurrentJournal({
+      id: journal.id,
+      title: journal.title,
+      content: journal.content,
+    })
+    setMode('view')
+    setIsJournalDialogOpen(true)
   }
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold mb-4">Notes</h2>
-        <Button onClick={handleCreateJournal} size="sm">
+        <Button onClick={onCreateJournal} size="sm">
           <Plus className="h-4 w-4" />
         </Button>
       </div>
@@ -145,20 +147,20 @@ export const Journals: React.FC = () => {
                 >
                   <TipTapEditor
                     content={journal.content ?? ''}
-                    onChange={() => void {}}
+                    onContentChange={() => void {}}
                     title={journal.title ?? ''}
                     onTitleChange={() => void {}}
                     editable={false}
                   />
                 </div>
                 {overflowingJournals.has(journal.id) && (
-                  <div className="flex justify-end -mt-2 mr-2" onClick={() => handleShowMore(journal.id)}>
-                    <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground">
+                  <div className="flex justify-end -mt-2 mr-2">
+                    <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground" onClick={() => onShowMore(journal.id)}>
                       Show more
                     </Button>
                   </div>
                 )}
-                <div className="flex justify-between items-center px-4 py-0 rounded-b-lg">
+                <div className="flex justify-between items-center px-4 py-0 -mt-2 rounded-b-lg">
                   <span className="text-xs text-muted-foreground">
                     {journal.createdAt.toLocaleString('en-US', {
                       month: 'short',
@@ -169,7 +171,7 @@ export const Journals: React.FC = () => {
                     })}
                   </span>
                   <div className="space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEditJournal(journal.id)}>
+                    <Button variant="ghost" size="sm" onClick={() => onEditJournal(journal.id)}>
                       <Edit3 className="h-4 w-4" />
                     </Button>
                     <Button
@@ -190,40 +192,16 @@ export const Journals: React.FC = () => {
           </div>
         )}
       </ScrollArea>
-      <Dialog open={isCreateJournalOpen} onOpenChange={onOpenChange}>
-        <DialogContent className={`sm:max-w-[1000px] ${mode === 'read' ? "p-0" : ""}`}>
-          {
-            mode === 'create' ? (
-              <>
-                <DialogTitle>New note</DialogTitle>
-                <DialogDescription className='-mt-2'>Create a new note to track your thoughts and ideas.</DialogDescription>
-              </>
-            ) : mode === 'edit' ? (
-              <>
-                <DialogTitle>Edit note</DialogTitle>
-                <DialogDescription className='-mt-2'>Edit your note.</DialogDescription>
-              </>
-            ) : null
-          }
-
-          <div className="max-h-[calc(100vh-16rem)] border border-input rounded-lg overflow-y-auto overflow-x-visible">
-            <TipTapEditor content={content} onChange={handleEditorChange} title={title} onTitleChange={setTitle} editable={mode !== 'read'} />
-          </div>
-
-          {
-            mode !== 'read' ? (
-              <DialogFooter>
-                <Button onClick={() => setIsJournalModalOpen(false)} size={'sm'} variant="outline">
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit} size={'sm'} disabled={isCreatingJournal || !title || !content}>
-                  {isCreatingJournal ? 'Saving...' : 'Save'}
-                </Button>
-              </DialogFooter>
-            ) : null
-          }
-        </DialogContent>
-      </Dialog>
+      <JournalDialog
+        isOpen={isJournalDialogOpen}
+        onOpenChange={onJournalDialogOpenChange}
+        defaultMode={mode}
+        journal={currentJournal}
+      />
+      <CreateJournalDialog
+        isOpen={isCreateJournalDialogOpen}
+        onOpenChange={onCreateJournalDialogOpenChange}
+      />
     </div>
   )
 }

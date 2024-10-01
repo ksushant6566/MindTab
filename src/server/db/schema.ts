@@ -174,8 +174,8 @@ export const journal = createTable(
     "journal",
     {
         id: uuid("id").primaryKey().defaultRandom(),
-        title: varchar("title", { length: 256 }),
-        content: text("content"),
+        title: varchar("title", { length: 256 }).notNull(),
+        content: text("content").notNull(),
         createdAt: timestamp("created_at", { withTimezone: true })
             .default(sql`CURRENT_TIMESTAMP`)
             .notNull(),
