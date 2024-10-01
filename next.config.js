@@ -14,6 +14,19 @@ const config = {
       { hostname: "avatars.example.com" },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-max-age=0, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default config;
