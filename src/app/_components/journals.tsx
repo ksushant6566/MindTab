@@ -38,6 +38,8 @@ const JournalSkeleton: React.FC = () => {
 }
 
 export const Journals: React.FC = () => {
+  const apiUtils = api.useUtils()
+
   const { data: journals, refetch: refetchJournals, isFetching: isFetchingJournals } = api.journals.getAll.useQuery()
 
   const {
@@ -45,8 +47,9 @@ export const Journals: React.FC = () => {
     isPending: isDeletingJournal,
     variables: deleteJournalVariables,
   } = api.journals.delete.useMutation({
-    onSuccess: () => {
-      refetchJournals()
+    onSettled: () => {
+      apiUtils.journals.getAll.invalidate()
+      apiUtils.journals.search.invalidate()
     },
   })
 
