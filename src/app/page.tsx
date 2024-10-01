@@ -17,7 +17,7 @@ export default async function App() {
     <HydrateClient>
       <main className="flex min-h-screen w-full flex-col items-center bg-gradient-to-b">
         <div className='w-full flex flex-col items-center p-6 px-12 max-w-screen-2xl mx-auto'>
-          <Header />
+          <Header session={session} />
         </div>
         <Home />
       </main>

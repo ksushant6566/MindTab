@@ -1,12 +1,16 @@
+'use client'
+
 import Image from 'next/image'
 import React from 'react'
-import { getServerAuthSession } from '~/server/auth'
 import { CommandMenu } from './command-menu'
 import Streak from './streak'
+import { Session } from 'next-auth'
 
+type HeaderProps = {
+  session: Session
+}
 
-export const Header = async () => {
-  const session = await getServerAuthSession()
+export const Header = ({ session }: HeaderProps) => {
 
   return (
     <div className="flex w-full justify-end items-center gap-6">
