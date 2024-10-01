@@ -21,7 +21,7 @@ import { JournalDialog } from './journal-dialog'
 export const CommandMenu = () => {
   const { setTheme } = useTheme()
 
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
   // Create Journal Dialog states
@@ -45,8 +45,9 @@ export const CommandMenu = () => {
   }
 
   const { data: journals, isFetching: isFetchingSearchResults } = api.journals.search.useQuery({
-    query: searchQuery,
+    query: searchQuery ?? '',
   }, {
+    enabled: open,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })
@@ -204,7 +205,7 @@ export const CommandMenu = () => {
       <CommandDialog open={open} onOpenChange={toggleOpen}>
         <CommandInput
           placeholder="Type a command or search..."
-          value={searchQuery}
+          value={searchQuery ?? ''}
           onValueChange={setSearchQuery}
         />
         <CommandList>
