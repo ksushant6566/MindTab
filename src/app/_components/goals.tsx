@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit3, Flag, Loader2, Plus, Trash2, Zap } from 'lucide-react'
+import { Edit3, Flag, Plus, Trash2, Zap } from 'lucide-react'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
