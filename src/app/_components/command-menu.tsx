@@ -15,12 +15,34 @@ import {
   CommandShortcut,
 } from '~/components/ui/command'
 import { api } from '~/trpc/react'
+import { CreateJournalDialog } from './create-journal-dialog'
+import { JournalDialog } from './journal-dialog'
 
 export const CommandMenu = () => {
   const { setTheme } = useTheme()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [open, setOpen] = useState(false)
+
+  // Create Journal Dialog states
+  const [isCreateJournalDialogOpen, setIsCreateJournalDialogOpen] = useState(false)
+  const onCreateJournalDialogOpenChange = (open: boolean) => {
+    setIsCreateJournalDialogOpen(open)
+  }
+
+  // Journal Dialog states
+  const [currentJournal, setCurrentJournal] = useState<{
+    id: string
+    title: string
+    content: string
+  } | null>(null)
+  const [isJournalDialogOpen, setIsJournalDialogOpen] = useState(false)
+  const onJournalDialogOpenChange = (open: boolean) => {
+    setIsJournalDialogOpen(open)
+    if (!open) {
+      setCurrentJournal(null)
+    }
+  }
 
   const { data: journals, isFetching: isFetchingSearchResults } = api.journals.search.useQuery({
     query: searchQuery,
@@ -95,17 +117,18 @@ export const CommandMenu = () => {
         {
           label: 'Create Note',
           icon: PlusIcon,
-          shortcut: '⌘ + N',
+          // shortcut: '⌘ + N',
           onClick: () => {
+            setIsCreateJournalDialogOpen(true)
             setOpen(false)
           },
         },
         {
           label: 'Search Notes',
           icon: Notebook,
+          shortcut: 'Type to search...',
           onClick: () => {
-            console.log('Create Note')
-            setOpen(false)
+            console.log('Search Notes')
           },
         }
       ],
@@ -161,7 +184,8 @@ export const CommandMenu = () => {
       label: journal.title!,
       icon: FileText,
       onClick: () => {
-        console.log('Open journal', journal)
+        setCurrentJournal(journal)
+        setIsJournalDialogOpen(true)
         setOpen(false)
       },
     }))
@@ -201,6 +225,16 @@ export const CommandMenu = () => {
           )}
         </CommandList>
       </CommandDialog>
+      <CreateJournalDialog
+        isOpen={isCreateJournalDialogOpen}
+        onOpenChange={onCreateJournalDialogOpenChange}
+      />
+      <JournalDialog
+        isOpen={isJournalDialogOpen}
+        onOpenChange={onJournalDialogOpenChange}
+        defaultMode={'view'}
+        journal={currentJournal}
+      />
     </div>
   )
 }
