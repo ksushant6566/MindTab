@@ -17,6 +17,7 @@ import { Label } from '~/components/ui/label'
 
 import { InferSelectModel } from 'drizzle-orm'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
+import { Skeleton } from '~/components/ui/skeleton'
 
 const priorityColors = {
   priority_1: 'red',
@@ -173,7 +174,7 @@ export const Goals: React.FC = () => {
     async onMutate(variables) {
       await apiUtils.goals.getAll.cancel()
       const previousGoals = apiUtils.goals.getAll.getData() ?? []
-      
+
       apiUtils.goals.getAll.setData(undefined, previousGoals.filter(goal => goal.id !== variables.id))
       return { previousGoals }
     },
@@ -253,9 +254,7 @@ export const Goals: React.FC = () => {
       </div>
       <div>
         {isLoading ? (
-          <div className="flex items-center justify-start">
-            <Loader2 className="mb-4 ml-8 h-4 w-4 animate-spin" />
-          </div>
+          <GoalSkeleton />
         ) : (
           <div className="flex flex-col gap-4 pr-4">
             {isCreateGoalOpen ? (
@@ -278,7 +277,7 @@ export const Goals: React.FC = () => {
               <div className="flex flex-col gap-0 pr-4 pb-12">
                 <Accordion type="single" collapsible defaultValue="pending">
                   <AccordionItem value="pending">
-                    <AccordionTrigger className="text-sm font-medium">Pending</AccordionTrigger>
+                    <AccordionTrigger className="text-sm font-medium pt-1">Pending</AccordionTrigger>
                     <AccordionContent className="space-y-6">
                       {sortedPendingGoals?.map((goal) => (
                         <div key={goal.id}>
@@ -327,3 +326,34 @@ export const Goals: React.FC = () => {
     </div>
   )
 }
+
+const GoalSkeleton = () => {
+  return (
+    <Accordion type="single" collapsible defaultValue="pending" className='mt-12'>
+      <AccordionItem value="pending">
+        <AccordionTrigger className="text-sm font-medium">Pending</AccordionTrigger>
+        <AccordionContent className="space-y-6">
+          {
+            Array.from({ length: 4 }).map((_, index) => (
+              <div className="flex items-start justify-start gap-3 w-full">
+                <div className="flex items-start justify-start">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                </div>
+                <div className="flex flex-col gap-2 w-full pt-0.5">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-8 w-64" />
+                  <div className="flex items-center gap-1">
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
