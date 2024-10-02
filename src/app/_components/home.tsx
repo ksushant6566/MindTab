@@ -1,11 +1,22 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 import { Goals } from './goals'
 import { Habits } from './habits'
 import { Journals } from './journals'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
+import { Skeleton } from '~/components/ui/skeleton'
 
 
-export default async function Component() {
+export default function Component() {
+
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  if (!isHydrated) return null
 
   return (
     <div className="max-w-screen-lg w-full grid grid-cols-10 gap-2">

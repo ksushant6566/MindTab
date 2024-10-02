@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { CommandMenu } from './command-menu'
 import Streak from './streak'
 import { Session } from 'next-auth'
@@ -11,6 +11,14 @@ type HeaderProps = {
 }
 
 export const Header = ({ session }: HeaderProps) => {
+
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  if (!isHydrated) return null
 
   return (
     <div className="flex w-full justify-end items-center gap-6">

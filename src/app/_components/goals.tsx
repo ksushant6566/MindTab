@@ -121,14 +121,14 @@ const Clock = () => {
 
   return (
     <div className="flex flex-col gap-1">
-      <h1 className="text-6xl font-thin">
+      <h1 className="text-6xl font-thin" suppressHydrationWarning>
         {time.toLocaleTimeString('en-IN', {
           minute: 'numeric',
           hour: 'numeric',
           hour12: false,
         })}
       </h1>
-      <h1 className="text-xl font-medium">
+      <h1 className="text-xl font-medium" suppressHydrationWarning>
         {time.toLocaleDateString('en-US', {
           weekday: 'long',
           month: 'long',
