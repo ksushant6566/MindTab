@@ -17,7 +17,7 @@ export default function Streak() {
         for (let i = habitTracker.length - 1; i >= 0; i--) {
             const habit = habitTracker[i]!
             if (habit.status === 'completed') {
-                const date = habit.createdAt.toISOString().split('T')[0]!
+                const date = habit.date
                 groupedByDate.set(date, true)
             }
         }
