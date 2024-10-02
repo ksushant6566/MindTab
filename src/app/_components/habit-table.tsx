@@ -121,7 +121,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     const date = new Date(start.getTime() + diff)
 
     date.setDate(date.getDate() + day)
-    return date.toISOString().split('T')[0]
+    return date.toLocaleDateString().split('/').reverse().join('-')
   }
 
   const handleCreateHabit = (habit: z.infer<typeof ZInsertHabit>) => {
@@ -187,8 +187,8 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                 </h2>
                 <div className="flex items-center justify-start gap-2 text-sm text-muted-foreground">
                   {(() => {
-                    const startDate = getDateFromWeekAndDay(weekIndex, 1);
-                    const endDate = getDateFromWeekAndDay(weekIndex, 7);
+                    const startDate = getDateFromWeekAndDay(weekIndex, 0);
+                    const endDate = getDateFromWeekAndDay(weekIndex, 6);
                     if (startDate && endDate) {
                       const formatDate = (dateString: string) => {
                         const date = new Date(dateString);
@@ -253,7 +253,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                                   (tracker) =>
                                     tracker.habitId === habit.id &&
                                     tracker.status === 'completed' &&
-                                    tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex + 1),
+                                    tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex),
                                 )}
                                 onCheckedChange={(checked) => {
                                   onCheckedChange(habit.id, checked)

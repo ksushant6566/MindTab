@@ -18,21 +18,30 @@ export default function Streak() {
             const habit = habitTracker[i]!
             if (habit.status === 'completed') {
                 const date = habit.date
+
                 groupedByDate.set(date, true)
             }
         }
 
         let streakCount = 0
         const today = new Date()
-        const currentDate = today
+
+        // start from yesterday
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        const currentDate = yesterday
 
         while (true) {
-            const dateString = currentDate.toISOString().split('T')[0]!
+            const dateString = currentDate.toLocaleDateString().split('/').reverse().join('-')
             if (!groupedByDate.has(dateString)) {
                 break
             }
             streakCount++
             currentDate.setDate(currentDate.getDate() - 1)
+        }
+
+        if (groupedByDate.has(today.toLocaleDateString().split('/').reverse().join('-'))) {
+            streakCount++
         }
 
         return streakCount
