@@ -1,4 +1,4 @@
-import { desc, eq, ilike } from 'drizzle-orm'
+import { and, desc, eq, ilike } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { journal as journals } from '~/server/db/schema'
@@ -49,6 +49,6 @@ export const journalsRouter = createTRPCRouter({
       return await ctx.db
         .select()
         .from(journals)
-        .where(ilike(journals.title, `%${input.query}%`))
+        .where(and(eq(journals.userId, ctx.session.user.id), ilike(journals.title, `%${input.query}%`)))
     }),
 })
