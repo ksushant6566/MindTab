@@ -3,7 +3,7 @@
 import { CheckedState } from '@radix-ui/react-checkbox'
 import { createInsertSchema } from 'drizzle-zod'
 import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
@@ -70,6 +70,16 @@ export const HabitTable: React.FC<THabitTableProps> = ({
 
   const [showConfetti, setShowConfetti] = useState(false)
 
+
+  const handleScroll = useCallback(() => {
+    if (containerRef.current && currentWeekRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const currentWeekRect = currentWeekRef.current.getBoundingClientRect()
+      setShowScrollButton(currentWeekRect.top < containerRect.top || currentWeekRect.bottom > containerRect.bottom)
+      setScrollDirection(currentWeekRect.top < containerRect.top ? 'down' : 'up')
+    }
+  }, [containerRef, currentWeekRef])
+
   useEffect(() => {
     if (containerRef.current && currentWeekRef.current) {
       containerRef.current.scrollTo({
@@ -78,14 +88,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
       })
     }
 
-    const handleScroll = () => {
-      if (containerRef.current && currentWeekRef.current) {
-        const containerRect = containerRef.current.getBoundingClientRect()
-        const currentWeekRect = currentWeekRef.current.getBoundingClientRect()
-        setShowScrollButton(currentWeekRect.top < containerRect.top || currentWeekRect.bottom > containerRect.bottom)
-        setScrollDirection(currentWeekRect.top < containerRect.top ? 'down' : 'up')
-      }
-    }
+    handleScroll()
 
     containerRef.current?.addEventListener('scroll', handleScroll)
     return () => {
@@ -105,19 +108,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     }
   }
 
-  const getCurrentWeek = () => {
-    const now = new Date()
-    const start = new Date(now.getFullYear(), 0, 1)
-    const diff = now.getTime() - start.getTime()
-    const oneWeek = 1000 * 60 * 60 * 24 * 7
-    return Math.floor(diff / oneWeek)
-  }
-
-  const getCurrentDay = () => {
-    return new Date().getDay() || 7 // Sunday is 0, so we change it to 7
-  }
-
-  const getWeek = (date: Date) => {
+  const getWeekIndexFromName = (date: Date) => {
     const start = new Date(date.getFullYear(), 0, 1)
     const diff = date.getTime() - start.getTime()
     const oneWeek = 1000 * 60 * 60 * 24 * 7
@@ -163,8 +154,17 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     }
   }
 
-  const currentWeek = getCurrentWeek()
-  const currentDay = getCurrentDay()
+  const currentWeek = useMemo(() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), 0, 1)
+    const diff = now.getTime() - start.getTime()
+    const oneWeek = 1000 * 60 * 60 * 24 * 7
+    return Math.floor(diff / oneWeek)
+  }, [])
+
+  const currentDay = useMemo(() => {
+    return new Date().getDay() || 7 // Sunday is 0, so we change it to 7
+  }, [])
 
   return (
     <div className="relative">
@@ -220,7 +220,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                   {habits?.map(
                     (habit) =>
                       // a habit should only be visible if it was created in the current week or before
-                      getWeek(habit.createdAt) <= weekIndex &&
+                      getWeekIndexFromName(habit.createdAt) <= weekIndex &&
                       (habit.id === editHabitId && weekIndex === currentWeek ? (
                         <TableRow className="border-none hover:bg-transparent group">
                           <TableCell colSpan={8}>

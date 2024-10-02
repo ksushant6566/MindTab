@@ -143,7 +143,8 @@ const Clock = () => {
 export const Goals: React.FC = () => {
   const apiUtils = api.useUtils()
 
-  const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery()
+  const { data: goals, isLoading, refetch } = api.goals.getAll.useQuery(undefined, {
+  })
   const { mutate: createGoal, isPending: isCreatingGoal } = api.goals.create.useMutation({
     onSuccess: () => refetch()
   })
@@ -335,7 +336,7 @@ const GoalSkeleton = () => {
         <AccordionContent className="space-y-6">
           {
             Array.from({ length: 4 }).map((_, index) => (
-              <div className="flex items-start justify-start gap-3">
+              <div className="flex items-start justify-start gap-3" key={index}>
                 <div className="flex items-start justify-start">
                   <Skeleton className="h-6 w-6 rounded-full" />
                 </div>

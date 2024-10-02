@@ -1,12 +1,15 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { api } from "~/trpc/react"
 
 export default function Streak() {
-    const { data: habitTracker } = api.habitTracker.getAll.useQuery()
+    const { data: habitTracker } = api.habitTracker.getAll.useQuery(undefined, {
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    })
 
-    const streak = useMemo(() => {
+    const getStreak = useCallback(() => {
         if (!habitTracker) return 0
 
         const groupedByDate = new Map<string, boolean>()
@@ -33,6 +36,10 @@ export default function Streak() {
         }
 
         return streakCount
+    }, [habitTracker])
+
+    const streak = useMemo(() => {
+        return getStreak()
     }, [habitTracker])
 
     return (

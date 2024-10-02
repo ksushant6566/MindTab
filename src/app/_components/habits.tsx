@@ -10,7 +10,7 @@ const HabitTableSkeleton = () => {
     <div className="flex flex-col gap-16 w-full max-h-[80vh] overflow-y-hidden">
       {
         Array.from({ length: 2 }).map((_, index) => (
-          <div className="flex flex-col gap-12 w-full py-3">
+          <div className="flex flex-col gap-12 w-full py-3" key={index}>
             <div className="flex flex-col gap-2">
               <Skeleton className="w-44 h-10" />
               <Skeleton className="w-44 h-4" />
@@ -44,7 +44,11 @@ export const Habits: React.FC = () => {
 
   const apiUtils = api.useUtils()
 
-  const { data: habits, refetch: refetchHabits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery()
+  const { data: habits, refetch: refetchHabits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
   const {
     mutate: deleteHabit,
     isPending: isDeletingHabit,
@@ -77,7 +81,10 @@ export const Habits: React.FC = () => {
     },
   })
 
-  const { data: habitTracker } = api.habitTracker.getAll.useQuery()
+  const { data: habitTracker } = api.habitTracker.getAll.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
 
   const { mutate: trackHabit } = api.habits.trackHabit.useMutation({
     async onMutate(variables) {
