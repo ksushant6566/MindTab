@@ -5,6 +5,7 @@ import { type Metadata } from 'next'
 
 import { ThemeProvider } from '~/app/_components/theme-provider'
 import { TRPCReactProvider } from '~/trpc/react'
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata: Metadata = {
   title: 'MindTab',
@@ -17,7 +18,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${GeistSans.variable} `}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            {children}
+            <Analytics />
+          </TRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>
