@@ -92,6 +92,13 @@
       "when": 1727773586238,
       "tag": "0012_talented_random",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1728325081140,
+      "tag": "0013_chief_champions",
+      "breakpoints": true
     }
   ]
 }

@@ -87,6 +87,11 @@ export const goals = createTable(
     })
 );
 
+export const goalsRelations = relations(goals, ({ one, many }) => ({
+    user: one(users, { fields: [goals.userId], references: [users.id] }),
+    journalGoals: many(journalGoals),
+}));
+
 export const habitFrequencyEnum = pgEnum("habit_frequency", [
     "daily",
     "weekly",
@@ -185,6 +190,7 @@ export const journal = createTable(
         userId: varchar("user_id", { length: 255 })
             .notNull()
             .references(() => users.id),
+        deletedAt: timestamp("deleted_at", { withTimezone: true }),
     },
     (journal) => ({
         userTitleIndex: uniqueIndex("journal_title_user_id_unique_idx").on(
@@ -195,8 +201,92 @@ export const journal = createTable(
     })
 );
 
-export const journalRelations = relations(journal, ({ one }) => ({
+export const journalRelations = relations(journal, ({ one, many }) => ({
     user: one(users, { fields: [journal.userId], references: [users.id] }),
+    journalGoals: many(journalGoals),
+    journalHabits: many(journalHabits), // Add this line
+}));
+
+export const journalGoals = createTable(
+    "journal_goal",
+    {
+        id: uuid("id").primaryKey().defaultRandom(),
+        journalId: uuid("journal_id")
+            .notNull()
+            .references(() => journal.id, { onDelete: "cascade" }),
+        goalId: uuid("goal_id")
+            .notNull()
+            .references(() => goals.id, { onDelete: "cascade" }),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+            () => new Date()
+        ),
+    },
+    (journalGoal) => ({
+        journalIdIdx: index("journal_goal_journal_id_idx").on(journalGoal.journalId),
+        goalIdIdx: index("journal_goal_goal_id_idx").on(journalGoal.goalId),
+        journalGoalIdx: uniqueIndex("journal_goal_idx").on(
+            journalGoal.journalId,
+            journalGoal.goalId
+        ),
+    })
+)
+
+export const journalGoalRelations = relations(journalGoals, ({ one }) => ({
+    journal: one(journal, {
+        fields: [journalGoals.journalId],
+        references: [journal.id],
+    }),
+    goal: one(goals, {
+        fields: [journalGoals.goalId],
+        references: [goals.id],
+    }),
+}));
+
+// New junction table for the many-to-many relation between journals and habits
+export const journalHabits = createTable(
+    "journal_habits",
+    {
+        id: uuid("id").primaryKey().defaultRandom(),
+        journalId: uuid("journal_id")
+            .notNull()
+            .references(() => journal.id, { onDelete: "cascade" }),
+        habitId: uuid("habit_id")
+            .notNull()
+            .references(() => habits.id, { onDelete: "cascade" }),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+            () => new Date()
+        ),
+    },
+    (journalHabits) => ({
+        journalHabitIdx: uniqueIndex("journal_habit_idx").on(
+            journalHabits.journalId,
+            journalHabits.habitId
+        ),
+        journalIdIdx: index("journal_habits_journal_id_idx").on(journalHabits.journalId),
+        habitIdIdx: index("journal_habits_habit_id_idx").on(journalHabits.habitId),
+    })
+);
+
+export const journalHabitsRelations = relations(journalHabits, ({ one }) => ({
+    journal: one(journal, {
+        fields: [journalHabits.journalId],
+        references: [journal.id],
+    }),
+    habit: one(habits, {
+        fields: [journalHabits.habitId],
+        references: [habits.id],
+    }),
+}));
+
+export const habitsRelations = relations(habits, ({ one, many }) => ({
+    user: one(users, { fields: [habits.userId], references: [users.id] }),
+    journalHabits: many(journalHabits),
 }));
 
 /*{
