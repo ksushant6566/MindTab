@@ -1,4 +1,4 @@
-import { asc, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { goals } from '~/server/db/schema'
@@ -39,4 +39,14 @@ export const goalsRouter = createTRPCRouter({
       .where(eq(goals.userId, ctx.session.user.id))
       .orderBy(asc(goals.priority), desc(goals.createdAt))
   }),
+
+  search: protectedProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db
+        .select()
+        .from(goals)
+        .where(and(eq(goals.userId, ctx.session.user.id), ilike(goals.title, `%${input.query}%`)))
+        .limit(5)
+    }),
 })

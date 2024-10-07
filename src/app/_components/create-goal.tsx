@@ -39,6 +39,7 @@ export type CreateGoalProps = {
     onSave: (goal: z.infer<typeof ZInsertGoal>) => void;
     onCancel: () => void;
     defaultValues?: Partial<z.infer<typeof ZInsertGoal>>;
+    loading?: boolean;
 };
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
@@ -47,6 +48,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
     onSave,
     onCancel,
     defaultValues,
+    loading,
 }) => {
     const [formData, setFormData] = React.useState<z.infer<typeof ZInsertGoal>>(
         {
@@ -286,7 +288,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                 >
                     Cancel
                 </Button>
-                <Button type="submit" size="sm" className="h-8 text-xs">
+                <Button type="submit" size="sm" className="h-8 text-xs" loading={loading} disabled={loading || !formData.title}>
                     Add goal
                 </Button>
             </div>

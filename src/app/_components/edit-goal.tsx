@@ -39,6 +39,7 @@ export type EditGoalProps = {
   onSave: (goal: z.infer<typeof ZInsertGoal>) => void
   onCancel: () => void
   goal: typeof goals.$inferSelect
+  loading?: boolean
 }
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true })
@@ -47,6 +48,7 @@ export const EditGoal: React.FC<EditGoalProps> = ({
   onSave,
   onCancel,
   goal,
+  loading = false,
 }) => {
   const [formData, setFormData] = React.useState<z.infer<typeof ZInsertGoal>>({
     id: goal.id,
@@ -121,12 +123,12 @@ export const EditGoal: React.FC<EditGoalProps> = ({
                   className="h-4 w-4"
                   color={
                     priorityColors[
-                      formData.priority as keyof typeof priorityColors
+                    formData.priority as keyof typeof priorityColors
                     ]
                   }
                   fill={
                     priorityColors[
-                      formData.priority as keyof typeof priorityColors
+                    formData.priority as keyof typeof priorityColors
                     ]
                   }
                 />
@@ -274,7 +276,7 @@ export const EditGoal: React.FC<EditGoalProps> = ({
         >
           Cancel
         </Button>
-        <Button type="submit" size="sm">
+        <Button type="submit" size="sm" disabled={loading || !formData.title} loading={loading}>
           Save
         </Button>
       </div>

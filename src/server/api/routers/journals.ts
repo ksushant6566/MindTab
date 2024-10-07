@@ -50,5 +50,6 @@ export const journalsRouter = createTRPCRouter({
         .select()
         .from(journals)
         .where(and(eq(journals.userId, ctx.session.user.id), ilike(journals.title, `%${input.query}%`)))
+        .limit(5)
     }),
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText, Laptop, Loader, LogOut, LucideIcon, Moon, Notebook, PlusIcon, Sun } from 'lucide-react'
+import { FileText, Goal, Laptop, Loader, LogOut, LucideIcon, Moon, Notebook, PlusIcon, Sun } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useState } from 'react'
@@ -17,9 +17,15 @@ import {
 import { api } from '~/trpc/react'
 import { CreateJournalDialog } from './create-journal-dialog'
 import { JournalDialog } from './journal-dialog'
+import { CreateGoalDialog } from './create-goal-dialog'
+import { EditGoalDialog } from './edit-goal-dialog'
+import { goals } from '~/server/db/schema'
+import { z } from 'zod'
 
 export const CommandMenu = () => {
   const { setTheme } = useTheme()
+
+  const apiUtils = api.useUtils()
 
   const [searchQuery, setSearchQuery] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
@@ -36,7 +42,9 @@ export const CommandMenu = () => {
     title: string
     content: string
   } | null>(null)
+
   const [isJournalDialogOpen, setIsJournalDialogOpen] = useState(false)
+
   const onJournalDialogOpenChange = (open: boolean) => {
     setIsJournalDialogOpen(open)
     if (!open) {
@@ -44,7 +52,41 @@ export const CommandMenu = () => {
     }
   }
 
-  const { data: journals, isFetching: isFetchingSearchResults } = api.journals.search.useQuery({
+  const [isCreateGoalDialogOpen, setIsCreateGoalDialogOpen] = useState(false)
+  const onCreateGoalDialogOpenChange = (open: boolean) => {
+    setIsCreateGoalDialogOpen(open)
+  }
+
+  const [isEditGoalDialogOpen, setIsEditGoalDialogOpen] = useState(false)
+  const [currentGoal, setCurrentGoal] = useState<typeof goals.$inferSelect | null>(null)
+
+  const onEditGoalDialogOpenChange = (open: boolean) => {
+    setIsEditGoalDialogOpen(open)
+  }
+
+  const { mutate: createGoal, isPending: isCreatingGoal } = api.goals.create.useMutation({
+    onSettled: () => {
+      apiUtils.goals.getAll.invalidate()
+      setIsCreateGoalDialogOpen(false)
+    }
+  })
+
+  const { mutate: updateGoal, isPending: isUpdatingGoal } = api.goals.update.useMutation({
+    onSettled: () => {
+      apiUtils.goals.getAll.invalidate()
+      setIsEditGoalDialogOpen(false)
+    }
+  })
+
+  const { data: journalsSearchResults, isFetching: isFetchingSearchResults } = api.journals.search.useQuery({
+    query: searchQuery ?? '',
+  }, {
+    enabled: open,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  })
+
+  const { data: goalsSearchResults, isFetching: isFetchingGoals } = api.goals.search.useQuery({
     query: searchQuery ?? '',
   }, {
     enabled: open,
@@ -70,27 +112,28 @@ export const CommandMenu = () => {
   }
 
   const commandMenuGroups = useMemo(() => [
-    // {
-    //   heading: 'Goals',
-    //   items: [
-    //     {
-    //       label: 'Create Goal',
-    //       icon: PlusIcon,
-    //       shortcut: '⌘ + G',
-    //       onClick: () => {
-    //         setOpen(false)
-    //       },
-    //     },
-    //     {
-    //       label: 'Search Goals',
-    //       icon: Goal,
-    //       onClick: () => {
-    //         console.log('Create Goal')
-    //         setOpen(false)
-    //       },
-    //     },
-    //   ],
-    // },
+    {
+      heading: 'Goals',
+      items: [
+        {
+          label: 'Create Goal',
+          icon: PlusIcon,
+          // shortcut: '⌘ + G',
+          onClick: () => {
+            setIsCreateGoalDialogOpen(true)
+            setOpen(false)
+          },
+        },
+        {
+          label: 'Search Goals',
+          icon: Goal,
+          onClick: () => {
+            console.log('Create Goal')
+            setOpen(false)
+          },
+        },
+      ],
+    },
     // {
     //   heading: 'Habits',
     //   items: [
@@ -176,21 +219,33 @@ export const CommandMenu = () => {
         },
       ],
     },
-  ], [journals])
+  ], [])
 
   const searchResults = useMemo(() => {
-    if (!journals) return []
-
-    return journals.map((journal) => ({
+    const journalResults = journalsSearchResults?.map((journal) => ({
       label: journal.title!,
       icon: FileText,
       onClick: () => {
         setCurrentJournal(journal)
+        setSearchQuery(null)
         setIsJournalDialogOpen(true)
         setOpen(false)
       },
-    }))
-  }, [journals])
+    })) || [];
+
+    const goalResults = goalsSearchResults?.map((goal) => ({
+      label: goal.title!,
+      icon: Goal,
+      onClick: () => {
+        setCurrentGoal(goal)
+        setSearchQuery(null)
+        setIsEditGoalDialogOpen(true)
+        setOpen(false)
+      },
+    })) || [];
+
+    return [...journalResults, ...goalResults];
+  }, [journalsSearchResults, goalsSearchResults])
 
   return (
     <div className="flex items-center justify-center">
@@ -209,7 +264,7 @@ export const CommandMenu = () => {
           onValueChange={setSearchQuery}
         />
         <CommandList>
-          {isFetchingSearchResults ?
+          {isFetchingSearchResults || isFetchingGoals ?
             <CommandEmpty>
               <div className="flex items-center justify-center">
                 <span className="animate-spin">
@@ -236,6 +291,26 @@ export const CommandMenu = () => {
         defaultMode={'view'}
         journal={currentJournal}
       />
+      <CreateGoalDialog
+        open={isCreateGoalDialogOpen}
+        onOpenChange={onCreateGoalDialogOpenChange}
+        onSave={createGoal}
+        onCancel={() => setIsCreateGoalDialogOpen(false)}
+        loading={isCreatingGoal}
+      />
+      {currentGoal && (
+        <EditGoalDialog
+          open={isEditGoalDialogOpen}
+          onOpenChange={onEditGoalDialogOpenChange}
+          goal={currentGoal}
+          onSave={(values) => updateGoal({
+            ...values,
+            id: values.id!,
+          })}
+          onCancel={() => setIsEditGoalDialogOpen(false)}
+          loading={isUpdatingGoal}
+        />
+      )}
     </div>
   )
 }
