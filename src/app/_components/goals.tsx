@@ -63,7 +63,7 @@ const Goal: React.FC<TGoalProps> = ({
           {goal.title}
         </Label>
         {goal.description && (
-          <p className={`text-sm text-muted-foreground ${goal.status === 'completed' ? 'line-through' : ''}`}>
+          <p className={`text-sm text-muted-foreground break-words max-w-sm pr-10 ${goal.status === 'completed' ? 'line-through' : ''}`}>
             {goal.description}
           </p>
         )}
