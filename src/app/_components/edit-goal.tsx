@@ -35,7 +35,7 @@ const impactNumber = {
   high: 3,
 }
 
-type EditGoalProps = {
+export type EditGoalProps = {
   onSave: (goal: z.infer<typeof ZInsertGoal>) => void
   onCancel: () => void
   goal: typeof goals.$inferSelect
@@ -76,9 +76,9 @@ export const EditGoal: React.FC<EditGoalProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-0 rounded-lg border p-4"
+      className="flex flex-col gap-2 rounded-lg border p-6"
     >
-      <div className="">
+      <div className="space-y-2">
         <input
           type="text"
           id="title"
@@ -87,7 +87,7 @@ export const EditGoal: React.FC<EditGoalProps> = ({
           value={formData.title || ''}
           onChange={handleChange}
           required
-          className="w-full bg-inherit text-base font-semibold focus:border-none focus:outline-none"
+          className="w-full bg-inherit text-xl font-semibold focus:border-none focus:outline-none"
         />
         <textarea
           id="description"
@@ -95,7 +95,7 @@ export const EditGoal: React.FC<EditGoalProps> = ({
           placeholder="Description"
           value={formData.description || ''}
           onChange={handleChange}
-          className="w-full resize-none overflow-hidden bg-inherit text-sm font-normal focus:border-none focus:outline-none"
+          className="w-full resize-none overflow-hidden bg-inherit text-base font-normal focus:border-none focus:outline-none"
           style={{ height: 'auto' }}
           onInput={(e) => {
             const target = e.target as HTMLTextAreaElement
@@ -270,12 +270,11 @@ export const EditGoal: React.FC<EditGoalProps> = ({
           onClick={onCancel}
           variant="secondary"
           size="sm"
-          className="h-8 text-xs"
           type="button"
         >
           Cancel
         </Button>
-        <Button type="submit" size="sm" className="h-8 text-xs">
+        <Button type="submit" size="sm">
           Save
         </Button>
       </div>

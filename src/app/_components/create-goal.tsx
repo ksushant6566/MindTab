@@ -35,7 +35,7 @@ const impactNumber = {
     high: 3,
 };
 
-type CreateGoalProps = {
+export type CreateGoalProps = {
     onSave: (goal: z.infer<typeof ZInsertGoal>) => void;
     onCancel: () => void;
     defaultValues?: Partial<z.infer<typeof ZInsertGoal>>;
@@ -77,9 +77,9 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-2 rounded-lg border p-4"
+            className="flex flex-col gap-2 rounded-lg border p-6"
         >
-            <div className="">
+            <div className="space-y-2">
                 <input
                     type="text"
                     id="title"
@@ -88,7 +88,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     value={formData.title || ""}
                     onChange={handleChange}
                     required
-                    className="w-full bg-inherit text-base font-semibold focus:border-none focus:outline-none"
+                    className="w-full bg-inherit text-xl font-semibold focus:border-none focus:outline-none"
                 />
                 <textarea
                     id="description"
@@ -96,7 +96,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     placeholder="Description"
                     value={formData.description || ""}
                     onChange={handleChange}
-                    className="w-full resize-none overflow-hidden bg-inherit text-sm font-normal focus:border-none focus:outline-none"
+                    className="w-full resize-none overflow-hidden bg-inherit text-base font-normal focus:border-none focus:outline-none"
                     style={{ height: "auto" }}
                     onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -105,7 +105,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     }}
                 />
             </div>
-            <div className="flex gap-2 border-b pb-2">
+            <div className="flex gap-2 pb-2">
                 <Select
                     onValueChange={(value) =>
                         setFormData({
@@ -123,12 +123,12 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                                     className="h-4 w-4"
                                     color={
                                         priorityColors[
-                                            formData.priority as keyof typeof priorityColors
+                                        formData.priority as keyof typeof priorityColors
                                         ]
                                     }
                                     fill={
                                         priorityColors[
-                                            formData.priority as keyof typeof priorityColors
+                                        formData.priority as keyof typeof priorityColors
                                         ]
                                     }
                                 />

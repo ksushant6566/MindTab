@@ -10,14 +10,14 @@ import { api } from '~/trpc/react'
 import { CheckedState } from '@radix-ui/react-checkbox'
 import { createInsertSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { CreateGoal } from './create-goal'
-import { EditGoal } from './edit-goal'
+import { CreateGoalDialog } from './create-goal-dialog'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Label } from '~/components/ui/label'
 
 import { InferSelectModel } from 'drizzle-orm'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '~/components/ui/accordion'
 import { Skeleton } from '~/components/ui/skeleton'
+import { EditGoalDialog } from './edit-goal-dialog'
 
 const priorityColors = {
   priority_1: 'red',
@@ -63,7 +63,7 @@ const Goal: React.FC<TGoalProps> = ({
           {goal.title}
         </Label>
         {goal.description && (
-          <p className={`text-sm text-muted-foreground pr-4 ${goal.status === 'completed' ? 'line-through' : ''} break-words`}>
+          <p className={`text-sm text-muted-foreground ${goal.status === 'completed' ? 'line-through' : ''} break-words`}>
             {goal.description}
           </p>
         )}
@@ -259,7 +259,13 @@ export const Goals: React.FC = () => {
         ) : (
           <div className="flex flex-col gap-4 pr-4">
             {isCreateGoalOpen ? (
-              <CreateGoal onSave={onCreateGoal} onCancel={onCancelCreateGoal} defaultValues={{ type: selectedGoalType }} />
+              <CreateGoalDialog
+                open={isCreateGoalOpen}
+                onOpenChange={setIsCreateGoalOpen}
+                onSave={onCreateGoal}
+                onCancel={onCancelCreateGoal}
+                defaultValues={{ type: selectedGoalType }}
+              />
             ) : (
               <div className="-mb-2 -ml-2 flex justify-start">
                 <Button
@@ -283,7 +289,17 @@ export const Goals: React.FC = () => {
                       {sortedPendingGoals?.map((goal) => (
                         <div key={goal.id}>
                           {editGoalId === goal.id ? (
-                            <EditGoal goal={goal} onSave={onSaveEditGoal} onCancel={onCancelEditGoal} />
+                            <EditGoalDialog
+                              open={editGoalId === goal.id}
+                              onOpenChange={(open) => {
+                                if (!open) {
+                                  setEditGoalId(null)
+                                }
+                              }}
+                              goal={goal}
+                              onSave={onSaveEditGoal}
+                              onCancel={onCancelEditGoal}
+                            />
                           ) : (
                             <Goal
                               goal={goal}
