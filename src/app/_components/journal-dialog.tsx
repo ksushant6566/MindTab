@@ -31,6 +31,7 @@ export const JournalDialog = ({ isOpen, onOpenChange, defaultMode, journal }: TJ
     const { mutate: updateJournal, isPending: isUpdatingJournal } = api.journals.update.useMutation({
         onSettled: () => {
             apiUtils.journals.getAll.invalidate()
+            apiUtils.journals.search.invalidate()
             onOpenChange(false)
         }
     })

@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "~/components/ui/dialog"
 import { Button } from "~/components/ui/button"
 import React, { useState } from "react"
-import { TipTapEditor } from "~/components/text-editor"
+import { TipTapEditor } from "~/components/text-editor/index"
 import { api } from "~/trpc/react"
 
 type TCreateJournalDialogProps = {

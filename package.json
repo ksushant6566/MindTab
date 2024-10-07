@@ -41,6 +41,7 @@
     "@tiptap/extension-italic": "^2.6.6",
     "@tiptap/extension-link": "^2.8.0",
     "@tiptap/extension-list-item": "^2.6.6",
+    "@tiptap/extension-mention": "^2.8.0",
     "@tiptap/extension-ordered-list": "^2.6.6",
     "@tiptap/extension-strike": "^2.6.6",
     "@tiptap/extension-text-style": "^2.6.6",
@@ -71,6 +72,7 @@
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "tippy.js": "^6.3.7",
     "zod": "^3.23.3"
   },
   "devDependencies": {
