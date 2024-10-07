@@ -48,14 +48,14 @@ const Goal: React.FC<TGoalProps> = ({
   deleteVariables
 }) => {
   return (
-    <div className="group relative flex items-start gap-3">
+    <div className="group relative grid grid-cols-[auto,1fr] gap-3 items-start">
       <Checkbox
         id={goal.id}
         className="h-4 w-4 rounded-full mt-0.5"
         checked={goal.status === 'completed'}
         onCheckedChange={(checked) => onToggleStatus(goal.id, checked)}
       />
-      <div className="flex flex-col gap-1 max-w-full">
+      <div className="flex flex-col gap-1 min-w-0">
         <Label
           htmlFor={goal.id}
           className={`text-sm font-medium ${goal.status === 'completed' ? 'line-through' : ''}`}
@@ -63,11 +63,11 @@ const Goal: React.FC<TGoalProps> = ({
           {goal.title}
         </Label>
         {goal.description && (
-          <p className={`text-sm text-muted-foreground break-words max-w-sm pr-10 ${goal.status === 'completed' ? 'line-through' : ''}`}>
+          <p className={`text-sm text-muted-foreground pr-4 ${goal.status === 'completed' ? 'line-through' : ''} break-words`}>
             {goal.description}
           </p>
         )}
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1 flex items-center gap-2 flex-wrap">
           <span className="flex items-center gap-1 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-muted-foreground">
             <Flag
               className="h-3 w-3"
@@ -357,4 +357,3 @@ const GoalSkeleton = () => {
     </Accordion>
   )
 }
-
