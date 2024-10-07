@@ -172,6 +172,16 @@ body {
   padding: 0.75rem 1rem;
 }
 
+.ProseMirror.tiptap a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.dark .ProseMirror.tiptap a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
 .ProseMirror.tiptap blockquote {
   border-left: 3px solid var(--border);
   margin: 1.5rem 0;

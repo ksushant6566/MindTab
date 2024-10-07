@@ -1,5 +1,6 @@
 import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link' // Import the Link extension
 import {
   Bold,
   Code,
@@ -9,10 +10,17 @@ import {
   MessageSquareCode,
   MessageSquareQuote,
   Strikethrough,
+  Link as LinkIcon, // Import a link icon
+  X,
+  Check, // Import an icon for closing the input
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Separator } from '../ui/separator'
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
+
+// import '../../styles/text-editor.css'
 
 type TipTapEditorProps = {
   content: string
@@ -22,15 +30,33 @@ type TipTapEditorProps = {
   editable?: boolean
 }
 
-export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, editable = true }: TipTapEditorProps) => {
+export const TipTapEditor = ({
+  content,
+  onContentChange,
+  title,
+  onTitleChange,
+  editable = true,
+}: TipTapEditorProps) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false)
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 })
   const editorRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
+  const [isLinkInputVisible, setIsLinkInputVisible] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: {
+          target: '_blank', // Ensure links open in a new tab
+          rel: 'noopener noreferrer',
+        },
+      }),
+    ],
     content: content,
     shouldRerenderOnTransaction: false,
     onUpdate: ({ editor }) => {
@@ -86,6 +112,7 @@ export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, e
         !menuRef.current.contains(event.target as Node)
       ) {
         setIsMenuVisible(false)
+        setIsLinkInputVisible(false) // Hide link input when clicking outside
       }
     }
 
@@ -97,6 +124,19 @@ export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, e
       }
     }
   }, [])
+
+  /**
+   * This useEffect ensures that when the link input becomes visible,
+   * it prepopulates the linkUrl with the current link's href if a link is active.
+   */
+  useEffect(() => {
+    if (isLinkInputVisible && editor?.isActive('link')) {
+      const currentLink = editor.getAttributes('link').href || ''
+      setLinkUrl(currentLink)
+    } else if (!isLinkInputVisible) {
+      setLinkUrl('')
+    }
+  }, [isLinkInputVisible, editor])
 
   return (
     <div ref={editorRef} className={`relative rounded-md px-2 py-3 w-full`}>
@@ -121,7 +161,9 @@ export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, e
           onKeyDown={(e) => {
             if (e.key === 'Backspace' && editor?.isEmpty) {
               e.preventDefault()
-              const titleInput = document.getElementById('title') as HTMLInputElement
+              const titleInput = document.getElementById(
+                'title'
+              ) as HTMLInputElement
               titleInput?.focus()
             }
           }}
@@ -138,20 +180,90 @@ export const TipTapEditor = ({ content, onContentChange, title, onTitleChange, e
             zIndex: 50,
             transform: 'translateY(-100%)',
           }}
-          className="bg-background border rounded shadow-md"
+          className="bg-background border rounded shadow-md p-2 flex items-center"
         >
-          <MenuBar editor={editor} />
+          <MenuBar
+            editor={editor}
+            isLinkInputVisible={isLinkInputVisible}
+            setIsLinkInputVisible={setIsLinkInputVisible}
+          />
+          {isLinkInputVisible && (
+            <form 
+              className="flex items-center space-x-2 ml-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (linkUrl) {
+                  editor
+                    ?.chain()
+                    .focus()
+                    .extendMarkRange('link')
+                    .setLink({ href: linkUrl, target: '_blank' })
+                    .run()
+                  setLinkUrl('')
+                  setIsLinkInputVisible(false)
+                }
+              }}
+            >
+              <Input
+                type="url"
+                placeholder="https://formonce.in"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  if (linkUrl) {
+                    editor
+                      ?.chain()
+                      .focus()
+                      .extendMarkRange('link')
+                      .setLink({ href: linkUrl, target: '_blank' })
+                      .run()
+                    setLinkUrl('')
+                    setIsLinkInputVisible(false)
+                  }
+                }}
+                className="text-green-500"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsLinkInputVisible(false)
+                  setLinkUrl('')
+                }}
+                className="text-red-500"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </form>
+          )}
         </div>
       )}
     </div>
   )
 }
 
-const MenuBar = ({ editor }: { editor: Editor | null }) => {
+type MenuBarProps = {
+  editor: Editor | null
+  isLinkInputVisible: boolean
+  setIsLinkInputVisible: (visible: boolean) => void
+}
+
+const MenuBar = ({
+  editor,
+  isLinkInputVisible,
+  setIsLinkInputVisible,
+}: MenuBarProps) => {
   if (!editor) return null
 
   return (
-    <div className="flex gap-0 p-0 w-fit">
+    <div className="flex gap-0 p-0 w-fit items-center">
       <ToggleGroup type="multiple">
         <ToggleGroupItem
           value="bold"
@@ -190,7 +302,13 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       <Separator orientation="vertical" className="h-full" />
       <ToggleGroup
         type="single"
-        value={editor.isActive('bulletList') ? 'bullet' : editor.isActive('orderedList') ? 'ordered' : ''}
+        value={
+          editor.isActive('bulletList')
+            ? 'bullet'
+            : editor.isActive('orderedList')
+              ? 'ordered'
+              : ''
+        }
       >
         <ToggleGroupItem
           value="bullet"
@@ -210,7 +328,13 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       <Separator orientation="vertical" className="h-full" />
       <ToggleGroup
         type="single"
-        value={editor.isActive('blockquote') ? 'blockquote' : editor.isActive('codeBlock') ? 'codeBlock' : ''}
+        value={
+          editor.isActive('blockquote')
+            ? 'blockquote'
+            : editor.isActive('codeBlock')
+              ? 'codeBlock'
+              : ''
+        }
         className="gap-0"
       >
         <ToggleGroupItem
@@ -228,6 +352,20 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
           data-state={editor.isActive('codeBlock') ? 'on' : 'off'}
         >
           <MessageSquareCode className="h-5 w-5" />
+        </ToggleGroupItem>
+      </ToggleGroup>
+      <Separator orientation="vertical" className="h-full" />
+      {/* Link Toggle Button */}
+      <ToggleGroup type="single">
+        <ToggleGroupItem
+          value="link"
+          aria-label="Toggle link"
+          onClick={() => {
+            setIsLinkInputVisible(!isLinkInputVisible)
+          }}
+          data-state={editor.isActive('link') ? 'on' : 'off'}
+        >
+          <LinkIcon className="h-4 w-4" />
         </ToggleGroupItem>
       </ToggleGroup>
     </div>
