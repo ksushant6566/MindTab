@@ -180,7 +180,7 @@ export const TipTapEditor = ({
             zIndex: 50,
             transform: 'translateY(-100%)',
           }}
-          className="bg-background border rounded shadow-md p-2 flex items-center"
+          className="bg-background border rounded-md shadow-md p-2 flex items-center"
         >
           <MenuBar
             editor={editor}
