@@ -6,6 +6,7 @@ import { type Metadata } from 'next'
 import { ThemeProvider } from '~/app/_components/theme-provider'
 import { TRPCReactProvider } from '~/trpc/react'
 import { Analytics } from "@vercel/analytics/react"
+import { Toaster } from '~/components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'MindTab',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <TRPCReactProvider>
             {children}
             <Analytics />
+            <Toaster />
           </TRPCReactProvider>
         </ThemeProvider>
       </body>
