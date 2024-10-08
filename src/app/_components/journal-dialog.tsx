@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button"
 import React, { useEffect, useState } from "react"
 import { TipTapEditor } from "~/components/text-editor"
 import { api } from "~/trpc/react"
-import { Edit, Edit2, Edit3 } from "lucide-react"
+import { Edit3 } from "lucide-react"
 import { ToggleGroupItem } from "~/components/ui/toggle-group"
 import { ToggleGroup } from "~/components/ui/toggle-group"
 
