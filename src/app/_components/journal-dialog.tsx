@@ -88,14 +88,18 @@ export const JournalDialog = ({ isOpen, onOpenChange, defaultMode, journal }: TJ
 
         if (!mentionSpans) return mentionedItems
 
+        const mentionedIdsSet = new Set<string>()
+
         // 2. loop through each span
         mentionSpans.forEach(span => {
             const [type, id] = span.getAttribute('data-id')?.split(':') || []
             const label = span.getAttribute('data-label')
 
             if (id && label && type) {
-                console.log({ id, label, type })
-                mentionedItems[type as keyof TMentionedItems].push({ id, label, type } as TMentionedItem)
+                if (!mentionedIdsSet.has(id)) {
+                    mentionedItems[type as keyof TMentionedItems].push({ id, label, type } as TMentionedItem)
+                    mentionedIdsSet.add(id)
+                }
             }
         })
 
@@ -131,7 +135,7 @@ export const JournalDialog = ({ isOpen, onOpenChange, defaultMode, journal }: TJ
                     </ToggleGroupItem>
                 </ToggleGroup>
 
-                <div className={`border border-input rounded-lg overflow-y-auto overflow-x-visible ${mode === 'view' ? "max-h-[calc(100vh-8rem)] p-4 rounded-b-none" : "max-h-[calc(100vh-14rem)] p-1"}`}>
+                <div className={`border border-input rounded-lg overflow-y-auto overflow-x-visible ${mode === 'view' ? "max-h-[calc(100vh-8rem)] p-4 pb-0 rounded-b-none" : "max-h-[calc(100vh-14rem)] p-1 pb-0"}`}>
                     <TipTapEditor
                         content={info.content}
                         onContentChange={content => setInfo({ ...info, content })}
@@ -158,7 +162,27 @@ export const JournalDialog = ({ isOpen, onOpenChange, defaultMode, journal }: TJ
                                             key={item.id}
                                             data-id={`goal:${item.id}`}
                                             data-label={item.label}
-                                            className="text-sm bg-muted rounded-md px-2 py-0.5 hover:bg-muted/50 text-blue-400 cursor-pointer"
+                                            className="text-sm bg-secondary rounded-md px-2 py-0.5 hover:bg-secondary/50 text-green-500 cursor-pointer"
+                                        >
+                                            {item.label.split(':')[1]}
+                                        </span>
+                                    ))}
+                                    {mentionedItems.habit.map(item => (
+                                        <span
+                                            key={item.id}
+                                            data-id={`habit:${item.id}`}
+                                            data-label={item.label}
+                                            className="text-sm bg-secondary rounded-md px-2 py-0.5 hover:bg-secondary/50 text-fuchsia-400 cursor-pointer"
+                                        >
+                                            {item.label.split(':')[1]}
+                                        </span>
+                                    ))}
+                                    {mentionedItems.journal.map(item => (
+                                        <span
+                                            key={item.id}
+                                            data-id={`journal:${item.id}`}
+                                            data-label={item.label}
+                                            className="text-sm bg-secondary rounded-md px-2 py-0.5 hover:bg-secondary/50 text-orange-400 cursor-pointer"
                                         >
                                             {item.label.split(':')[1]}
                                         </span>

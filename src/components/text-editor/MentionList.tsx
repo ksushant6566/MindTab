@@ -13,7 +13,7 @@ type Goal = typeof goals.$inferSelect
 
 
 interface MentionListProps {
-    items: Goal[];
+    items: (Goal & { resourceType: 'string' })[];
     command: (item: { id: string, label: string }) => void;
 }
 
@@ -29,7 +29,8 @@ const MentionList: ForwardRefRenderFunction<MentionListRef, MentionListProps> = 
         const item = props.items[index]
 
         if (item) {
-            props.command({ id: `goal:${item.id}`, label: `goal:${item.title}` })
+            const resourceType = item.resourceType
+            props.command({ id: `${resourceType}:${item.id}`, label: `${resourceType.replace('journal', 'note')}:${item.title}` })
         }
     }
 
@@ -90,29 +91,31 @@ const MentionList: ForwardRefRenderFunction<MentionListRef, MentionListProps> = 
     }))
 
     return (
-        <div className="z-50 bg-background flex flex-col gap-2 justify-start items-start border border-border rounded-md h-[350px]">
-            <div ref={scrollAreaRef} className="flex flex-col gap-2 justify-start items-start border border-border rounded-md overflow-y-scroll px-1 py-1">
+        <div className="z-50 bg-background flex flex-col gap-2 justify-start items-start border border-border rounded-md ">
+            <div ref={scrollAreaRef} className="flex flex-col gap-1 justify-start items-start border border-border rounded-md overflow-y-auto max-h-[350px] w-[300px] px-1 py-1">
                 {props.items.length
                     ? props.items.map((item, index) => (
                         <button
-                            className={`${index === selectedIndex ? 'bg-secondary text-secondary-foreground' : ''} px-2 py-2 w-full text-start text-sm first:mt-0 flex flex-col gap-1 rounded-md`}
+                            className={`${index === selectedIndex ? 'bg-secondary text-secondary-foreground' : ''} px-3 py-2 w-full text-start text-sm first:mt-0 flex flex-col gap-1 rounded-md`}
                             key={item.id}
                             onClick={() => selectItem(index)}
                         >
                             <span className='text-sm'>{item.title}</span>
                             <span className='flex items-center gap-1.5'>
-                                <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs border-b 
-                                    ${index === selectedIndex ? 'bg-background px-2.5 py-0.5' : 'bg-muted'} 
-                                    text-blue-400`}>goal
+                                <span className={`flex items-center gap-1 rounded-md px-2.5 py-0.5 text-xs border-b 
+                                    ${index === selectedIndex ? 'bg-background ' : 'bg-muted'} 
+                                    text-blue-400`}>{item.resourceType.replace('journal', 'note')}
                                 </span>
-                                <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs border-b 
+                                {item.status && (
+                                    <span className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs border-b 
                                     ${index === selectedIndex ? 'bg-background px-2.5 py-0.5' : 'bg-muted'} 
                                     ${item.status === 'completed' ? 'text-green-500' : 'text-white/90'}`}>{item.status}
-                                </span>
+                                    </span>
+                                )}
                             </span>
                         </button>
                     ))
-                    : <div className="item">No result</div>
+                    : <div className="text-sm text-muted-foreground text-center w-full py-2">No result</div>
                 }
             </div>
         </div>

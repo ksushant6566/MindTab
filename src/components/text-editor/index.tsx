@@ -55,6 +55,8 @@ export const TipTapEditor = ({
   const [linkUrl, setLinkUrl] = useState('')
 
   const { data: goals } = api.goals.getAll.useQuery()
+  const { data: habits } = api.habits.getAll.useQuery()
+  const { data: journals } = api.journals.getAll.useQuery()
 
   const editor = useEditor({
     extensions: [
@@ -72,8 +74,23 @@ export const TipTapEditor = ({
         },
         suggestion: {
           items: ({ query }: { query: string }) => {
-            return goals
+
+            // add type to each item, these are used to data-resource-type for mentioned elements
+            const goalItems = goals?.map(goal => ({ ...goal, resourceType: 'goal' })) || []
+            const habitItems = habits?.map(habit => ({ ...habit, resourceType: 'habit' })) || []
+            const journalItems = journals?.map(journal => ({ ...journal, resourceType: 'journal' })) || []
+
+            const initialItems = [...goalItems.slice(0, 2), ...journalItems.slice(0, 2), ...habitItems.slice(0, 2)]
+
+            if (!query) {
+              return initialItems
+            }
+
+            const items = [...goalItems, ...habitItems, ...journalItems]
+
+            return items
               ?.filter(item => item.title?.toLowerCase().includes(query.toLowerCase()))
+              ?.slice(0, 10)
               || []
           },
 
@@ -233,7 +250,7 @@ export const TipTapEditor = ({
   }, [isLinkInputVisible, editor])
 
   return (
-    <div ref={editorRef} className={`relative rounded-md px-2 py-3 w-full`}>
+    <div ref={editorRef} className={`relative rounded-md px-2 pt-2 w-full`}>
       <div className="flex flex-col gap-0 w-full">
         <input
           type="text"
