@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { TipTapEditor } from '~/components/text-editor';
 import { Button } from '~/components/ui/button';
 import { Edit3, Trash2 } from 'lucide-react';
@@ -18,7 +18,8 @@ type JournalProps = {
     deleteJournalVariables: { id: string } | undefined
 }
 
-export const Journal = ({ journal, overflowingJournals, contentRefs, onShowMore, onEditJournal, deleteJournal, isDeletingJournal, deleteJournalVariables }: JournalProps) => {
+export const JournalPreview = ({ journal, overflowingJournals, contentRefs, onShowMore, onEditJournal, deleteJournal, isDeletingJournal, deleteJournalVariables }: JournalProps) => {
+
     return (
         <div
             key={journal.id}
@@ -47,9 +48,7 @@ export const Journal = ({ journal, overflowingJournals, contentRefs, onShowMore,
                     </Button>
                 </div>
             )}
-            <div>
-            </div>
-            <div className="flex justify-between items-center px-4 py-0 -mt-2 rounded-b-lg">
+            <div className="flex justify-between items-center px-4 py-0 rounded-b-lg -mt-2">
                 <span className="text-xs text-muted-foreground">
                     {journal.createdAt.toLocaleString('en-US', {
                         month: 'short',
@@ -79,5 +78,3 @@ export const Journal = ({ journal, overflowingJournals, contentRefs, onShowMore,
         </div>
     )
 }
-
-export default Journal

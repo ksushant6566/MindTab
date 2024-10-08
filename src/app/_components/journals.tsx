@@ -11,7 +11,7 @@ import { api } from '~/trpc/react'
 import '~/styles/text-editor.css'
 import { JournalDialog } from './journal-dialog'
 import { CreateJournalDialog } from './create-journal-dialog'
-import { Journal } from './journal'
+import { JournalPreview } from './journal-preview'
 
 const JournalSkeleton: React.FC = () => {
   return (
@@ -136,7 +136,7 @@ export const Journals: React.FC = () => {
         {isFetchingJournals ? <JournalSkeleton /> : (
           <div className='pr-4'>
             {journals?.map((journal) => (
-              <Journal
+              <JournalPreview
                 key={journal.id}
                 journal={journal}
                 overflowingJournals={overflowingJournals}

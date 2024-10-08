@@ -29,7 +29,7 @@ const MentionList: ForwardRefRenderFunction<MentionListRef, MentionListProps> = 
         const item = props.items[index]
 
         if (item) {
-            props.command({ id: item.id, label: item.title! })
+            props.command({ id: `goal:${item.id}`, label: `goal:${item.title}` })
         }
     }
 
