@@ -11,6 +11,7 @@ import { api } from '~/trpc/react'
 import '~/styles/text-editor.css'
 import { JournalDialog } from './journal-dialog'
 import { CreateJournalDialog } from './create-journal-dialog'
+import { Journal } from './journal'
 
 const JournalSkeleton: React.FC = () => {
   return (
@@ -93,7 +94,7 @@ export const Journals: React.FC = () => {
     setIsCreateJournalDialogOpen(open)
   }
 
-  const onEditJournal = (id: string) => {
+  const onEditJournal = useCallback((id: string) => {
     const journal = journals?.find((journal) => journal.id === id)
     if (!journal) {
       console.error('Invalid journal id')
@@ -106,7 +107,7 @@ export const Journals: React.FC = () => {
     })
     setMode('edit')
     setIsJournalDialogOpen(true)
-  }
+  }, [journals])
 
   const onShowMore = (id: string) => {
     const journal = journals?.find((journal) => journal.id === id)
@@ -135,61 +136,17 @@ export const Journals: React.FC = () => {
         {isFetchingJournals ? <JournalSkeleton /> : (
           <div className='pr-4'>
             {journals?.map((journal) => (
-              <div
+              <Journal
                 key={journal.id}
-                className="mb-6 py-2 relative rounded-lg border shadow-sm hover:shadow-md transition-shadow duration-300"
-              >
-                <div
-                  className="max-h-56 overflow-y-hidden"
-                  ref={(el) => {
-                    if (el) {
-                      contentRefs.current[journal.id] = el;
-                    }
-                  }}
-                >
-                  <TipTapEditor
-                    content={journal.content ?? ''}
-                    onContentChange={() => void {}}
-                    title={journal.title ?? ''}
-                    onTitleChange={() => void {}}
-                    editable={false}
-                  />
-                </div>
-                {overflowingJournals.has(journal.id) && (
-                  <div className="flex justify-end -mt-2 mr-2">
-                    <Button variant="link" className="text-sm hover:no-underline text-muted-foreground hover:text-foreground" onClick={() => onShowMore(journal.id)}>
-                      Show more
-                    </Button>
-                  </div>
-                )}
-                <div className="flex justify-between items-center px-4 py-0 -mt-2 rounded-b-lg">
-                  <span className="text-xs text-muted-foreground">
-                    {journal.createdAt.toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: 'numeric',
-                    })}
-                  </span>
-                  <div className="space-x-2">
-                    <Button variant="ghost" size="sm" onClick={() => onEditJournal(journal.id)}>
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:bg-red-900 active:bg-red-900"
-                      onClick={() => deleteJournal({ id: journal.id })}
-                      disabled={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                      loading={isDeletingJournal && deleteJournalVariables?.id === journal.id}
-                      hideContentWhenLoading
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+                journal={journal}
+                overflowingJournals={overflowingJournals}
+                contentRefs={contentRefs}
+                onShowMore={onShowMore}
+                onEditJournal={onEditJournal}
+                deleteJournal={(id) => deleteJournal({ id })}
+                isDeletingJournal={isDeletingJournal}
+                deleteJournalVariables={deleteJournalVariables}
+              />
             ))}
           </div>
         )}
