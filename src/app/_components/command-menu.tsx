@@ -20,7 +20,6 @@ import { JournalDialog } from './journal-dialog'
 import { CreateGoalDialog } from './create-goal-dialog'
 import { EditGoalDialog } from './edit-goal-dialog'
 import { goals } from '~/server/db/schema'
-import { z } from 'zod'
 
 export const CommandMenu = () => {
   const { setTheme } = useTheme()
@@ -264,15 +263,15 @@ export const CommandMenu = () => {
           onValueChange={setSearchQuery}
         />
         <CommandList>
-          {isFetchingSearchResults || isFetchingGoals ?
-            <CommandEmpty>
+          <CommandEmpty>
+            {isFetchingSearchResults || isFetchingGoals ?
               <div className="flex items-center justify-center">
                 <span className="animate-spin">
                   <Loader className="h-5 w-5" />
                 </span>
               </div>
-            </CommandEmpty>
-            : <CommandEmpty>No results found.</CommandEmpty>}
+              : <span>No results found.</span>}
+          </CommandEmpty>
           {commandMenuGroups.map((group) => (
             <CommandMenuGroup key={group.heading} heading={group.heading} items={group.items} />
           ))}

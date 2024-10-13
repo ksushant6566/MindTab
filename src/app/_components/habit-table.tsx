@@ -170,7 +170,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     <div className="relative">
       <div
         ref={containerRef}
-        className={`custom-scrollbar overflow-auto max-h-[80vh] snap-y snap-mandatory scroll-smooth `}
+        className={`custom-scrollbar overflow-auto max-h-[80vh] snap-y snap-mandatory scroll-smooth`}
         style={{
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch',
@@ -208,7 +208,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
                       <TableHead
                         key={day}
-                        className={`text-center  ${isCurrentWeek && index + 1 === currentDay ? 'text-primary' : ''
+                        className={`text-center ${isCurrentWeek && index + 1 === currentDay ? 'text-primary' : ''
                           }`}
                       >
                         {day}
