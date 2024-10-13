@@ -285,8 +285,20 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                   {habits?.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8}>
-                        <div className="flex flex-col items-center justify-center gap-2 -mt-2">
+                        <div className="flex flex-col items-center justify-center gap-4 -mt-2">
                           <span className="text-base">No habits found</span>
+                          <Button
+                            variant="default"
+                            size={'sm'}
+                            onClick={() => {
+                              // scroll to current week
+                              scrollToCurrentWeek()
+                              setIsCreateHabitOpen(true)
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add First Habit
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -307,7 +319,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                     hideContentWhenLoading={true}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add habit
+                    Add Habit
                   </Button>
                 ))}
             </div>
