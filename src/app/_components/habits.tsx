@@ -70,14 +70,32 @@ export const Habits: React.FC = () => {
   })
 
   const { mutate: createHabit, isPending: isCreatingHabit } = api.habits.create.useMutation({
-    onSuccess: () => {
-      refetchHabits()
+    async onMutate(variables) {
+      await apiUtils.habits.getAll.cancel()
+      const previousHabits = apiUtils.habits.getAll.getData() ?? []
+
+      const newHabit = {
+        ...variables,
+        id: '1',
+        userId: '1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any
+
+      apiUtils.habits.getAll.setData(undefined, [...previousHabits, newHabit])
+      return { previousHabits }
+    },
+    onError(error, variables, context) {
+      apiUtils.habits.getAll.setData(undefined, context?.previousHabits ?? [])
+    },
+    onSettled() {
+      apiUtils.habits.getAll.invalidate()
     },
   })
 
   const { mutate: updateHabit, isPending: isUpdatingHabit } = api.habits.update.useMutation({
-    onSuccess: () => {
-      refetchHabits()
+    onSettled() {
+      apiUtils.habits.getAll.invalidate()
     },
   })
 
