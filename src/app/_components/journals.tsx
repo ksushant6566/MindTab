@@ -135,7 +135,17 @@ export const Journals: React.FC = () => {
       <ScrollArea className="h-[calc(100vh-14rem)]">
         {isFetchingJournals ? <JournalSkeleton /> : (
           <div className='pr-4'>
-            {journals?.map((journal) => (
+            {journals?.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 text-center mt-8">
+                <span className="text-base">
+                  No notes found
+                </span>
+                <Button onClick={onCreateJournal} size="sm">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create First Note
+                </Button>
+              </div>
+            ) : journals?.map((journal) => (
               <JournalPreview
                 key={journal.id}
                 journal={journal}
