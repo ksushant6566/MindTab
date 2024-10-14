@@ -40,8 +40,8 @@ type THabitTableProps = {
   createHabit: (habit: z.infer<typeof ZInsertHabit>) => void
   updateHabit: (habit: z.infer<typeof ZUpdateHabit>) => void
   deleteHabit: (habit: { id: string }) => void
-  trackHabit: (habit: { habitId: string, date: Date }) => void
-  untrackHabit: (habit: { habitId: string, date: Date }) => void
+  trackHabit: (habit: { habitId: string, date: string }) => void
+  untrackHabit: (habit: { habitId: string, date: string }) => void
   habitTracker: THabitTracker[]
 }
 
@@ -136,21 +136,21 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     }
   }
 
-  const onTrackHabit = (habitId: string) => {
-    trackHabit({ habitId, date: new Date() })
+  const onTrackHabit = (habitId: string, date: string) => {
+    trackHabit({ habitId, date })
   }
 
-  const onUntrackHabit = (habitId: string) => {
-    untrackHabit({ habitId, date: new Date() })
+  const onUntrackHabit = (habitId: string, date: string) => {
+    untrackHabit({ habitId, date })
   }
 
-  const onCheckedChange = (habitId: string, checked: CheckedState) => {
+  const onCheckedChange = (habitId: string, checked: CheckedState, date: string) => {
     if (checked) {
-      onTrackHabit(habitId)
+      onTrackHabit(habitId, date)
       setShowConfetti(true)
       setTimeout(() => setShowConfetti(false), 2500)
     } else {
-      onUntrackHabit(habitId)
+      onUntrackHabit(habitId, date)
     }
   }
 
@@ -256,7 +256,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                                     tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex),
                                 )}
                                 onCheckedChange={(checked) => {
-                                  onCheckedChange(habit.id, checked)
+                                  onCheckedChange(habit.id, checked, getDateFromWeekAndDay(weekIndex, dayIndex))
                                 }}
                               />
                             </TableCell>

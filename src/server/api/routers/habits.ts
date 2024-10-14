@@ -61,7 +61,7 @@ export const habitsRouter = createTRPCRouter({
     }),
 
     trackHabit: protectedProcedure
-        .input(z.object({ habitId: z.string().uuid(), date: z.date() }))
+        .input(z.object({ habitId: z.string().uuid(), date: z.string() }))
         .mutation(async ({ ctx, input }) => {
             return await ctx.db
                 .insert(habitTracker)
@@ -69,7 +69,7 @@ export const habitsRouter = createTRPCRouter({
                     habitId: input.habitId,
                     userId: ctx.session.user.id,
                     status: "completed",
-                    date: input.date.toDateString(),
+                    date: input.date,
                 })
                 .onConflictDoUpdate({
                     target: [habitTracker.habitId, habitTracker.userId, habitTracker.date],
@@ -81,10 +81,10 @@ export const habitsRouter = createTRPCRouter({
         }),
 
     untrackHabit: protectedProcedure
-        .input(z.object({ habitId: z.string().uuid(), date: z.date() }))
+        .input(z.object({ habitId: z.string().uuid(), date: z.string() }))
         .mutation(async ({ ctx, input }) => {
             await ctx.db
                 .delete(habitTracker)
-                .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date.toDateString())));
+                .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date)));
         }),
 });

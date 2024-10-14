@@ -117,8 +117,7 @@ export const Habits: React.FC = () => {
         ...previousHabitTracker,
         {
           habitId: variables.habitId,
-          // return date in the format YYYY-MM-DD
-          date: variables.date.toLocaleDateString().split('/').reverse().join('-'),
+          date: variables.date,
           status: "completed",
           id: "1",
           createdAt: new Date(),
@@ -150,7 +149,7 @@ export const Habits: React.FC = () => {
 
       // set the new value of habitTracker
       apiUtils.habitTracker.getAll.setData(undefined,
-        previousHabitTracker.filter(habit => !(habit.habitId === variables.habitId && habit.date === variables.date.toLocaleDateString().split('/').reverse().join('-')))
+        previousHabitTracker.filter(habit => !(habit.habitId === variables.habitId && habit.date === variables.date))
       )
 
       // return the previous value of habitTracker, this is used to revert the mutation in case of an error
