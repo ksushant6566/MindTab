@@ -148,11 +148,22 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     if (checked) {
       onTrackHabit(habitId, date)
       setShowConfetti(true)
-      setTimeout(() => setShowConfetti(false), 2500)
     } else {
       onUntrackHabit(habitId, date)
     }
   }
+
+  useEffect(() => {
+    let timoutId: NodeJS.Timeout
+    if (showConfetti) {
+      timoutId = setTimeout(() => setShowConfetti(false), 2500)
+    }
+    return () => {
+      if (timoutId) {
+        clearTimeout(timoutId)
+      }
+    }
+  }, [showConfetti])
 
   const currentWeek = useMemo(() => {
     const now = new Date()
@@ -355,7 +366,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
             height={window.innerHeight}
             recycle={false}
             gravity={0.1}
-            numberOfPieces={2000}
+            numberOfPieces={500}
           />
         </div>
       )}
