@@ -2,7 +2,7 @@
 
 import { createInsertSchema } from "drizzle-zod";
 import { Flag, Zap } from "lucide-react";
-import React from "react";
+import React, { useRef, KeyboardEvent } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import {
@@ -62,6 +62,9 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
         }
     );
 
+    const titleRef = useRef<HTMLInputElement>(null);
+    const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
     const handleChange = (
         e: React.ChangeEvent<
             HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -74,6 +77,16 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave(formData);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (e.key === 'ArrowUp' && e.target === descriptionRef.current) {
+            e.preventDefault();
+            titleRef.current?.focus();
+        } else if (e.key === 'ArrowDown' && e.target === titleRef.current) {
+            e.preventDefault();
+            descriptionRef.current?.focus();
+        }
     };
 
     return (
@@ -89,8 +102,10 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     placeholder="Goal name"
                     value={formData.title || ""}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     required
                     className="w-full bg-inherit text-xl font-semibold focus:border-none focus:outline-none"
+                    ref={titleRef}
                 />
                 <textarea
                     id="description"
@@ -98,6 +113,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                     placeholder="Description"
                     value={formData.description || ""}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     className="w-full resize-none overflow-hidden bg-inherit text-base font-normal focus:border-none focus:outline-none"
                     style={{ height: "auto" }}
                     onInput={(e) => {
@@ -105,6 +121,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
                         target.style.height = "auto";
                         target.style.height = `${target.scrollHeight}px`;
                     }}
+                    ref={descriptionRef}
                 />
             </div>
             <div className="flex gap-2 pb-2">
