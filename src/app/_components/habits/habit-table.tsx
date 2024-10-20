@@ -1,27 +1,23 @@
 'use client'
 
-import { CheckedState } from '@radix-ui/react-checkbox'
 import { createInsertSchema } from 'drizzle-zod'
-import { Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
-import { Checkbox } from '~/components/ui/checkbox'
-import { Skeleton } from '~/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
 import { habits, habitTracker } from '~/server/db/schema'
 import { CreateHabit } from './create-habit'
-import { EditHabit } from './edit-habit'
-import Confetti from 'react-confetti'
 import { InferSelectModel } from 'drizzle-orm'
+import { HabitRow } from './habit-row'
 
-const ZInsertHabit = createInsertSchema(habits).omit({
+export const ZInsertHabit = createInsertSchema(habits).omit({
   userId: true,
   id: true,
 })
 
-const ZUpdateHabit = createInsertSchema(habits).omit({
+export const ZUpdateHabit = createInsertSchema(habits).omit({
   userId: true,
   id: true,
 }).extend({
@@ -129,6 +125,26 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     }
   }
 
+  const handleEdit = useCallback((id: string) => {
+    setEditHabitId(id);
+  }, []);
+
+  const handleDelete = useCallback((id: string) => {
+    deleteHabit({ id });
+  }, [deleteHabit]);
+
+  const handleSaveEdit = useCallback((habit: z.infer<typeof ZInsertHabit>) => {
+    if (editHabitId) {
+      updateHabit({ ...habit, id: editHabitId });
+      setEditHabitId(null);
+    }
+  }, [editHabitId, updateHabit]);
+
+  const handleCreateHabit = useCallback((habit: z.infer<typeof ZInsertHabit>) => {
+    createHabit(habit);
+    setIsCreateHabitOpen(false);
+  }, [createHabit]);
+
   const getWeekIndexFromName = (date: Date) => {
     const start = new Date(date.getFullYear(), 0, 1)
     const diff = date.getTime() - start.getTime()
@@ -145,37 +161,6 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     return date.toLocaleDateString().split('/').reverse().join('-')
   }
 
-  const handleCreateHabit = (habit: z.infer<typeof ZInsertHabit>) => {
-    createHabit(habit)
-    setIsCreateHabitOpen(false)
-  }
-
-  const handleEditHabit = (habit: z.infer<typeof ZInsertHabit>) => {
-    if (editHabitId) {
-      updateHabit({ ...habit, id: editHabitId })
-      setEditHabitId(null)
-    }
-  }
-
-  const onTrackHabit = (habitId: string, date: string) => {
-    trackHabit({ habitId, date })
-  }
-
-  const onUntrackHabit = (habitId: string, date: string) => {
-    untrackHabit({ habitId, date })
-  }
-
-  const onCheckedChange = (habitId: string, checked: CheckedState, date: string) => {
-    if (checked) {
-      onTrackHabit(habitId, date)
-      setShowConfetti(true)
-      playSound('success')
-    } else {
-      onUntrackHabit(habitId, date)
-      playSound('error')
-    }
-  }
-
   const currentWeek = useMemo(() => {
     const now = new Date()
     const start = new Date(now.getFullYear(), 0, 1)
@@ -183,6 +168,12 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     const oneWeek = 1000 * 60 * 60 * 24 * 7
     return Math.floor(diff / oneWeek)
   }, [])
+
+  const weeksToRender = useMemo(() => {
+    const startWeek = Math.max(0, currentWeek - 2)
+    const endWeek = Math.min(51, currentWeek + 2)
+    return Array.from({ length: endWeek - startWeek + 1 }, (_, i) => startWeek + i)
+  }, [currentWeek])
 
   const currentDay = useMemo(() => {
     return new Date().getDay() || 7 // Sunday is 0, so we change it to 7
@@ -198,7 +189,7 @@ export const HabitTable: React.FC<THabitTableProps> = ({
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {Array.from({ length: 52 }, (_, weekIndex) => {
+        {weeksToRender.map((weekIndex) => {
           const isCurrentWeek = weekIndex === currentWeek
           return (
             <div key={weekIndex} className="snap-start mb-16" ref={isCurrentWeek ? currentWeekRef : null}>
@@ -239,84 +230,31 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {habits?.map(
-                    (habit) =>
-                      // a habit should only be visible if it was created in the current week or before
-                      getWeekIndexFromName(habit.createdAt) <= weekIndex &&
-                      (habit.id === editHabitId && weekIndex === currentWeek ? (
-                        <TableRow className="border-none hover:bg-transparent group">
-                          <TableCell colSpan={8}>
-                            {isUpdatingHabit ? (
-                              <div className="flex gap-2 m-0 p-0">
-                                <Skeleton className="h-11 w-[25%]" />
-                                <Skeleton className="h-11 w-full" />
-                              </div>
-                            ) : (
-                              <EditHabit
-                                key={habit.id}
-                                habit={habit}
-                                onSave={handleEditHabit}
-                                onCancel={() => setEditHabitId(null)}
-                              />
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        <TableRow key={habit.id} className="border-none hover:bg-transparent group">
-                          <TableCell className="font-medium overflow-hidden text-ellipsis text-nowrap">
-                            {habit.title}
-                          </TableCell>
-                          {Array.from({ length: 7 }, (_, dayIndex) => (
-                            <TableCell key={`${habit.id}-${dayIndex}`} className="text-center p-0 px-1">
-                              <button
-                                onClick={(event) => {
-                                  const rect = event.currentTarget.getBoundingClientRect();
-                                  const scrollX = window.scrollX || window.pageXOffset;
-                                  const scrollY = window.scrollY || window.pageYOffset;
-                                  setConfettiSource({ 
-                                    x: rect.left + rect.width / 2 + scrollX, 
-                                    y: rect.top + rect.height / 2 + scrollY 
-                                  });
-                                }}
-                                className="w-8 h-8 md:w-full md:h-11"
-                                disabled={!isCurrentWeek || dayIndex + 1 !== currentDay}
-                              >
-                                <Checkbox
-                                  className="w-full h-full"
-                                  checked={habitTracker?.some(
-                                    (tracker) =>
-                                      tracker.habitId === habit.id &&
-                                      tracker.status === 'completed' &&
-                                      tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex),
-                                  )}
-                                  onCheckedChange={(checked) => {
-                                    onCheckedChange(habit.id, checked, getDateFromWeekAndDay(weekIndex, dayIndex));
-                                  }}
-                                />
-                              </button>
-                            </TableCell>
-                          ))}
-                          <TableCell className="relative p-0" colSpan={1}>
-                            <div className="flex absolute gap-0 group-hover:visible left-2 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
-                              {/* <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
-                                <Edit3 className="h-4 w-4" />
-                              </Button> */}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className=" hover:bg-red-900 active:bg-red-900"
-                                onClick={() => deleteHabit({ id: habit.id })}
-                                disabled={isDeletingHabit && deleteHabitVariables?.id === habit.id}
-                                loading={isDeletingHabit && deleteHabitVariables?.id === habit.id}
-                                hideContentWhenLoading
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )),
-                  )}
+                  {habits?.map((habit) => {
+                    const habitWeekIndex = getWeekIndexFromName(new Date(habit.createdAt))
+                    return (
+                      habitWeekIndex <= weekIndex && (
+                        <HabitRow
+                          key={habit.id}
+                          habit={habit}
+                          weekIndex={weekIndex}
+                          currentWeek={currentWeek}
+                          currentDay={currentDay}
+                          isEditing={habit.id === editHabitId && weekIndex === currentWeek}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          onSaveEdit={handleSaveEdit}
+                          isUpdating={isUpdatingHabit}
+                          isDeleting={isDeletingHabit}
+                          deleteVariables={deleteHabitVariables}
+                          habitTracker={habitTracker}
+                          onTrack={trackHabit}
+                          onUntrack={untrackHabit}
+                          getDate={getDateFromWeekAndDay}
+                        />
+                      )
+                    )
+                  })}
                   {habits?.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8}>
@@ -382,36 +320,6 @@ export const HabitTable: React.FC<THabitTableProps> = ({
             <TooltipContent>Scroll to current week</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      )}
-      {showConfetti && (
-        <Confetti
-          recycle={false}
-          gravity={0.1}
-          initialVelocityY={10}
-          initialVelocityX={5}
-          numberOfPieces={50}
-          colors={['#FFD700', '#FF6347', '#4169E1', '#32CD32', '#FF1493']}
-          confettiSource={{
-            x: confettiSource.x,
-            y: confettiSource.y,
-            w: 0,
-            h: 0
-          }}
-          style={{
-            position: 'fixed',
-            pointerEvents: 'none',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0
-          }}
-          tweenDuration={10}
-          onConfettiComplete={(confetti) => {
-            confetti?.stop();
-            confetti?.reset();
-            setShowConfetti(false);
-          }}
-        />
       )}
     </div>
   )
