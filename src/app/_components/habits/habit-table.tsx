@@ -307,8 +307,8 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                 className="absolute top-0 right-4"
                 onClick={scrollToCurrentWeek}
                 title="Scroll to current week"
-                size="icon"
-                variant="secondary"
+                size="sm"
+                variant="default"
               >
                 {scrollDirection !== 'down' ? (
                   <ChevronDown className="h-4 w-4" />
