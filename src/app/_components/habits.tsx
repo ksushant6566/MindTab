@@ -44,7 +44,7 @@ export const Habits: React.FC = () => {
 
   const apiUtils = api.useUtils()
 
-  const { data: habits, refetch: refetchHabits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery(undefined, {
+  const { data: habits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   })

@@ -69,7 +69,28 @@ export const HabitTable: React.FC<THabitTableProps> = ({
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
 
   const [showConfetti, setShowConfetti] = useState(false)
+  const successAudioRef = useRef<HTMLAudioElement | null>(null)
+  const errorAudioRef = useRef<HTMLAudioElement | null>(null)
+  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
 
+  useEffect(() => {
+    successAudioRef.current = new Audio('/audio/success.mp3')
+    successAudioRef.current.addEventListener('error', (e) => {
+      console.error('Audio loading error:', e)
+    })
+    errorAudioRef.current = new Audio('/audio/error.mp3')
+    errorAudioRef.current.addEventListener('error', (e) => {
+      console.error('Audio loading error:', e)
+    })
+  }, [])
+
+  const playSound = (type: 'success' | 'error') => {
+    const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current
+    if (audio) {
+      audio.currentTime = 0
+      audio.play().catch(error => console.error('Error playing sound:', error))
+    }
+  }
 
   const handleScroll = useCallback(() => {
     if (containerRef.current && currentWeekRef.current) {
@@ -148,22 +169,12 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     if (checked) {
       onTrackHabit(habitId, date)
       setShowConfetti(true)
+      playSound('success')
     } else {
       onUntrackHabit(habitId, date)
+      playSound('error')
     }
   }
-
-  useEffect(() => {
-    let timoutId: NodeJS.Timeout
-    if (showConfetti) {
-      timoutId = setTimeout(() => setShowConfetti(false), 2500)
-    }
-    return () => {
-      if (timoutId) {
-        clearTimeout(timoutId)
-      }
-    }
-  }, [showConfetti])
 
   const currentWeek = useMemo(() => {
     const now = new Date()
@@ -257,19 +268,32 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                           </TableCell>
                           {Array.from({ length: 7 }, (_, dayIndex) => (
                             <TableCell key={`${habit.id}-${dayIndex}`} className="text-center p-0 px-1">
-                              <Checkbox
+                              <button
+                                onClick={(event) => {
+                                  const rect = event.currentTarget.getBoundingClientRect();
+                                  const scrollX = window.scrollX || window.pageXOffset;
+                                  const scrollY = window.scrollY || window.pageYOffset;
+                                  setConfettiSource({ 
+                                    x: rect.left + rect.width / 2 + scrollX, 
+                                    y: rect.top + rect.height / 2 + scrollY 
+                                  });
+                                }}
                                 className="w-8 h-8 md:w-full md:h-11"
                                 disabled={!isCurrentWeek || dayIndex + 1 !== currentDay}
-                                checked={habitTracker?.some(
-                                  (tracker) =>
-                                    tracker.habitId === habit.id &&
-                                    tracker.status === 'completed' &&
-                                    tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex),
-                                )}
-                                onCheckedChange={(checked) => {
-                                  onCheckedChange(habit.id, checked, getDateFromWeekAndDay(weekIndex, dayIndex))
-                                }}
-                              />
+                              >
+                                <Checkbox
+                                  className="w-full h-full"
+                                  checked={habitTracker?.some(
+                                    (tracker) =>
+                                      tracker.habitId === habit.id &&
+                                      tracker.status === 'completed' &&
+                                      tracker.date === getDateFromWeekAndDay(weekIndex, dayIndex),
+                                  )}
+                                  onCheckedChange={(checked) => {
+                                    onCheckedChange(habit.id, checked, getDateFromWeekAndDay(weekIndex, dayIndex));
+                                  }}
+                                />
+                              </button>
                             </TableCell>
                           ))}
                           <TableCell className="relative p-0" colSpan={1}>
@@ -360,15 +384,34 @@ export const HabitTable: React.FC<THabitTableProps> = ({
         </TooltipProvider>
       )}
       {showConfetti && (
-        <div className="fixed top-0 left-0 w-full h-full">
-          <Confetti
-            width={window.innerWidth}
-            height={window.innerHeight}
-            recycle={false}
-            gravity={0.1}
-            numberOfPieces={500}
-          />
-        </div>
+        <Confetti
+          recycle={false}
+          gravity={0.1}
+          initialVelocityY={10}
+          initialVelocityX={5}
+          numberOfPieces={50}
+          colors={['#FFD700', '#FF6347', '#4169E1', '#32CD32', '#FF1493']}
+          confettiSource={{
+            x: confettiSource.x,
+            y: confettiSource.y,
+            w: 0,
+            h: 0
+          }}
+          style={{
+            position: 'fixed',
+            pointerEvents: 'none',
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0
+          }}
+          tweenDuration={10}
+          onConfettiComplete={(confetti) => {
+            confetti?.stop();
+            confetti?.reset();
+            setShowConfetti(false);
+          }}
+        />
       )}
     </div>
   )
