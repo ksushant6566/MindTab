@@ -150,7 +150,7 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
                                         wind={0.1}
                                         initialVelocityY={20}
                                         initialVelocityX={5}
-                                        numberOfPieces={50}
+                                        numberOfPieces={25}
                                         colors={['#FFD700', '#FF6347', '#4169E1', '#32CD32', '#FF1493']}
                                         confettiSource={{
                                             x: confettiSource.x,
