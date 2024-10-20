@@ -334,7 +334,7 @@ export const Goals: React.FC = () => {
                   </AccordionItem>
                 </Accordion>
               </div>
-              <div className="absolute bottom-0 left-0 flex h-12 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" />
+              {/* <div className="absolute bottom-0 left-0 flex h-12 w-full flex-col gap-2 backdrop-blur-sm backdrop-brightness-75" /> */}
             </ScrollArea>
           </div>
         )}
