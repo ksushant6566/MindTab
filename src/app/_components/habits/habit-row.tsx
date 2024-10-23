@@ -145,11 +145,11 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
                                 {showConfetti && (
                                     <Confetti
                                         recycle={false}
-                                        gravity={0.2}
+                                        gravity={0.5}           // Increased from 0.2
                                         opacity={0.7}
-                                        wind={0.1}
-                                        initialVelocityY={20}
-                                        initialVelocityX={5}
+                                        wind={0.5}             // Increased from 0.1
+                                        initialVelocityY={40}  // Increased from 20
+                                        initialVelocityX={10}  // Increased from 5
                                         numberOfPieces={15}
                                         colors={['#FFD700', '#FF6347', '#4169E1', '#32CD32', '#FF1493']}
                                         confettiSource={{
@@ -166,7 +166,7 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
                                             top: '0',
                                             left: '0',
                                         }}
-                                        tweenDuration={50}
+                                        tweenDuration={100}    // Increased from 50
                                         onConfettiComplete={(confetti) => {
                                             confetti?.stop();
                                             confetti?.reset();
