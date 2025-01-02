@@ -11,6 +11,7 @@ import { habits, habitTracker } from '~/server/db/schema'
 import { CreateHabit } from './create-habit'
 import { InferSelectModel } from 'drizzle-orm'
 import { HabitRow } from './habit-row'
+import { calculateYearOffset } from '~/lib/utils'
 
 export const ZInsertHabit = createInsertSchema(habits).omit({
   userId: true,
@@ -64,10 +65,8 @@ export const HabitTable: React.FC<THabitTableProps> = ({
   const [editHabitId, setEditHabitId] = useState<string | null>(null)
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
 
-  const [showConfetti, setShowConfetti] = useState(false)
   const successAudioRef = useRef<HTMLAudioElement | null>(null)
   const errorAudioRef = useRef<HTMLAudioElement | null>(null)
-  const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     successAudioRef.current = new Audio('/audio/success.mp3')
@@ -79,14 +78,6 @@ export const HabitTable: React.FC<THabitTableProps> = ({
       console.error('Audio loading error:', e)
     })
   }, [])
-
-  const playSound = (type: 'success' | 'error') => {
-    const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current
-    if (audio) {
-      audio.currentTime = 0
-      audio.play().catch(error => console.error('Error playing sound:', error))
-    }
-  }
 
   const handleScroll = useCallback(() => {
     if (containerRef.current && currentWeekRef.current) {
@@ -145,19 +136,16 @@ export const HabitTable: React.FC<THabitTableProps> = ({
     setIsCreateHabitOpen(false);
   }, [createHabit]);
 
-  const getWeekIndexFromName = (date: Date) => {
-    const start = new Date(date.getFullYear(), 0, 1)
-    const diff = date.getTime() - start.getTime()
-    const oneWeek = 1000 * 60 * 60 * 24 * 7
-    return Math.floor(diff / oneWeek)
-  }
-
-  const getDateFromWeekAndDay = (week: number, day: number) => {
-    const start = new Date(new Date().getFullYear(), 0, 1)
+  const getDateFromWeekAndDay = (week: number, day: number) => {  
+    const year = new Date().getFullYear()
+    const start = new Date(year, 0, 1)
+    
     const diff = week * 1000 * 60 * 60 * 24 * 7
     const date = new Date(start.getTime() + diff)
+    
+    const offset = start.getDay() - 1
 
-    date.setDate(date.getDate() + day)
+    date.setDate(date.getDate() + day - offset)
     return date.toLocaleDateString().split('/').reverse().join('-')
   }
 
@@ -231,9 +219,10 @@ export const HabitTable: React.FC<THabitTableProps> = ({
                 </TableHeader>
                 <TableBody>
                   {habits?.map((habit) => {
-                    const habitWeekIndex = getWeekIndexFromName(new Date(habit.createdAt))
+                    const date1 = new Date(getDateFromWeekAndDay(weekIndex, 0))
+                    const date2 = new Date(habit.createdAt)
                     return (
-                      habitWeekIndex <= weekIndex && (
+                      date1 >= date2 && (
                         <HabitRow
                           key={habit.id}
                           habit={habit}
