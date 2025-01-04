@@ -1,49 +1,37 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { api } from '~/trpc/react'
 import { HabitTable } from './habit-table'
-import { Skeleton } from '~/components/ui/skeleton'
-import { CollapseHabitTable } from './collapse-habit-table'
-
-const HabitTableSkeleton = () => {
-  return (
-    <div className="flex flex-col gap-16 w-full max-h-[80vh] overflow-y-hidden">
-      {
-        Array.from({ length: 2 }).map((_, index) => (
-          <div className="flex flex-col gap-12 w-full py-3" key={index}>
-            <div className="flex flex-col gap-2">
-              <Skeleton className="w-44 h-10" />
-              <Skeleton className="w-44 h-4" />
-            </div>
-            <div className="flex flex-col gap-1.5 pl-2">
-              {
-                Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="flex flex-col gap-2">
-                    <div className="flex gap-6 justify-start items-center">
-                      <Skeleton className="w-28 h-11" />
-                      <div className="flex gap-1.5">
-                        {
-                          Array.from({ length: 7 }).map((_, index) => (
-                            <Skeleton key={index} className="w-14 h-12" />
-                          ))
-                        }
-                      </div>
-                    </div>
-                  </div>
-                ))
-              }
-            </div>
-          </div>
-        ))
-      }
-    </div>
-  )
-}
+import { CollapsedHabits } from './collapsed-habits'
+import { Button } from '~/components/ui/button'
+import { LayoutGrid, Table2 } from 'lucide-react'
+import { HabitTableSkeleton } from './habit-table-skeleton'
 
 export const Habits: React.FC = () => {
-
+  const [viewMode, setViewMode] = useState<'table' | 'collapsed'>('table')
   const apiUtils = api.useUtils()
+  const successAudioRef = useRef<HTMLAudioElement | null>(null)
+  const errorAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    successAudioRef.current = new Audio('/audio/success.mp3')
+    successAudioRef.current.addEventListener('error', (e) => {
+      console.error('Audio loading error:', e)
+    })
+    errorAudioRef.current = new Audio('/audio/error.mp3')
+    errorAudioRef.current.addEventListener('error', (e) => {
+      console.error('Audio loading error:', e)
+    })
+  }, [])
+
+  const playSound = (type: 'success' | 'error') => {
+    const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current
+    if (audio) {
+      audio.currentTime = 0
+      audio.play().catch(error => console.error('Error playing sound:', error))
+    }
+  }
 
   const { data: habits, isFetching: isFetchingHabits } = api.habits.getAll.useQuery(undefined, {
     refetchOnWindowFocus: false,
@@ -107,13 +95,9 @@ export const Habits: React.FC = () => {
 
   const { mutate: trackHabit } = api.habits.trackHabit.useMutation({
     async onMutate(variables) {
-      // cancel any existing requests to avoid conflicts
       await apiUtils.habitTracker.getAll.cancel()
-
-      // store the previous value of habitTracker
       const previousHabitTracker = apiUtils.habitTracker.getAll.getData() ?? []
 
-      // set the new value of habitTracker
       apiUtils.habitTracker.getAll.setData(undefined, [
         ...previousHabitTracker,
         {
@@ -127,7 +111,7 @@ export const Habits: React.FC = () => {
         }
       ])
 
-      // return the previous value of habitTracker, this is used to revert the mutation in case of an error
+      playSound('success')
       return { previousHabitTracker }
     },
 
@@ -142,18 +126,14 @@ export const Habits: React.FC = () => {
 
   const { mutate: untrackHabit } = api.habits.untrackHabit.useMutation({
     async onMutate(variables) {
-      // cancel any existing requests to avoid conflicts
       await apiUtils.habitTracker.getAll.cancel()
-
-      // store the previous value of habitTracker
       const previousHabitTracker = apiUtils.habitTracker.getAll.getData() ?? []
 
-      // set the new value of habitTracker
       apiUtils.habitTracker.getAll.setData(undefined,
         previousHabitTracker.filter(habit => !(habit.habitId === variables.habitId && habit.date === variables.date))
       )
 
-      // return the previous value of habitTracker, this is used to revert the mutation in case of an error
+      playSound('error')
       return { previousHabitTracker }
     },
 
@@ -167,36 +147,54 @@ export const Habits: React.FC = () => {
   })
 
   return (
-    <div className="flex justify-center items-center relative">
-      {
-        isFetchingHabits ? <HabitTableSkeleton /> :
-          <HabitTable
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+          >
+            <Table2 className="h-4 w-4 mr-1" />
+            Table
+          </Button>
+          <Button
+            variant={viewMode === 'collapsed' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('collapsed')}
+          >
+            <LayoutGrid className="h-4 w-4 mr-1" />
+            Cards
+          </Button>
+        </div>
+      </div>
+
+      {isFetchingHabits ? (
+        <HabitTableSkeleton />
+      ) : viewMode === 'table' ? (
+        <HabitTable
+          habits={habits ?? []}
+          isCreatingHabit={isCreatingHabit}
+          isUpdatingHabit={isUpdatingHabit}
+          isDeletingHabit={isDeletingHabit}
+          deleteHabitVariables={deleteHabitVariables}
+          createHabit={createHabit}
+          updateHabit={updateHabit}
+          deleteHabit={deleteHabit}
+          trackHabit={trackHabit}
+          untrackHabit={untrackHabit}
+          habitTracker={habitTracker ?? []}
+        />
+      ) : (
+        <div className="">
+          <CollapsedHabits
             habits={habits ?? []}
-            isCreatingHabit={isCreatingHabit}
-            isUpdatingHabit={isUpdatingHabit}
-            isDeletingHabit={isDeletingHabit}
-            deleteHabitVariables={deleteHabitVariables}
-            createHabit={createHabit}
-            updateHabit={updateHabit}
-            deleteHabit={deleteHabit}
+            habitTracker={habitTracker ?? []}
             trackHabit={trackHabit}
             untrackHabit={untrackHabit}
-            habitTracker={habitTracker ?? []}
           />
-          // <CollapseHabitTable
-          //   habits={habits ?? []}
-          //   isCreatingHabit={isCreatingHabit}
-          //   isUpdatingHabit={isUpdatingHabit}
-          //   isDeletingHabit={isDeletingHabit}
-          //   deleteHabitVariables={deleteHabitVariables}
-          //   createHabit={createHabit}
-          //   updateHabit={updateHabit}
-          //   deleteHabit={deleteHabit}
-          //   trackHabit={trackHabit}
-          //   untrackHabit={untrackHabit}
-          //   habitTracker={habitTracker ?? []}
-          // />
-      }
+        </div>
+      )}
     </div>
   )
 }

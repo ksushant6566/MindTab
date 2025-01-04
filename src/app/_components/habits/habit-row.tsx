@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { CheckedState } from '@radix-ui/react-checkbox'
 import { Trash2 } from 'lucide-react'
 import { z } from 'zod'
@@ -48,35 +48,11 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
     onUntrack,
     getDate,
 }) => {
-    const successAudioRef = useRef<HTMLAudioElement | null>(null)
-    const errorAudioRef = useRef<HTMLAudioElement | null>(null)
-
-    React.useEffect(() => {
-        successAudioRef.current = new Audio('/audio/success.mp3')
-        successAudioRef.current.addEventListener('error', (e) => {
-            console.error('Audio loading error:', e)
-        })
-        errorAudioRef.current = new Audio('/audio/error.mp3')
-        errorAudioRef.current.addEventListener('error', (e) => {
-            console.error('Audio loading error:', e)
-        })
-    }, [])
-
-    const playSound = (type: 'success' | 'error') => {
-        const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current
-        if (audio) {
-            audio.currentTime = 0
-            audio.play().catch(error => console.error('Error playing sound:', error))
-        }
-    }
-
     const onCheckedChange = (checked: CheckedState, date: string) => {
         if (checked) {
             onTrack({ habitId: habit.id, date })
-            playSound('success')
         } else {
             onUntrack({ habitId: habit.id, date })
-            playSound('error')
         }
     }
 
@@ -118,7 +94,7 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
                         )
 
                         return (
-                            <TableCell key={`${habit.id}-${dayIndex}`} className='text-center p-0 px-1'>
+                            <TableCell key={`${habit.id}-${dayIndex}`} className='text-center p-0 px-1 w-8 h-9'>
                                 <HabitCell
                                     habit={habit}
                                     date={date}
@@ -131,9 +107,6 @@ export const HabitRow: React.FC<HabitRowProps> = React.memo(({
                     })}
                     <TableCell className="relative p-0" colSpan={1}>
                         <div className="flex absolute gap-0 group-hover:visible left-2 -top-4 group-hover:top-2 group-hover:opacity-100 invisible transition-all opacity-0">
-                            {/* <Button size="sm" variant="ghost" onClick={() => setEditHabitId(habit.id)}>
-                <Edit3 className="h-4 w-4" />
-              </Button> */}
                             <Button
                                 size="sm"
                                 variant="ghost"

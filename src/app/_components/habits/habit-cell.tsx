@@ -25,7 +25,7 @@ export const HabitCell: React.FC<HabitCellProps> = ({
     const [confettiSource, setConfettiSource] = useState({ x: 0, y: 0 })
 
     return (
-        <div className="flex justify-center items-center">
+        <div className='flex justify-center items-center h-full w-full'>
             <button
                 onClick={(event) => {
                     const rect = event.currentTarget.getBoundingClientRect()
@@ -36,7 +36,7 @@ export const HabitCell: React.FC<HabitCellProps> = ({
                         y: rect.top + rect.height / 2 + scrollY
                     })
                 }}
-                className="w-8 h-8 md:w-full md:h-11"
+                className="w-8 h-8 md:w-full md:h-11 max-h-full"
             >
                 <Checkbox
                     className="w-full h-full"
