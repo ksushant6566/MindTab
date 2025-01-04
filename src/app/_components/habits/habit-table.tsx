@@ -11,7 +11,6 @@ import { habits, habitTracker } from '~/server/db/schema'
 import { CreateHabit } from './create-habit'
 import { InferSelectModel } from 'drizzle-orm'
 import { HabitRow } from './habit-row'
-import { calculateYearOffset } from '~/lib/utils'
 
 export const ZInsertHabit = createInsertSchema(habits).omit({
   userId: true,

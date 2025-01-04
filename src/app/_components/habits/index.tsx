@@ -4,6 +4,7 @@ import React from 'react'
 import { api } from '~/trpc/react'
 import { HabitTable } from './habit-table'
 import { Skeleton } from '~/components/ui/skeleton'
+import { CollapseHabitTable } from './collapse-habit-table'
 
 const HabitTableSkeleton = () => {
   return (
@@ -182,6 +183,19 @@ export const Habits: React.FC = () => {
             untrackHabit={untrackHabit}
             habitTracker={habitTracker ?? []}
           />
+          // <CollapseHabitTable
+          //   habits={habits ?? []}
+          //   isCreatingHabit={isCreatingHabit}
+          //   isUpdatingHabit={isUpdatingHabit}
+          //   isDeletingHabit={isDeletingHabit}
+          //   deleteHabitVariables={deleteHabitVariables}
+          //   createHabit={createHabit}
+          //   updateHabit={updateHabit}
+          //   deleteHabit={deleteHabit}
+          //   trackHabit={trackHabit}
+          //   untrackHabit={untrackHabit}
+          //   habitTracker={habitTracker ?? []}
+          // />
       }
     </div>
   )
