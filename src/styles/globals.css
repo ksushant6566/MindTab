@@ -6,9 +6,11 @@ body {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-left: calc(100vw - 100%);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
 
 /* Customizing the scrollbar */
 ::-webkit-scrollbar {

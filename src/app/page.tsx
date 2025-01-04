@@ -4,8 +4,6 @@ import { getServerAuthSession } from '~/server/auth'
 import Auth from '~/app/_components/auth'
 import { Header } from './_components/header'
 import { headers } from 'next/headers'
-import { Button } from '~/components/ui/button'
-import { ArrowRightIcon, ChevronRight } from 'lucide-react'
 import MobilePlaceholder from './_components/mobile-layout-placeholder'
 
 export default async function App() {
