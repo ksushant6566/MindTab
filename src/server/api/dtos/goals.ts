@@ -30,4 +30,5 @@ export const UpdateGoalPositionDto = z.object({
 
 export const UpdateGoalPositionsDto = z.object({
   goals: z.array(UpdateGoalPositionDto),
+  sequence: z.number(),
 })

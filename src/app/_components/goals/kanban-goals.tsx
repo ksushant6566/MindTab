@@ -12,7 +12,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { type CheckedState } from '@radix-ui/react-checkbox'
 import { type InferSelectModel } from 'drizzle-orm'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { type goals, type goalStatusEnum } from '~/server/db/schema'
 import { api } from '~/trpc/react'
@@ -48,6 +48,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     const [localPendingGoals, setLocalPendingGoals] = React.useState<TGoal[]>([])
     const [localInProgressGoals, setLocalInProgressGoals] = React.useState<TGoal[]>([])
     const [localCompletedGoals, setLocalCompletedGoals] = React.useState<TGoal[]>([])
+    const sequenceRef = useRef(0)
     const apiUtils = api.useUtils()
 
     useEffect(() => {
@@ -57,40 +58,18 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     }, [pendingGoals, inProgressGoals, completedGoals])
 
     const { mutate: updatePositions } = api.goals.updatePositions.useMutation({
-        async onMutate(variables) {
-            await apiUtils.goals.getAll.cancel()
-            const previousGoals = apiUtils.goals.getAll.getData()
-
-            const updatedGoals =
-                previousGoals?.map((goal) => {
-                    const update = variables.goals.find((g) => g.id === goal.id)
-                    if (update) {
-                        return {
-                            ...goal,
-                            position: update.position,
-                            status: update.status ?? goal.status,
-                        }
-                    }
-                    return goal
-                }) ?? []
-
-            updatedGoals.sort((a, b) => {
-                if (a.status !== b.status) {
-                    const statusOrder: Record<GoalStatus, number> = { pending: 0, in_progress: 1, completed: 2 }
-                    return statusOrder[a.status] - statusOrder[b.status]
-                }
-                return a.position - b.position
-            })
-
-            apiUtils.goals.getAll.setData(undefined, updatedGoals)
-
-            return { previousGoals }
-        },
         onError(error, variables, context) {
-            apiUtils.goals.getAll.setData(undefined, context?.previousGoals ?? [])
+            // revert local state
+            if (variables?.sequence === sequenceRef.current) {
+                setLocalPendingGoals(pendingGoals)
+                setLocalInProgressGoals(inProgressGoals)
+                setLocalCompletedGoals(completedGoals)
+            }
         },
-        onSettled() {
-            apiUtils.goals.getAll.invalidate()
+        onSettled(data, error, variables, context) {
+            if (data?.sequence === sequenceRef.current) {
+                apiUtils.goals.getAll.invalidate()
+            }
         },
     })
 
@@ -197,7 +176,8 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             else setLocalCompletedGoals(destinationGoals)
         }
 
-        updatePositions({ goals: updates })
+        const sequence = ++sequenceRef.current
+        updatePositions({ goals: updates, sequence })
         setActiveId(null)
     }
 

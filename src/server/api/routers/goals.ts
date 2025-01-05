@@ -17,7 +17,6 @@ export const goalsRouter = createTRPCRouter({
   }),
 
   updatePositions: protectedProcedure.input(UpdateGoalPositionsDto).mutation(async ({ ctx, input }) => {
-    // Update each goal's position in a transaction
     await ctx.db.transaction(async (tx) => {
       for (const goal of input.goals) {
         await tx
@@ -29,6 +28,7 @@ export const goalsRouter = createTRPCRouter({
           .where(eq(goals.id, goal.id))
       }
     })
+    return { success: true, sequence: input.sequence }
   }),
 
   delete: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {

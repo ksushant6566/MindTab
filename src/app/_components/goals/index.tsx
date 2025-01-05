@@ -50,9 +50,9 @@ export const Goals: React.FC = () => {
       const updatedGoals = previousGoals?.map((goal) =>
         goal.id === variables.id
           ? {
-              ...goal,
-              ...variables,
-            }
+            ...goal,
+            ...variables,
+          }
           : goal,
       ) as any
 
@@ -226,6 +226,7 @@ export const Goals: React.FC = () => {
             {viewMode === 'list' ? (
               <ListGoals
                 pendingGoals={sortedPendingGoals}
+                inProgressGoals={sortedInProgressGoals}
                 completedGoals={sortedCompletedGoals}
                 onEdit={setEditGoalId}
                 onDelete={handleDeleteGoal}
