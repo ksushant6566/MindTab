@@ -99,6 +99,13 @@
       "when": 1728325081140,
       "tag": "0013_chief_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1736098603742,
+      "tag": "0014_faulty_swarm",
+      "breakpoints": true
     }
   ]
 }

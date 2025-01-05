@@ -1,15 +1,17 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { api } from '~/trpc/react'
-import { HabitTable } from './habit-table'
-import { CollapsedHabits } from './collapsed-habits'
-import { Button } from '~/components/ui/button'
 import { LayoutGrid, Table2 } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { Button } from '~/components/ui/button'
+import { api } from '~/trpc/react'
+import { CollapsedHabits } from './collapsed-habits'
+import { HabitTable } from './habit-table'
 import { HabitTableSkeleton } from './habit-table-skeleton'
 
+type ViewMode = 'table' | 'collapsed'
+
 export const Habits: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'table' | 'collapsed'>('table')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const apiUtils = api.useUtils()
   const successAudioRef = useRef<HTMLAudioElement | null>(null)
   const errorAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -23,13 +25,23 @@ export const Habits: React.FC = () => {
     errorAudioRef.current.addEventListener('error', (e) => {
       console.error('Audio loading error:', e)
     })
+
+    const savedViewMode = localStorage.getItem('habitsViewMode') as ViewMode
+    if (savedViewMode) {
+      setViewMode(savedViewMode)
+    }
   }, [])
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode)
+    localStorage.setItem('habitsViewMode', mode)
+  }
 
   const playSound = (type: 'success' | 'error') => {
     const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current
     if (audio) {
       audio.currentTime = 0
-      audio.play().catch(error => console.error('Error playing sound:', error))
+      audio.play().catch((error) => console.error('Error playing sound:', error))
     }
   }
 
@@ -47,7 +59,10 @@ export const Habits: React.FC = () => {
       await apiUtils.habits.getAll.cancel()
       const previousHabits = apiUtils.habits.getAll.getData() ?? []
 
-      apiUtils.habits.getAll.setData(undefined, previousHabits.filter(habit => habit.id !== variables.id))
+      apiUtils.habits.getAll.setData(
+        undefined,
+        previousHabits.filter((habit) => habit.id !== variables.id),
+      )
       return { previousHabits }
     },
     onError(error, variables, context) {
@@ -103,12 +118,12 @@ export const Habits: React.FC = () => {
         {
           habitId: variables.habitId,
           date: variables.date,
-          status: "completed",
-          id: "1",
+          status: 'completed',
+          id: '1',
           createdAt: new Date(),
           updatedAt: new Date(),
-          userId: "1",
-        }
+          userId: '1',
+        },
       ])
 
       playSound('success')
@@ -129,8 +144,9 @@ export const Habits: React.FC = () => {
       await apiUtils.habitTracker.getAll.cancel()
       const previousHabitTracker = apiUtils.habitTracker.getAll.getData() ?? []
 
-      apiUtils.habitTracker.getAll.setData(undefined,
-        previousHabitTracker.filter(habit => !(habit.habitId === variables.habitId && habit.date === variables.date))
+      apiUtils.habitTracker.getAll.setData(
+        undefined,
+        previousHabitTracker.filter((habit) => !(habit.habitId === variables.habitId && habit.date === variables.date)),
       )
 
       playSound('error')
@@ -148,26 +164,24 @@ export const Habits: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <div className="flex gap-2">
           <Button
             variant={viewMode === 'table' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setViewMode('table')}
+            onClick={() => handleViewModeChange('table')}
           >
-            <Table2 className="h-4 w-4 mr-1" />
-            Table
+            <Table2 className="h-4 w-4" />
           </Button>
           <Button
             variant={viewMode === 'collapsed' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setViewMode('collapsed')}
+            onClick={() => handleViewModeChange('collapsed')}
           >
-            <LayoutGrid className="h-4 w-4 mr-1" />
-            Cards
+            <LayoutGrid className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {isFetchingHabits ? (
         <HabitTableSkeleton />

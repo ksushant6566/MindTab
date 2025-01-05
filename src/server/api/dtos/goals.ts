@@ -21,3 +21,13 @@ export const UpdateGoalDto = CreateGoalDto.partial().extend({
   id: z.string().uuid(),
   status: z.enum(goalStatusEnum.enumValues).optional(),
 })
+
+export const UpdateGoalPositionDto = z.object({
+  id: z.string().uuid(),
+  position: z.number(),
+  status: z.enum(goalStatusEnum.enumValues).optional(),
+})
+
+export const UpdateGoalPositionsDto = z.object({
+  goals: z.array(UpdateGoalPositionDto),
+})
