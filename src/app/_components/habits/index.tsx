@@ -1,17 +1,18 @@
 'use client'
 
-import { LayoutGrid, Table2 } from 'lucide-react'
-import React, { useState, useRef, useEffect } from 'react'
-import { Button } from '~/components/ui/button'
+import React, {useRef, useEffect } from 'react'
 import { api } from '~/trpc/react'
 import { CollapsedHabits } from './collapsed-habits'
 import { HabitTable } from './habit-table'
 import { HabitTableSkeleton } from './habit-table-skeleton'
 
-type ViewMode = 'table' | 'collapsed'
+export type ViewMode = 'table' | 'cards'
 
-export const Habits: React.FC = () => {
-  const [viewMode, setViewMode] = useState<ViewMode>('table')
+type HabitsProps = { 
+  viewMode: ViewMode
+}
+
+export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
   const apiUtils = api.useUtils()
   const successAudioRef = useRef<HTMLAudioElement | null>(null)
   const errorAudioRef = useRef<HTMLAudioElement | null>(null)
@@ -25,17 +26,7 @@ export const Habits: React.FC = () => {
     errorAudioRef.current.addEventListener('error', (e) => {
       console.error('Audio loading error:', e)
     })
-
-    const savedViewMode = localStorage.getItem('habitsViewMode') as ViewMode
-    if (savedViewMode) {
-      setViewMode(savedViewMode)
-    }
   }, [])
-
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode)
-    localStorage.setItem('habitsViewMode', mode)
-  }
 
   const playSound = (type: 'success' | 'error') => {
     const audio = type === 'success' ? successAudioRef.current : errorAudioRef.current

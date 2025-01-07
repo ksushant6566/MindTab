@@ -17,7 +17,7 @@ export const DroppableColumn: React.FC<DroppableColumnProps> = ({ id, title, chi
         <div
             ref={setNodeRef}
             className={cn(
-                'flex flex-col gap-4 rounded-lg border-2 border-transparent px-1 transition-all',
+                'flex flex-col gap-4 rounded-lg transition-all',
                 isOver && active && 'border-primary/50 bg-muted',
             )}
         >

@@ -151,9 +151,16 @@ export const HabitTable: React.FC<THabitTableProps> = ({
   const currentWeek = useMemo(() => {
     const now = new Date()
     const start = new Date(now.getFullYear(), 0, 1)
-    const diff = now.getTime() - start.getTime()
+
+    const offsetInDays = start.getDay() - 1
+    const offsetInTime = offsetInDays * 1000 * 60 * 60 * 24
+
+    const diff = now.getTime() - start.getTime() + offsetInTime
     const oneWeek = 1000 * 60 * 60 * 24 * 7
-    return Math.floor(diff / oneWeek)
+
+    const currentWeek = Math.floor(diff / oneWeek)
+    console.log('currentWeek', currentWeek)
+    return currentWeek
   }, [])
 
   const weeksToRender = useMemo(() => {
