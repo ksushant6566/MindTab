@@ -75,11 +75,13 @@ const layout2 = {
 export default function Component() {
     const [isHydrated, setIsHydrated] = useState(false);
     const [layoutVersion, setLayoutVersion] = useState(1);
+    const layout = layoutVersion === 1 ? layout1 : layout2;
+
+
     const [activeElement, setActiveElement] = useState<EActiveLayout>(
-        EActiveLayout.Goals
+        layout[layout.activeColumn as "col1" | "col2"].elements[0]!.title
     );
 
-    const layout = layoutVersion === 1 ? layout1 : layout2;
 
     useEffect(() => {
         setIsHydrated(true);
