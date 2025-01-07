@@ -5,9 +5,11 @@ import {
     DragStartEvent,
     KeyboardSensor,
     PointerSensor,
-    closestCenter,
     useSensor,
     useSensors,
+    pointerWithin,
+    CollisionDetection,
+    rectIntersection,
 } from "@dnd-kit/core";
 import {
     SortableContext,
@@ -16,7 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import { type InferSelectModel } from "drizzle-orm";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { type goals, type goalStatusEnum } from "~/server/db/schema";
 import { api } from "~/trpc/react";
@@ -68,6 +70,9 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     }, [pendingGoals, inProgressGoals, completedGoals]);
 
     const { mutate: updatePositions } = api.goals.updatePositions.useMutation({
+        onMutate() {
+            apiUtils.goals.getAll.cancel();
+        },
         onError(error, variables, context) {
             // revert local state
             if (variables?.sequence === sequenceRef.current) {
@@ -128,6 +133,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
         }
 
         const overContainer = findContainer(over.id as string);
+
         if (!overContainer) {
             setActiveId(null);
             return;
@@ -149,12 +155,20 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
         else destinationGoals = [...localCompletedGoals];
 
         const oldIndex = sourceGoals.findIndex((g) => g.id === active.id);
-        const newIndex =
-            over.id === overContainer
-                ? destinationGoals.length
-                : destinationGoals.findIndex((g) => g.id === over.id);
+        let newIndex: number;
+
+        // Handle dropping into empty columns or onto other goals
+        if (over.id === overContainer) {
+            // Dropping into an empty column
+            newIndex = destinationGoals.length;
+        } else {
+            // Dropping onto another goal
+            newIndex = destinationGoals.findIndex((g) => g.id === over.id);
+            if (newIndex === -1) newIndex = destinationGoals.length;
+        }
 
         const isSameContainer = activeGoal.status === overContainer;
+
         const updates: { id: string; position: number; status?: GoalStatus }[] =
             [];
 
@@ -225,10 +239,38 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
         [activeId, localPendingGoals, localInProgressGoals, localCompletedGoals]
     );
 
+    const collisionDetectionStrategy: CollisionDetection = useCallback(
+        (args) => {
+            // First, check for intersections with other draggable items
+            const rectIntersectionCollisions = rectIntersection(args);
+
+            if (rectIntersectionCollisions.length > 0) {
+                return rectIntersectionCollisions;
+            }
+
+            // If no direct intersections, check for container collisions
+            const containerCollisions = pointerWithin(args);
+
+            if (containerCollisions.length > 0) {
+                const columnIds = ["pending", "in_progress", "completed"];
+                const columnCollision = containerCollisions.find((collision) =>
+                    columnIds.includes(collision.id as string)
+                );
+
+                if (columnCollision) {
+                    return [columnCollision];
+                }
+            }
+
+            return [];
+        },
+        []
+    );
+
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={collisionDetectionStrategy}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}

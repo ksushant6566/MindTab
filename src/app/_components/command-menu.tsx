@@ -292,7 +292,6 @@ export const CommandMenu = () => {
             setCurrentPlaceholder((prev) => {
                 const currentIndex = placeholders.indexOf(prev);
                 const nextIndex = (currentIndex + 1) % placeholders.length;
-                console.log(currentIndex, nextIndex, placeholders[nextIndex]);
                 return placeholders[nextIndex]!;
             });
         }, 3000);
