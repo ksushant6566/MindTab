@@ -90,6 +90,11 @@ export default function Component() {
         if (storedLayoutVersion) {
             setLayoutVersion(parseInt(storedLayoutVersion));
         }
+
+        const storedActiveElement = localStorage.getItem("activeElement");
+        if (storedActiveElement) {
+            setActiveElement(storedActiveElement as EActiveLayout);
+        }
     }, []);
 
     const handleLayoutVersionChange = (layoutVersion: number) => {
@@ -107,7 +112,12 @@ export default function Component() {
             return;
         }
 
-        setActiveElement(activeColumn.elements[0]!.title);
+        handleActiveElementChange(activeColumn.elements[0]!.title);
+    };
+
+    const handleActiveElementChange = (activeElement: EActiveLayout) => {
+        setActiveElement(activeElement);
+        localStorage.setItem("activeElement", activeElement);
     };
 
     if (!isHydrated) return null;
@@ -152,7 +162,7 @@ export default function Component() {
                                     key={element.title}
                                     size={"sm"}
                                     onClick={() =>
-                                        setActiveElement(element.title)
+                                        handleActiveElementChange(element.title)
                                     }
                                     variant={
                                         activeElement === element.title
