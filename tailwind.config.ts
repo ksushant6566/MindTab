@@ -77,13 +77,10 @@ export default {
                     },
                 },
                 moveUpDown: {
-                    "0%": { transform: "translateY(0)", opacity: "1" },
-                    "10%": { transform: "translateY(0)", opacity: "1" },
-                    "20%": { transform: "translateY(-5px)", opacity: "0" },
-                    "30%": { transform: "translateY(5px)", opacity: "0" },
-                    "40%": { transform: "translateY(0)", opacity: "1" },
-                    "75%": { transform: "translateY(0)", opacity: "1" },
-                    "100%": { transform: "translateY(0)", opacity: "1" },
+                    "0%": { transform: "translateY(5px)", opacity: "0" },
+                    "15%": { transform: "translateY(0px)", opacity: "1" },
+                    "85%": { transform: "translateY(0px)", opacity: "1" },
+                    "100%": { transform: "translateY(-5px)", opacity: "0" },
                 },
                 shimmer: {
                     from: {
