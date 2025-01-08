@@ -2,7 +2,7 @@
 
 **MindTab** is a lightweight and intuitive Chrome extension designed to make goal tracking and micro journaling as effortless as possible. Set as your default new tab, MindTab seamlessly integrates into your daily browsing experience, providing a clutter-free environment to stay focused on what matters most.
 
-### Audio Intro: [MindTab deep dive](google.com/notebook/9a2ce58b-2992-49af-b998-eb7849d72f23/audio)
+### Audio Intro: [MindTab deep dive](https://notebooklm.google.com/notebook/0d0e059b-4080-4f87-b1ec-758bd7e71a1f/audio)
 
 ## 🚀 Features
 
