@@ -70,15 +70,53 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     }, [pendingGoals, inProgressGoals, completedGoals]);
 
     const { mutate: updatePositions } = api.goals.updatePositions.useMutation({
-        onMutate() {
-            apiUtils.goals.getAll.cancel();
+        async onMutate(variables) {
+            await apiUtils.goals.getAll.cancel();
+            const previousGoals = apiUtils.goals.getAll.getData();
+
+            const updatedGoals =
+                previousGoals?.map((goal) => {
+                    const update = variables.goals.find(
+                        (g) => g.id === goal.id
+                    );
+                    if (update) {
+                        return {
+                            ...goal,
+                            position: update.position,
+                            status: update.status ?? goal.status,
+                        };
+                    }
+                    return goal;
+                }) ?? [];
+
+            updatedGoals.sort((a, b) => {
+                if (a.status !== b.status) {
+                    const statusOrder = {
+                        pending: 0,
+                        in_progress: 1,
+                        completed: 2,
+                    };
+                    return (
+                        statusOrder[a.status as keyof typeof statusOrder] -
+                        statusOrder[b.status as keyof typeof statusOrder]
+                    );
+                }
+                return a.position - b.position;
+            });
+
+            apiUtils.goals.getAll.setData(undefined, updatedGoals);
+
+            return { previousGoals, sequence: variables.sequence };
         },
         onError(error, variables, context) {
-            // revert local state
-            if (variables?.sequence === sequenceRef.current) {
+            if (context?.sequence === sequenceRef.current) {
                 setLocalPendingGoals(pendingGoals);
                 setLocalInProgressGoals(inProgressGoals);
                 setLocalCompletedGoals(completedGoals);
+                apiUtils.goals.getAll.setData(
+                    undefined,
+                    context.previousGoals ?? []
+                );
             }
         },
         onSettled(data, error, variables, context) {
