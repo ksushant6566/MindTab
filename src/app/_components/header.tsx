@@ -31,7 +31,7 @@ export const Header = ({ session }: HeaderProps) => {
             </a>
           </div>
           {session?.user?.image ? (
-            <a href={`https://mindtab.in/${session.user.email}`} target="_blank" className="z-10">
+            <a href={`https://mindtab.in/users/${session.user.email}`} target="_blank" className="z-10">
               <Image
                 src={session.user.image}
                 alt="profile"
