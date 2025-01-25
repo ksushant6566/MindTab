@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { UserX, Home } from "lucide-react";
 
-export function UserNotFound({ email }: { email: string }) {
+export function UserNotFound({ email }: { email?: string }) {
     return (
         <div className="container mx-auto py-16">
             <div className="flex flex-col items-center gap-8 text-center">

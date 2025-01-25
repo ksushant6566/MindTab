@@ -60,16 +60,16 @@ export const goalsRouter = createTRPCRouter({
                 .where(eq(goals.id, input.id));
         }),
 
-    getAll: protectedProcedure.query(async ({ ctx }) => {
+    getAll: protectedProcedure.input(z.object({ userId: z.string().optional() }).optional()).query(async ({ ctx, input }) => {
         return await ctx.db
             .select()
             .from(goals)
-            .where(eq(goals.userId, ctx.session.user.id))
+            .where(eq(goals.userId, input?.userId ?? ctx.session.user.id))
             .orderBy(
                 asc(goals.position),
                 asc(goals.priority),
                 desc(goals.createdAt)
-            );
+            )
     }),
 
     search: protectedProcedure

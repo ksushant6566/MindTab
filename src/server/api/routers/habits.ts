@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { habits, habitTracker } from "~/server/db/schema";
@@ -48,16 +48,17 @@ export const habitsRouter = createTRPCRouter({
                 .where(eq(habits.id, input.id));
         }),
 
-    getAll: protectedProcedure.query(async ({ ctx }) => {
+    getAll: protectedProcedure.input(z.object({ userId: z.string().optional() }).optional()).query(async ({ ctx, input }) => {
         return await ctx.db
             .select()
             .from(habits)
             .where(
                 and(
-                    eq(habits.userId, ctx.session.user.id),
+                    eq(habits.userId, input?.userId ?? ctx.session.user.id),
                     isNull(habits.deletedAt)
                 )
-            );
+            )
+            .orderBy(desc(habits.createdAt));
     }),
 
     trackHabit: protectedProcedure
