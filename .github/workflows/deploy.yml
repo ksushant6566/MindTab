@@ -1,0 +1,30 @@
+name: Deploy to VM
+
+on:
+  workflow_run:
+    workflows: ["Docker Build and Push"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          script: |            
+            # Pull the latest image
+            sudo docker pull ghcr.io/${{ github.repository_owner }}/mindtab:latest
+            
+            # Stop and remove the old container if it exists
+            sudo docker stop mindtab || true
+            sudo docker rm mindtab || true
+            
+            # Run the new container
+            sudo docker run -d --name mindtab -p 3000:3000 -v /home/ubuntu/.env:/app/.env ghcr.io/${{ github.repository_owner }}/mindtab:latest
