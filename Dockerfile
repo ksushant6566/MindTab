@@ -29,6 +29,10 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Add build arg for env validation
+ARG SKIP_ENV_VALIDATION
+ENV SKIP_ENV_VALIDATION=${SKIP_ENV_VALIDATION}
+
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
