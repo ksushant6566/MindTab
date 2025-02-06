@@ -201,14 +201,14 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
                 : destinationGoals.findIndex((g) => g.id === over.id);
 
         const isSameContainer = activeGoal.status === overContainer;
-        const updates: { id: string; position: number; status?: GoalStatus }[] =
+        const updates: { id: string; position: number; status: GoalStatus }[] =
             [];
 
         if (isSameContainer) {
             // Reordering within the same container
             const reorderedGoals = arrayMove(sourceGoals, oldIndex, newIndex);
             reorderedGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index });
+                updates.push({ id: goal.id, position: index, status: goal.status });
             });
 
             // Update local state
@@ -225,7 +225,7 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
 
             // Update positions for source container
             sourceGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index });
+                updates.push({ id: goal.id, position: index, status: goal.status });
             });
 
             // Update positions for destination container
@@ -233,8 +233,7 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
                 updates.push({
                     id: goal.id,
                     position: index,
-                    status:
-                        goal.id === activeGoal.id ? overContainer : undefined,
+                    status: goal.id === activeGoal.id ? overContainer : goal.status,
                 });
             });
 

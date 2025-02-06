@@ -53,6 +53,7 @@ export const goals = createTable(
     position: integer('position').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
     userId: varchar('user_id', { length: 255 })
       .notNull()
       .references(() => users.id),
@@ -265,6 +266,7 @@ export const users = createTable('user', {
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar('image', { length: 255 }),
+  xp: integer('xp').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).default(sql`CURRENT_TIMESTAMP`).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 })

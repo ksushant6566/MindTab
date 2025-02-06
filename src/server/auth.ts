@@ -26,15 +26,17 @@ declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string
+      xp: number
       // ...other properties
       // role: UserRole;
     } & DefaultSession['user']
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    // ...other properties
+    // role: UserRole;
+    xp: number
+  }
 }
 
 /**
@@ -49,6 +51,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        xp: user.xp,
       },
     }),
     redirect: async () => '/',

@@ -118,12 +118,18 @@ export default function Profile({
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Streak</CardTitle>
+                            <CardTitle>Streak & XP</CardTitle>
                         </CardHeader>
                         <CardContent className="grid gap-4">
-                            <div className="flex items-center gap-2">
-                                <div className={`h-2 w-2 rounded-full ${streak === 0 ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                                <p className="text-sm font-medium">{streak} days streak</p>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className={`h-2 w-2 rounded-full ${streak === 0 ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                                    <p className="text-sm font-medium">{streak} days streak</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                    <p className="text-sm font-medium">{user.xp ?? 0} XP</p>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

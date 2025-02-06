@@ -1,17 +1,16 @@
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import { createInsertSchema } from "drizzle-zod";
-import { LayoutGrid, List, Plus } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
+import { Plus } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { goals } from "~/server/db/schema";
 import { api } from "~/trpc/react";
-import { Clock } from "../clock";
 import { CreateGoalDialog } from "./create-goal-dialog";
 import { EditGoalDialog } from "./edit-goal-dialog";
 import { GoalSkeleton } from "./goal-skeleton";
 import { KanbanGoals } from "./kanban-goals";
 import { ListGoals } from "./list-goals";
+import { z } from "zod";
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
 

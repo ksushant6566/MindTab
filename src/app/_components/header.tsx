@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { CommandMenu } from './command-menu'
 import Streak from './streak'
 import { Session } from 'next-auth'
+import { XP } from './xp'
 
 type HeaderProps = {
   session: Session
@@ -45,6 +46,7 @@ export const Header = ({ session }: HeaderProps) => {
           )}
         </div>
         <Streak />
+        <XP />
       </div>
     </div>
   )
