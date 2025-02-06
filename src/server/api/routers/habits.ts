@@ -1,7 +1,7 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { habits, habitTracker } from "~/server/db/schema";
+import { habits, habitTracker, users } from "~/server/db/schema";
 import { CreateHabitDto, UpdateHabitDto } from "../dtos/habits";
 
 export const habitsRouter = createTRPCRouter({
@@ -64,28 +64,46 @@ export const habitsRouter = createTRPCRouter({
     trackHabit: protectedProcedure
         .input(z.object({ habitId: z.string().uuid(), date: z.string() }))
         .mutation(async ({ ctx, input }) => {
-            return await ctx.db
-                .insert(habitTracker)
-                .values({
-                    habitId: input.habitId,
-                    userId: ctx.session.user.id,
-                    status: "completed",
-                    date: input.date,
-                })
-                .onConflictDoUpdate({
-                    target: [habitTracker.habitId, habitTracker.userId, habitTracker.date],
-                    set: { status: "completed" },
-                })
-                .returning({
-                    id: habitTracker.id,
-                });
+            return await ctx.db.transaction(async (tx) => {
+                const result = await tx
+                    .insert(habitTracker)
+                    .values({
+                        habitId: input.habitId,
+                        userId: ctx.session.user.id,
+                        status: "completed",
+                        date: input.date,
+                    })
+                    .onConflictDoUpdate({
+                        target: [habitTracker.habitId, habitTracker.userId, habitTracker.date],
+                        set: { status: "completed" },
+                    })
+                    .returning({
+                        id: habitTracker.id,
+                    });
+
+                // Add XP for completing habit
+                await tx
+                    .update(users)
+                    .set({ xp: sql`${users.xp} + 5` })
+                    .where(eq(users.id, ctx.session.user.id));
+
+                return result[0];
+            });
         }),
 
     untrackHabit: protectedProcedure
         .input(z.object({ habitId: z.string().uuid(), date: z.string() }))
         .mutation(async ({ ctx, input }) => {
-            await ctx.db
-                .delete(habitTracker)
-                .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date)));
+            return await ctx.db.transaction(async (tx) => {
+                await tx
+                    .delete(habitTracker)
+                    .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date)));
+
+                // Subtract XP for uncompleting habit
+                await tx
+                    .update(users)
+                    .set({ xp: sql`${users.xp} - 5` })
+                    .where(eq(users.id, ctx.session.user.id));
+            });
         }),
 });
