@@ -25,6 +25,8 @@ import { api } from "~/trpc/react";
 import { DroppableColumn } from "./droppable-column";
 import { Goal } from "./goal";
 import { SortableGoal } from "./sortable-goal";
+import { Button } from "~/components/ui/button";
+import { ArchiveIcon } from "lucide-react";
 
 type TGoal = InferSelectModel<typeof goals>;
 type GoalStatus = (typeof goalStatusEnum.enumValues)[number];
@@ -36,6 +38,7 @@ interface KanbanGoalsProps {
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onToggleStatus: (id: string, checked: CheckedState) => void;
+    onArchiveCompleted?: () => void;
     isDeleting: boolean;
     deleteVariables?: { id: string };
 }
@@ -47,6 +50,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     onEdit,
     onDelete,
     onToggleStatus,
+    onArchiveCompleted,
     isDeleting,
     deleteVariables,
 }) => {
@@ -95,6 +99,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                         pending: 0,
                         in_progress: 1,
                         completed: 2,
+                        archived: 3,
                     };
                     return (
                         statusOrder[a.status as keyof typeof statusOrder] -
@@ -214,7 +219,11 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             // Reordering within the same container
             const reorderedGoals = arrayMove(sourceGoals, oldIndex, newIndex);
             reorderedGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index, status: goal.status });
+                updates.push({
+                    id: goal.id,
+                    position: index,
+                    status: goal.status,
+                });
             });
 
             // Update local state
@@ -231,7 +240,11 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
 
             // Update positions for source container
             sourceGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index, status: goal.status });
+                updates.push({
+                    id: goal.id,
+                    position: index,
+                    status: goal.status,
+                });
             });
 
             // Update positions for destination container
@@ -239,7 +252,8 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                 updates.push({
                     id: goal.id,
                     position: index,
-                    status: goal.id === activeGoal.id ? overContainer : goal.status,
+                    status:
+                        goal.id === activeGoal.id ? overContainer : goal.status,
                 });
             });
 
@@ -377,12 +391,26 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                     <DroppableColumn
                         id="completed"
                         title={
-                            <span>
-                                Completed
-                                <span className="text-xs text-primary ml-2 border border-muted px-2 py-0.5 rounded-sm bg-muted">
-                                    {localCompletedGoals.length}
+                            <div className="flex items-center justify-between w-full">
+                                <span className="flex items-center">
+                                    Completed
+                                    <span className="text-xs text-primary ml-2 border border-muted px-2 py-0.5 rounded-sm bg-muted">
+                                        {localCompletedGoals.length}
+                                    </span>
                                 </span>
-                            </span>
+                                {localCompletedGoals.length > 0 &&
+                                    onArchiveCompleted && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 px-2"
+                                            onClick={onArchiveCompleted}
+                                            title="Archive all completed"
+                                        >
+                                            <ArchiveIcon className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                            </div>
                         }
                     >
                         <SortableContext

@@ -28,6 +28,8 @@ import { type goals, type goalStatusEnum } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 import { Goal } from "./goal";
 import { SortableGoal } from "./sortable-goal";
+import { Button } from "~/components/ui/button";
+import { ArchiveIcon } from "lucide-react";
 
 type TGoal = InferSelectModel<typeof goals>;
 type GoalStatus = (typeof goalStatusEnum.enumValues)[number];
@@ -39,6 +41,7 @@ interface ListGoalsProps {
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onToggleStatus: (id: string, checked: CheckedState) => void;
+    onArchiveCompleted?: () => void;
     isDeleting: boolean;
     deleteVariables?: { id: string };
 }
@@ -50,6 +53,7 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
     onEdit,
     onDelete,
     onToggleStatus,
+    onArchiveCompleted,
     isDeleting,
     deleteVariables,
 }) => {
@@ -98,6 +102,7 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
                         pending: 0,
                         in_progress: 1,
                         completed: 2,
+                        archived: 3,
                     };
                     return (
                         statusOrder[a.status as keyof typeof statusOrder] -
@@ -208,7 +213,11 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
             // Reordering within the same container
             const reorderedGoals = arrayMove(sourceGoals, oldIndex, newIndex);
             reorderedGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index, status: goal.status });
+                updates.push({
+                    id: goal.id,
+                    position: index,
+                    status: goal.status,
+                });
             });
 
             // Update local state
@@ -225,7 +234,11 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
 
             // Update positions for source container
             sourceGoals.forEach((goal, index) => {
-                updates.push({ id: goal.id, position: index, status: goal.status });
+                updates.push({
+                    id: goal.id,
+                    position: index,
+                    status: goal.status,
+                });
             });
 
             // Update positions for destination container
@@ -233,7 +246,8 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
                 updates.push({
                     id: goal.id,
                     position: index,
-                    status: goal.id === activeGoal.id ? overContainer : goal.status,
+                    status:
+                        goal.id === activeGoal.id ? overContainer : goal.status,
                 });
             });
 
@@ -357,12 +371,29 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
                     >
                         <AccordionItem value="completed">
                             <AccordionTrigger className="text-sm font-medium">
-                                <span>
-                                    Completed
-                                    <span className="text-xs text-primary ml-2 border border-muted px-2 py-0.5 rounded-sm bg-muted">
-                                        {completedGoals.length}
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="flex items-center">
+                                        Completed
+                                        <span className="text-xs text-primary ml-2 border border-muted px-2 py-0.5 rounded-sm bg-muted">
+                                            {completedGoals.length}
+                                        </span>
                                     </span>
-                                </span>
+                                    {localCompletedGoals.length > 0 &&
+                                        onArchiveCompleted && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 px-2"
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Prevent accordion toggle
+                                                    onArchiveCompleted();
+                                                }}
+                                                title="Archive all completed"
+                                            >
+                                                <ArchiveIcon className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                </div>
                             </AccordionTrigger>
                             <AccordionContent className="space-y-6">
                                 <SortableContext
