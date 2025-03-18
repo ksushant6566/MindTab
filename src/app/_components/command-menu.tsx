@@ -204,13 +204,12 @@ export const CommandMenu = () => {
                 heading: "Theme",
                 items: [
                     {
-                        label: "Light mode (coming soon)",
+                        label: "Light mode",
                         icon: Sun,
                         onClick: () => {
                             setTheme("light");
                             setOpen(false);
                         },
-                        disabled: true,
                     },
                     {
                         label: "Dark mode",
@@ -386,7 +385,6 @@ type TCommandMenuGroupProps = {
         shortcut?: string;
         icon?: LucideIcon;
         onClick: () => void;
-        disabled?: boolean;
     }[];
 };
 
@@ -399,7 +397,6 @@ const CommandMenuGroup = ({ heading, items }: TCommandMenuGroupProps) => {
                     onSelect={item.onClick}
                     className="group"
                     value={item.label}
-                    disabled={item.disabled}
                 >
                     <span className="flex items-center gap-2 text-muted-foreground group-hover:text-primary group-active:text-primary group-data-[selected=true]:text-primary">
                         {item.icon && <item.icon className="!h-4 !w-4" />}
