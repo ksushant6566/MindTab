@@ -4,12 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerAuthSession } from "~/server/auth";
 import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
+import { db } from "~/server/db";
+import { sessions } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
 // CORS headers configuration
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*", // You might want to restrict this to specific domains in production
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-api-key",
+    "Access-Control-Allow-Headers":
+        "Content-Type, Authorization, x-api-key, x-session-token",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Origin":
+        "chrome-extension://ioghanojfdpcgppjahfaekciojfiddbm",
 };
 
 // Handle OPTIONS requests (preflight)
@@ -22,23 +28,16 @@ export async function POST(req: NextRequest) {
         let isAuthenticated = false;
         let userId = "";
 
-        // Check for session authentication (for web app users)
-        const session = await getServerAuthSession();
-        if (session && session.user) {
-            isAuthenticated = true;
-            userId = session.user.id;
-        }
-
         // Check for API key authentication (for external integrations)
-        const apiKey = req.headers.get("x-api-key");
-        if (!isAuthenticated && apiKey) {
-            // Simple API key validation - in a real app, you'd want to validate against stored keys
-            if (
-                env.READING_LIST_API_KEY &&
-                apiKey === env.READING_LIST_API_KEY
-            ) {
+        const sessionToken = req.headers.get("x-session-token");
+        if (!isAuthenticated && sessionToken) {
+            // get user id from session token
+            const session = await db.query.sessions.findFirst({
+                where: eq(sessions.sessionToken, sessionToken),
+            });
+            if (session) {
                 isAuthenticated = true;
-                // For API key auth, userId must be provided in the request body
+                userId = session.userId;
             }
         }
 
@@ -52,29 +51,17 @@ export async function POST(req: NextRequest) {
         // Parse the request body
         const body = await req.json();
 
-        if (!body.userId || !Array.isArray(body.items)) {
-            return NextResponse.json(
-                {
-                    error: "Invalid request format. Required fields: userId, items[]",
-                },
-                { status: 400, headers: corsHeaders }
-            );
-        }
-
-        // Use the user ID from the session if available, otherwise use the one from the request
-        const effectiveUserId = userId || body.userId;
-
         // Create tRPC context and caller
         const trpcContext = await createTRPCContext({
             headers: req.headers,
         });
-
         const caller = createCaller(trpcContext);
 
         // Call the tRPC procedure
         const result = await caller.readingLists.sync({
-            userId: effectiveUserId,
+            userId: userId,
             items: body.items,
+            metadata: body.metadata,
         });
 
         // Return the result with CORS headers
