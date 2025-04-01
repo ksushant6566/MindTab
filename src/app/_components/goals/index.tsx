@@ -144,7 +144,13 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
 
     const onSaveEditGoal = (goal: z.infer<typeof ZInsertGoal>) => {
         if (!editGoalId) return;
-        updateGoal({ ...goal, id: editGoalId });
+
+        // Convert null values to undefined to satisfy the type checker
+        const sanitizedGoal = Object.fromEntries(
+            Object.entries(goal).filter(([_, v]) => v !== null)
+        );
+
+        updateGoal({ ...sanitizedGoal, id: editGoalId });
         setEditGoalId(null);
     };
 
