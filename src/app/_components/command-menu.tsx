@@ -368,6 +368,8 @@ export const CommandMenu = () => {
                         updateGoal({
                             ...values,
                             id: values.id!,
+                            title: values.title ?? undefined,
+                            description: values.description ?? undefined,
                         })
                     }
                     onCancel={() => setIsEditGoalDialogOpen(false)}

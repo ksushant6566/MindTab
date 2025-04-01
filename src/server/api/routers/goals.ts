@@ -1,7 +1,14 @@
 import { and, asc, desc, eq, ilike, sql, inArray, not } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { goals, users } from "~/server/db/schema";
+import {
+    goals,
+    users,
+    goalPriorityEnum,
+    goalImpactEnum,
+    goalCategoryEnum,
+    goalTypeEnum,
+} from "~/server/db/schema";
 import {
     CreateGoalDto,
     UpdateGoalDto,
@@ -9,7 +16,29 @@ import {
 } from "../dtos/goals";
 import { db } from "~/server/db";
 
-async function setGoalCompleted(id: string, position: number, executor = db) {
+type updateGoalStatusParams = {
+    id: string;
+    position: number;
+    title?: string;
+    description?: string;
+    priority?: (typeof goalPriorityEnum.enumValues)[number];
+    impact?: (typeof goalImpactEnum.enumValues)[number];
+    category?: (typeof goalCategoryEnum.enumValues)[number];
+    type?: (typeof goalTypeEnum.enumValues)[number];
+    executor?: typeof db;
+};
+
+async function setGoalCompleted({
+    id,
+    position,
+    title,
+    description,
+    priority,
+    impact,
+    category,
+    type,
+    executor = db,
+}: updateGoalStatusParams) {
     console.log("setGoalCompleted called with:", {
         id,
         position,
@@ -39,14 +68,22 @@ async function setGoalCompleted(id: string, position: number, executor = db) {
         xpToAdd,
     });
 
-    await executor
-        .update(goals)
-        .set({
-            completedAt: new Date(),
-            status: "completed",
-            position,
-        })
-        .where(eq(goals.id, id));
+    // Create update object with required fields
+    const updateData: Record<string, unknown> = {
+        completedAt: new Date(),
+        status: "completed",
+        position,
+    };
+
+    // Only add fields that are defined
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (priority !== undefined) updateData.priority = priority;
+    if (impact !== undefined) updateData.impact = impact;
+    if (category !== undefined) updateData.category = category;
+    if (type !== undefined) updateData.type = type;
+
+    await executor.update(goals).set(updateData).where(eq(goals.id, id));
     await executor
         .update(users)
         .set({ xp: sql`${users.xp} + ${xpToAdd}` })
@@ -55,7 +92,17 @@ async function setGoalCompleted(id: string, position: number, executor = db) {
     return goal;
 }
 
-async function setGoalInprogress(id: string, position: number, executor = db) {
+async function setGoalInprogress({
+    id,
+    position,
+    title,
+    description,
+    priority,
+    impact,
+    category,
+    type,
+    executor = db,
+}: updateGoalStatusParams) {
     console.log("setGoalInprogress", id, position);
     const goal = await executor.query.goals.findFirst({
         where: eq(goals.id, id),
@@ -73,13 +120,21 @@ async function setGoalInprogress(id: string, position: number, executor = db) {
         xpToAdd = 5;
     }
 
-    await executor
-        .update(goals)
-        .set({
-            status: "in_progress",
-            position,
-        })
-        .where(eq(goals.id, id));
+    // Create update object with required fields
+    const updateData: Record<string, unknown> = {
+        status: "in_progress",
+        position,
+    };
+
+    // Only add fields that are defined
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (priority !== undefined) updateData.priority = priority;
+    if (impact !== undefined) updateData.impact = impact;
+    if (category !== undefined) updateData.category = category;
+    if (type !== undefined) updateData.type = type;
+
+    await executor.update(goals).set(updateData).where(eq(goals.id, id));
     await executor
         .update(users)
         .set({ xp: sql`${users.xp} + ${xpToAdd}` })
@@ -88,7 +143,17 @@ async function setGoalInprogress(id: string, position: number, executor = db) {
     return goal;
 }
 
-async function setGoalPending(id: string, position: number, executor = db) {
+async function setGoalPending({
+    id,
+    position,
+    title,
+    description,
+    priority,
+    impact,
+    category,
+    type,
+    executor = db,
+}: updateGoalStatusParams) {
     console.log("setGoalPending", id, position);
 
     const goal = await executor.query.goals.findFirst({
@@ -107,13 +172,21 @@ async function setGoalPending(id: string, position: number, executor = db) {
         xpToSubtract = 5;
     }
 
-    await executor
-        .update(goals)
-        .set({
-            status: "pending",
-            position,
-        })
-        .where(eq(goals.id, id));
+    // Create update object with required fields
+    const updateData: Record<string, unknown> = {
+        status: "pending",
+        position,
+    };
+
+    // Only add fields that are defined
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (priority !== undefined) updateData.priority = priority;
+    if (impact !== undefined) updateData.impact = impact;
+    if (category !== undefined) updateData.category = category;
+    if (type !== undefined) updateData.type = type;
+
+    await executor.update(goals).set(updateData).where(eq(goals.id, id));
     await executor
         .update(users)
         .set({ xp: sql`${users.xp} - ${xpToSubtract}` })
@@ -144,17 +217,38 @@ export const goalsRouter = createTRPCRouter({
             }
 
             if (input.status === "completed") {
-                await setGoalCompleted(
-                    input.id,
-                    input.position ?? goal.position
-                );
+                await setGoalCompleted({
+                    id: input.id,
+                    position: input.position ?? goal.position,
+                    title: input.title,
+                    description: input.description,
+                    priority: input.priority,
+                    impact: input.impact,
+                    category: input.category,
+                    type: input.type,
+                });
             } else if (input.status === "in_progress") {
-                await setGoalInprogress(
-                    input.id,
-                    input.position ?? goal.position
-                );
+                await setGoalInprogress({
+                    id: input.id,
+                    position: input.position ?? goal.position,
+                    title: input.title,
+                    description: input.description,
+                    priority: input.priority,
+                    impact: input.impact,
+                    category: input.category,
+                    type: input.type,
+                });
             } else if (input.status === "pending") {
-                await setGoalPending(input.id, input.position ?? goal.position);
+                await setGoalPending({
+                    id: input.id,
+                    position: input.position ?? goal.position,
+                    title: input.title,
+                    description: input.description,
+                    priority: input.priority,
+                    impact: input.impact,
+                    category: input.category,
+                    type: input.type,
+                });
             }
         }),
 
