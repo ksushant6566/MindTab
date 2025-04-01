@@ -1,6 +1,6 @@
 {
-  "id": "dd52db51-1fad-4fec-baf0-7185e8d03f35",
-  "prevId": "623db03e-a25d-4816-8cf5-01562a93420c",
+  "id": "a35531f2-7c84-4b33-be09-46164ff46cd1",
+  "prevId": "dd52db51-1fad-4fec-baf0-7185e8d03f35",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -578,7 +578,8 @@
           "name": "source",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'mindmap'"
         },
         "user_id": {
           "name": "user_id",
@@ -1085,8 +1086,7 @@
       "values": [
         "pending",
         "in_progress",
-        "completed",
-        "archived"
+        "completed"
       ]
     },
     "public.goal_type": {

@@ -177,6 +177,14 @@ export const habitTrackerRelations = relations(habitTracker, ({ one }) => ({
     user: one(users, { fields: [habitTracker.userId], references: [users.id] }),
 }));
 
+export const journalTypeEnum = pgEnum("journal_type", [
+    "article",
+    "book",
+    "video",
+    "podcast",
+    "website",
+]);
+
 export const journal = createTable(
     "journal",
     {
@@ -189,6 +197,8 @@ export const journal = createTable(
         updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
             () => new Date()
         ),
+        type: journalTypeEnum("type").default("article").notNull(),
+        source: varchar("source", { length: 256 }).notNull().default("mindmap"),
         userId: varchar("user_id", { length: 255 })
             .notNull()
             .references(() => users.id),
