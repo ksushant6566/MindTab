@@ -1,0 +1,1 @@
+ALTER TYPE "goal_status" ADD VALUE 'archived';

@@ -26,6 +26,7 @@ export const goalStatusEnum = pgEnum("goal_status", [
     "pending",
     "in_progress",
     "completed",
+    "archived",
 ]);
 
 export const goalPriorityEnum = pgEnum("goal_priority", [

@@ -17,7 +17,7 @@ const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
 export type ViewMode = "list" | "kanban";
 
 type GoalsProps = {
-    viewMode: ViewMode
+    viewMode: ViewMode;
 };
 
 export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
@@ -91,6 +91,29 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
         },
     });
 
+    const { mutate: archiveCompletedGoals, isPending: isArchiving } =
+        api.goals.archiveCompleted.useMutation({
+            async onMutate() {
+                await apiUtils.goals.getAll.cancel();
+                const previousGoals = apiUtils.goals.getAll.getData() ?? [];
+
+                apiUtils.goals.getAll.setData(
+                    undefined,
+                    previousGoals.filter((goal) => goal.status !== "completed")
+                );
+                return { previousGoals };
+            },
+            onError(error, variables, context) {
+                apiUtils.goals.getAll.setData(
+                    undefined,
+                    context?.previousGoals ?? []
+                );
+            },
+            onSettled() {
+                apiUtils.goals.getAll.invalidate();
+            },
+        });
+
     const onCreateGoal = (goal: z.infer<typeof ZInsertGoal>) => {
         createGoal(goal);
         setIsCreateGoalOpen(false);
@@ -102,7 +125,7 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
         const goal = goals?.find((g) => g.id === goalId);
         if (!goal) return;
 
-        let newStatus: "pending" | "in_progress" | "completed";
+        let newStatus: "pending" | "in_progress" | "completed" | "archived";
         if (goal.status === "pending") {
             newStatus = "in_progress";
         } else if (goal.status === "in_progress") {
@@ -126,6 +149,10 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
     };
 
     const onCancelEditGoal = () => setEditGoalId(null);
+
+    const handleArchiveCompleted = () => {
+        archiveCompletedGoals();
+    };
 
     const priorityNumberMap = {
         priority_1: 1,
@@ -216,6 +243,7 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                                 onEdit={setEditGoalId}
                                 onDelete={handleDeleteGoal}
                                 onToggleStatus={toggleGoalStatus}
+                                onArchiveCompleted={handleArchiveCompleted}
                                 isDeleting={isDeletingGoal}
                                 deleteVariables={deleteGoalVariables}
                             />
@@ -227,6 +255,7 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                                 onEdit={setEditGoalId}
                                 onDelete={handleDeleteGoal}
                                 onToggleStatus={toggleGoalStatus}
+                                onArchiveCompleted={handleArchiveCompleted}
                                 isDeleting={isDeletingGoal}
                                 deleteVariables={deleteGoalVariables}
                             />
