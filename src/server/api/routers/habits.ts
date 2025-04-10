@@ -90,7 +90,7 @@ export const habitsRouter = createTRPCRouter({
                 // Add XP for completing habit
                 await tx
                     .update(users)
-                    .set({ xp: sql`${users.xp} + 5` })
+                    .set({ xp: sql`${users.xp} + 10` })
                     .where(eq(users.id, ctx.session.user.id));
 
                 return result[0];
@@ -113,7 +113,7 @@ export const habitsRouter = createTRPCRouter({
                 // Subtract XP for uncompleting habit
                 await tx
                     .update(users)
-                    .set({ xp: sql`${users.xp} - 5` })
+                    .set({ xp: sql`${users.xp} - 10` })
                     .where(eq(users.id, ctx.session.user.id));
             });
         }),
