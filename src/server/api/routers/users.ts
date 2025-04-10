@@ -4,23 +4,21 @@ import { users } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export const usersRouter = createTRPCRouter({
-    get: protectedProcedure
-        .query(async ({ ctx }) => {
-            const result = await ctx.db
-                .select()
-                .from(users)
-                .where(eq(users.id, ctx.session.user.id));
+    get: protectedProcedure.query(async ({ ctx }) => {
+        const result = await ctx.db
+            .select()
+            .from(users)
+            .where(eq(users.id, ctx.session.user.id));
 
-            if (result.length === 0) {
-                return null;
-            }
+        if (result.length === 0) {
+            return null;
+        }
 
-            return result[0]!;
-        }),
+        return result[0]!;
+    }),
     getByEmail: protectedProcedure
         .input(z.object({ email: z.string() }))
         .query(async ({ ctx, input }) => {
-
             let result = await ctx.db
                 .select()
                 .from(users)
@@ -29,7 +27,7 @@ export const usersRouter = createTRPCRouter({
             if (result.length === 0) {
                 return null;
             }
-            const user = result[0]!
+            const user = result[0]!;
             return user;
         }),
 
@@ -50,10 +48,12 @@ export const usersRouter = createTRPCRouter({
         }),
 
     updateXP: protectedProcedure
-        .input(z.object({
-            userId: z.string(),
-            xpToAdd: z.number(),
-        }))
+        .input(
+            z.object({
+                userId: z.string(),
+                xpToAdd: z.number(),
+            })
+        )
         .mutation(async ({ ctx, input }) => {
             const user = await ctx.db.query.users.findFirst({
                 where: eq(users.id, input.userId),
@@ -74,4 +74,3 @@ export const usersRouter = createTRPCRouter({
             return updatedUser[0];
         }),
 });
-

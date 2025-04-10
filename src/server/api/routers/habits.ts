@@ -48,18 +48,20 @@ export const habitsRouter = createTRPCRouter({
                 .where(eq(habits.id, input.id));
         }),
 
-    getAll: protectedProcedure.input(z.object({ userId: z.string().optional() }).optional()).query(async ({ ctx, input }) => {
-        return await ctx.db
-            .select()
-            .from(habits)
-            .where(
-                and(
-                    eq(habits.userId, input?.userId ?? ctx.session.user.id),
-                    isNull(habits.deletedAt)
+    getAll: protectedProcedure
+        .input(z.object({ userId: z.string().optional() }).optional())
+        .query(async ({ ctx, input }) => {
+            return await ctx.db
+                .select()
+                .from(habits)
+                .where(
+                    and(
+                        eq(habits.userId, input?.userId ?? ctx.session.user.id),
+                        isNull(habits.deletedAt)
+                    )
                 )
-            )
-            .orderBy(desc(habits.createdAt));
-    }),
+                .orderBy(desc(habits.createdAt));
+        }),
 
     trackHabit: protectedProcedure
         .input(z.object({ habitId: z.string().uuid(), date: z.string() }))
@@ -74,7 +76,11 @@ export const habitsRouter = createTRPCRouter({
                         date: input.date,
                     })
                     .onConflictDoUpdate({
-                        target: [habitTracker.habitId, habitTracker.userId, habitTracker.date],
+                        target: [
+                            habitTracker.habitId,
+                            habitTracker.userId,
+                            habitTracker.date,
+                        ],
                         set: { status: "completed" },
                     })
                     .returning({
@@ -97,7 +103,12 @@ export const habitsRouter = createTRPCRouter({
             return await ctx.db.transaction(async (tx) => {
                 await tx
                     .delete(habitTracker)
-                    .where(and(eq(habitTracker.habitId, input.habitId), eq(habitTracker.date, input.date)));
+                    .where(
+                        and(
+                            eq(habitTracker.habitId, input.habitId),
+                            eq(habitTracker.date, input.date)
+                        )
+                    );
 
                 // Subtract XP for uncompleting habit
                 await tx

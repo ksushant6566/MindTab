@@ -1,9 +1,8 @@
-import { and, asc, desc, eq, ilike, sql, inArray, not } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, not } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
     goals,
-    users,
     goalPriorityEnum,
     goalImpactEnum,
     goalCategoryEnum,
@@ -53,19 +52,10 @@ async function setGoalCompleted({
         throw new Error("Goal not found");
     }
 
-    let xpToAdd = 0;
-
-    if (goal.status === "pending") {
-        xpToAdd = 5;
-    } else if (goal.status === "in_progress") {
-        xpToAdd = 10;
-    }
-
     console.log("Updating goal:", {
         id,
         position,
         status: "completed",
-        xpToAdd,
     });
 
     // Create update object with required fields
@@ -84,10 +74,6 @@ async function setGoalCompleted({
     if (type !== undefined) updateData.type = type;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
-    await executor
-        .update(users)
-        .set({ xp: sql`${users.xp} + ${xpToAdd}` })
-        .where(eq(users.id, goal.userId));
 
     return goal;
 }
@@ -112,14 +98,6 @@ async function setGoalInprogress({
         throw new Error("Goal not found");
     }
 
-    let xpToAdd = 0;
-
-    if (goal.status === "completed") {
-        xpToAdd = -5;
-    } else if (goal.status === "pending") {
-        xpToAdd = 5;
-    }
-
     // Create update object with required fields
     const updateData: Record<string, unknown> = {
         status: "in_progress",
@@ -135,10 +113,6 @@ async function setGoalInprogress({
     if (type !== undefined) updateData.type = type;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
-    await executor
-        .update(users)
-        .set({ xp: sql`${users.xp} + ${xpToAdd}` })
-        .where(eq(users.id, goal.userId));
 
     return goal;
 }
@@ -164,14 +138,6 @@ async function setGoalPending({
         throw new Error("Goal not found");
     }
 
-    let xpToSubtract = 0;
-
-    if (goal.status === "completed") {
-        xpToSubtract = 10;
-    } else if (goal.status === "in_progress") {
-        xpToSubtract = 5;
-    }
-
     // Create update object with required fields
     const updateData: Record<string, unknown> = {
         status: "pending",
@@ -187,10 +153,6 @@ async function setGoalPending({
     if (type !== undefined) updateData.type = type;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
-    await executor
-        .update(users)
-        .set({ xp: sql`${users.xp} - ${xpToSubtract}` })
-        .where(eq(users.id, goal.userId));
 
     return goal;
 }
@@ -266,37 +228,6 @@ export const goalsRouter = createTRPCRouter({
                         existingGoals.map((g) => [g.id, g])
                     );
 
-                    let totalXpChange = 0;
-                    const userId = existingGoals[0]?.userId;
-
-                    // Calculate total XP change
-                    for (const goal of input.goals) {
-                        const existingGoal = goalMap.get(goal.id);
-                        if (!existingGoal) continue;
-
-                        if (goal.status === "completed") {
-                            if (existingGoal.status === "pending")
-                                totalXpChange += 5;
-                            else if (existingGoal.status === "in_progress")
-                                totalXpChange += 10;
-                            // No XP change when moving from archived to completed
-                        } else if (goal.status === "in_progress") {
-                            if (existingGoal.status === "completed")
-                                totalXpChange -= 5;
-                            else if (existingGoal.status === "pending")
-                                totalXpChange += 5;
-                            // No XP change when moving from archived to in_progress
-                        } else if (goal.status === "pending") {
-                            if (existingGoal.status === "completed")
-                                totalXpChange -= 10;
-                            else if (existingGoal.status === "in_progress")
-                                totalXpChange -= 5;
-                            // No XP change when moving from archived to pending
-                        } else if (goal.status === "archived") {
-                            // No XP change when archiving goals
-                        }
-                    }
-
                     // Batch update all goals
                     for (const goal of input.goals) {
                         const updateData: Record<string, unknown> = {
@@ -323,14 +254,6 @@ export const goalsRouter = createTRPCRouter({
                             .update(goals)
                             .set(updateData)
                             .where(eq(goals.id, goal.id));
-                    }
-
-                    // Single update for user's XP
-                    if (totalXpChange !== 0 && userId) {
-                        await tx
-                            .update(users)
-                            .set({ xp: sql`${users.xp} + ${totalXpChange}` })
-                            .where(eq(users.id, userId));
                     }
                 });
                 return { success: true, sequence: input.sequence };
