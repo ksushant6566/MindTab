@@ -25,6 +25,7 @@ type updateGoalStatusParams = {
     impact?: (typeof goalImpactEnum.enumValues)[number];
     category?: (typeof goalCategoryEnum.enumValues)[number];
     type?: (typeof goalTypeEnum.enumValues)[number];
+    projectId?: string | null;
     executor?: typeof db;
 };
 
@@ -37,6 +38,7 @@ async function setGoalCompleted({
     impact,
     category,
     type,
+    projectId,
     executor = db,
 }: updateGoalStatusParams) {
     console.log("setGoalCompleted called with:", {
@@ -73,6 +75,7 @@ async function setGoalCompleted({
     if (impact !== undefined) updateData.impact = impact;
     if (category !== undefined) updateData.category = category;
     if (type !== undefined) updateData.type = type;
+    if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
 
@@ -88,6 +91,7 @@ async function setGoalInprogress({
     impact,
     category,
     type,
+    projectId,
     executor = db,
 }: updateGoalStatusParams) {
     console.log("setGoalInprogress", id, position);
@@ -112,6 +116,7 @@ async function setGoalInprogress({
     if (impact !== undefined) updateData.impact = impact;
     if (category !== undefined) updateData.category = category;
     if (type !== undefined) updateData.type = type;
+    if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
 
@@ -127,6 +132,7 @@ async function setGoalPending({
     impact,
     category,
     type,
+    projectId,
     executor = db,
 }: updateGoalStatusParams) {
     console.log("setGoalPending", id, position);
@@ -152,6 +158,7 @@ async function setGoalPending({
     if (impact !== undefined) updateData.impact = impact;
     if (category !== undefined) updateData.category = category;
     if (type !== undefined) updateData.type = type;
+    if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
 
@@ -189,6 +196,7 @@ export const goalsRouter = createTRPCRouter({
                     impact: input.impact,
                     category: input.category,
                     type: input.type,
+                    projectId: input.projectId,
                 });
             } else if (input.status === "in_progress") {
                 await setGoalInprogress({
@@ -200,6 +208,7 @@ export const goalsRouter = createTRPCRouter({
                     impact: input.impact,
                     category: input.category,
                     type: input.type,
+                    projectId: input.projectId,
                 });
             } else if (input.status === "pending") {
                 await setGoalPending({
@@ -211,7 +220,35 @@ export const goalsRouter = createTRPCRouter({
                     impact: input.impact,
                     category: input.category,
                     type: input.type,
+                    projectId: input.projectId,
                 });
+            } else {
+                // Handle updates without status change (e.g., just updating project assignment or other fields)
+                const updateData: Record<string, unknown> = {};
+
+                // Only add fields that are defined
+                if (input.title !== undefined) updateData.title = input.title;
+                if (input.description !== undefined)
+                    updateData.description = input.description;
+                if (input.priority !== undefined)
+                    updateData.priority = input.priority;
+                if (input.impact !== undefined)
+                    updateData.impact = input.impact;
+                if (input.category !== undefined)
+                    updateData.category = input.category;
+                if (input.type !== undefined) updateData.type = input.type;
+                if (input.projectId !== undefined)
+                    updateData.projectId = input.projectId;
+                if (input.position !== undefined)
+                    updateData.position = input.position;
+
+                // Only update if there are fields to update
+                if (Object.keys(updateData).length > 0) {
+                    await ctx.db
+                        .update(goals)
+                        .set(updateData)
+                        .where(eq(goals.id, input.id));
+                }
             }
         }),
 

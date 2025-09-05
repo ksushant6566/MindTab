@@ -157,7 +157,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent
-                                        align="end"
+                                        align="center"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <DropdownMenuItem
@@ -176,7 +176,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                             className="text-red-600"
                                         >
                                             <Archive className="mr-2 h-4 w-4" />
-                                            Delete Project
+                                            Archive Project
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
