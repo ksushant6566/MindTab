@@ -292,7 +292,7 @@ export const ListGoals: React.FC<ListGoalsProps> = ({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <ScrollArea className="h-[calc(100vh-14rem)] overflow-y-auto relative">
+            <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative">
                 <div className="flex flex-col gap-0 pr-4 pb-12">
                     <Accordion type="single" collapsible defaultValue="pending">
                         <AccordionItem value="pending">

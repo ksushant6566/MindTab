@@ -326,7 +326,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <ScrollArea className="h-[calc(100vh-14rem)] overflow-y-auto relative">
+            <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative">
                 <div className="grid grid-cols-3 gap-4 pb-12 pr-4">
                     <DroppableColumn
                         id="pending"

@@ -1,9 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Settings, Archive, FolderPlus } from "lucide-react";
+import {
+    Plus,
+    Settings,
+    Archive,
+    FolderPlus,
+    MoreVertical,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,6 +21,7 @@ import { CreateProjectDialog } from "./create-project-dialog";
 import { EditProjectDialog } from "./edit-project-dialog";
 import { z } from "zod";
 import { CreateProjectDto, UpdateProjectDto } from "~/server/api/dtos/projects";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 
 type ProjectTabsProps = {
     activeProjectId: string | null;
@@ -77,18 +83,9 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
         }
     };
 
-    // Get the tab value for the active project
-    const getActiveTabValue = () => {
-        return activeProjectId || "all";
-    };
-
-    // Handle tab change
-    const handleTabChange = (value: string) => {
-        if (value === "all") {
-            onProjectChange(null);
-        } else {
-            onProjectChange(value);
-        }
+    // Handle project selection
+    const handleProjectSelect = (projectId: string | null) => {
+        onProjectChange(projectId);
     };
 
     if (isLoadingProjects) {
@@ -101,13 +98,22 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     }
 
     return (
-        <div className="flex items-center gap-2 mb-4">
-            <Tabs value={getActiveTabValue()} onValueChange={handleTabChange}>
-                <TabsList>
-                    <TabsTrigger value="all" className="relative">
+        <div className="flex items-start gap-2">
+            {/* Horizontal scrollable project list */}
+            <ScrollArea className="flex-1 group">
+                <div className="flex items-center gap-2 min-w-fit pb-3">
+                    {/* All Goals Button */}
+                    <Button
+                        variant={
+                            activeProjectId === null ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => handleProjectSelect(null)}
+                        className="whitespace-nowrap flex items-center gap-2"
+                    >
                         All Goals
                         {projects && (
-                            <span className="ml-2 text-xs text-muted-foreground">
+                            <span className="text-xs opacity-70">
                                 (
                                 {projects.reduce(
                                     (sum, p) => sum + p.goalStats.total,
@@ -116,72 +122,83 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                 )
                             </span>
                         )}
-                    </TabsTrigger>
+                    </Button>
 
+                    {/* Project Buttons */}
                     {projects?.map((project) => (
-                        <TabsTrigger
+                        <div
                             key={project.id}
-                            value={project.id}
-                            className="relative group"
+                            className="relative group flex items-center"
                         >
-                            <div className="flex items-center gap-2">
+                            <Button
+                                variant={
+                                    activeProjectId === project.id
+                                        ? "default"
+                                        : "outline"
+                                }
+                                size="sm"
+                                onClick={() => handleProjectSelect(project.id)}
+                                className="whitespace-nowrap flex items-center gap-1"
+                            >
                                 <span>{project.name || "Unnamed Project"}</span>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs opacity-70">
                                     ({project.goalStats.total})
                                 </span>
-                            </div>
-
-                            {/* Project actions dropdown */}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="ml-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                {/* Project actions dropdown */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 w-6 p-0 transition-opacity -mr-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <MoreVertical className="h-3 w-3" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                        align="end"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <Settings className="h-3 w-3" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    align="end"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <DropdownMenuItem
-                                        onClick={() =>
-                                            setEditingProject(project)
-                                        }
-                                    >
-                                        <Settings className="mr-2 h-4 w-4" />
-                                        Edit Project
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={() =>
-                                            handleDeleteProject(project.id)
-                                        }
-                                        className="text-red-600"
-                                    >
-                                        <Archive className="mr-2 h-4 w-4" />
-                                        Delete Project
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </TabsTrigger>
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                setEditingProject(project)
+                                            }
+                                        >
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            Edit Project
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handleDeleteProject(project.id)
+                                            }
+                                            className="text-red-600"
+                                        >
+                                            <Archive className="mr-2 h-4 w-4" />
+                                            Delete Project
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </Button>
+                        </div>
                     ))}
-                </TabsList>
-            </Tabs>
+                </div>
+                <ScrollBar
+                    orientation="horizontal"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-0"
+                />
+            </ScrollArea>
 
             {/* Create Project Button */}
             <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 flex-shrink-0"
                 disabled={isCreatingProject}
             >
                 <FolderPlus className="h-4 w-4" />
-                New Project
             </Button>
 
             {/* Create Project Dialog */}

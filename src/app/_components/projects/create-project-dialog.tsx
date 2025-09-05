@@ -40,7 +40,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
         name: "",
         description: "",
         status: "active",
-        startDate: new Date().toISOString().split("T")[0],
+        startDate: new Date().toISOString(),
         endDate: undefined,
     });
 
@@ -68,7 +68,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                 name: "",
                 description: "",
                 status: "active",
-                startDate: new Date().toISOString().split("T")[0],
+                startDate: new Date().toISOString(),
                 endDate: undefined,
             });
         } finally {
@@ -81,7 +81,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
             name: "",
             description: "",
             status: "active",
-            startDate: new Date().toISOString().split("T")[0],
+            startDate: new Date().toISOString(),
             endDate: undefined,
         });
         onCancel();
@@ -118,41 +118,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="status">Status</Label>
-                        <Select
-                            value={formData.status || "active"}
-                            onValueChange={(value) =>
-                                handleSelectChange("status", value)
-                            }
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projectStatusEnum.enumValues.map((status) => (
-                                    <SelectItem key={status} value={status}>
-                                        {status.charAt(0).toUpperCase() +
-                                            status.slice(1)}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <Input
-                            id="startDate"
-                            name="startDate"
-                            type="date"
-                            value={formData.startDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                         <Label htmlFor="endDate">End Date (Optional)</Label>
                         <Input
                             id="endDate"
@@ -161,12 +127,13 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                             value={formData.endDate || ""}
                             onChange={handleChange}
                         />
-                    </div>
+                    </div> */}
 
                     <div className="flex justify-end gap-2 pt-4">
                         <Button
                             type="button"
                             variant="outline"
+                            size="sm"
                             onClick={handleCancel}
                             disabled={isSubmitting}
                         >
@@ -174,6 +141,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                         </Button>
                         <Button
                             type="submit"
+                            size="sm"
                             disabled={isSubmitting || !formData.name}
                         >
                             {isSubmitting ? "Creating..." : "Create Project"}

@@ -209,35 +209,33 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                 {isLoading ? (
                     <GoalSkeleton />
                 ) : (
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1">
                         {/* Project Tabs */}
                         <ProjectTabs
                             activeProjectId={activeProjectId}
                             onProjectChange={setActiveProjectId}
                         />
 
-                        {isCreateGoalOpen ? (
-                            <CreateGoalDialog
-                                open={isCreateGoalOpen}
-                                onOpenChange={setIsCreateGoalOpen}
-                                onSave={onCreateGoal}
-                                onCancel={onCancelCreateGoal}
-                                defaultValues={{ type: "daily" }}
-                            />
-                        ) : (
-                            <div className="-mb-2 -ml-2 flex justify-start">
-                                <Button
-                                    onClick={() => setIsCreateGoalOpen(true)}
-                                    disabled={isCreatingGoal}
-                                    loading={isCreatingGoal}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex items-center gap-2 text-sm font-normal"
-                                >
-                                    <Plus className="h-4 w-4" /> Add Goal
-                                </Button>
-                            </div>
-                        )}
+                        <div className="-ml-1 flex justify-start">
+                            <Button
+                                onClick={() => setIsCreateGoalOpen(true)}
+                                disabled={isCreatingGoal}
+                                loading={isCreatingGoal}
+                                variant="ghost"
+                                size="sm"
+                                className="flex items-center gap-2 text-sm font-normal"
+                            >
+                                <Plus className="h-4 w-4" /> Add Goal
+                            </Button>
+                        </div>
+
+                        <CreateGoalDialog
+                            open={isCreateGoalOpen}
+                            onOpenChange={setIsCreateGoalOpen}
+                            onSave={onCreateGoal}
+                            onCancel={onCancelCreateGoal}
+                            defaultValues={{ type: "daily" }}
+                        />
 
                         {editGoalId &&
                             goals?.find((g) => g.id === editGoalId) && (
