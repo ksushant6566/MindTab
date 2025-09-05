@@ -10,6 +10,7 @@ import { EditGoalDialog } from "./edit-goal-dialog";
 import { GoalSkeleton } from "./goal-skeleton";
 import { KanbanGoals } from "./kanban-goals";
 import { ListGoals } from "./list-goals";
+import { ProjectTabs } from "../projects";
 import { z } from "zod";
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
@@ -25,12 +26,16 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
 
     const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
     const [editGoalId, setEditGoalId] = useState<string | null>(null);
+    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
     const {
         data: goals,
         isLoading,
         refetch,
-    } = api.goals.getAll.useQuery(undefined, {});
+    } = api.goals.getAll.useQuery(
+        activeProjectId ? { projectId: activeProjectId } : undefined,
+        {}
+    );
 
     const { mutate: createGoal, isPending: isCreatingGoal } =
         api.goals.create.useMutation({
@@ -115,7 +120,11 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
         });
 
     const onCreateGoal = (goal: z.infer<typeof ZInsertGoal>) => {
-        createGoal(goal);
+        // If we're in a specific project context, assign the goal to that project
+        const goalData = activeProjectId
+            ? { ...goal, projectId: activeProjectId }
+            : goal;
+        createGoal(goalData);
         setIsCreateGoalOpen(false);
     };
 
@@ -201,6 +210,12 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                     <GoalSkeleton />
                 ) : (
                     <div className="flex flex-col gap-4">
+                        {/* Project Tabs */}
+                        <ProjectTabs
+                            activeProjectId={activeProjectId}
+                            onProjectChange={setActiveProjectId}
+                        />
+
                         {isCreateGoalOpen ? (
                             <CreateGoalDialog
                                 open={isCreateGoalOpen}

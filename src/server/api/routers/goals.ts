@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, inArray, not } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, not, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
@@ -12,6 +12,7 @@ import {
     CreateGoalDto,
     UpdateGoalDto,
     UpdateGoalPositionsDto,
+    GetGoalsDto,
 } from "../dtos/goals";
 import { db } from "~/server/db";
 
@@ -279,23 +280,39 @@ export const goalsRouter = createTRPCRouter({
         }),
 
     getAll: protectedProcedure
-        .input(z.object({ userId: z.string().optional() }).optional())
+        .input(GetGoalsDto)
         .query(async ({ ctx, input }) => {
-            return await ctx.db
-                .select()
-                .from(goals)
-                .where(
-                    and(
-                        eq(goals.userId, input?.userId ?? ctx.session.user.id),
-                        // Filter out archived goals
-                        not(eq(goals.status, "archived"))
-                    )
-                )
-                .orderBy(
+            const whereConditions = [
+                eq(goals.userId, input?.userId ?? ctx.session.user.id),
+            ];
+
+            // Filter out archived goals unless explicitly requested
+            if (!input?.includeArchived) {
+                whereConditions.push(not(eq(goals.status, "archived")));
+            }
+
+            // Filter by project if specified
+            if (input?.projectId) {
+                whereConditions.push(eq(goals.projectId, input.projectId));
+            }
+
+            return await ctx.db.query.goals.findMany({
+                where: and(...whereConditions),
+                with: {
+                    project: {
+                        columns: {
+                            id: true,
+                            name: true,
+                            status: true,
+                        },
+                    },
+                },
+                orderBy: [
                     asc(goals.position),
                     asc(goals.priority),
-                    desc(goals.createdAt)
-                );
+                    desc(goals.createdAt),
+                ],
+            });
         }),
 
     search: protectedProcedure
@@ -312,6 +329,22 @@ export const goalsRouter = createTRPCRouter({
                 )
                 .limit(5);
         }),
+
+    getUnassigned: protectedProcedure.query(async ({ ctx }) => {
+        return await ctx.db.query.goals.findMany({
+            where: and(
+                eq(goals.userId, ctx.session.user.id),
+                not(eq(goals.status, "archived")),
+                // Goals without project assignment
+                isNull(goals.projectId)
+            ),
+            orderBy: [
+                asc(goals.position),
+                asc(goals.priority),
+                desc(goals.createdAt),
+            ],
+        });
+    }),
 
     archiveCompleted: protectedProcedure.mutation(async ({ ctx }) => {
         try {

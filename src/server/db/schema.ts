@@ -80,6 +80,9 @@ export const goals = createTable(
         userId: varchar("user_id", { length: 255 })
             .notNull()
             .references(() => users.id),
+        projectId: uuid("project_id").references(() => projects.id, {
+            onDelete: "set null",
+        }),
     },
     (goal) => ({
         userTitleIndex: uniqueIndex("goal_title_user_id_unique_idx").on(
@@ -88,11 +91,16 @@ export const goals = createTable(
         ),
         userIdIdx: index("goal_user_id_idx").on(goal.userId),
         positionIdx: index("goal_position_idx").on(goal.position),
+        projectIdIdx: index("goal_project_id_idx").on(goal.projectId),
     })
 );
 
 export const goalsRelations = relations(goals, ({ one, many }) => ({
     user: one(users, { fields: [goals.userId], references: [users.id] }),
+    project: one(projects, {
+        fields: [goals.projectId],
+        references: [projects.id],
+    }),
     journalGoals: many(journalGoals),
 }));
 
@@ -305,6 +313,57 @@ export const journalHabitsRelations = relations(journalHabits, ({ one }) => ({
 export const habitsRelations = relations(habits, ({ one, many }) => ({
     user: one(users, { fields: [habits.userId], references: [users.id] }),
     journalHabits: many(journalHabits),
+}));
+
+export const projectStatusEnum = pgEnum("project_status", [
+    "active",
+    "paused",
+    "completed",
+    "archived",
+]);
+
+export const projects = createTable(
+    "project",
+    {
+        id: uuid("id").primaryKey().defaultRandom(),
+        name: varchar("name", { length: 256 }),
+        description: text("description"),
+        status: projectStatusEnum("status").default("active").notNull(),
+        startDate: date("start_date").notNull(),
+        endDate: date("end_date"),
+        createdAt: timestamp("created_at", { withTimezone: true })
+            .default(sql`CURRENT_TIMESTAMP`)
+            .notNull(),
+        updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
+            () => new Date()
+        ),
+        createdBy: varchar("created_by", { length: 255 })
+            .notNull()
+            .references(() => users.id),
+        lastUpdatedBy: varchar("last_updated_by", { length: 255 })
+            .notNull()
+            .references(() => users.id),
+        deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    },
+    (project) => ({
+        createdByIdx: index("project_created_by_idx").on(project.createdBy),
+        lastUpdatedByIdx: index("project_last_updated_by_idx").on(
+            project.lastUpdatedBy
+        ),
+        statusIdx: index("project_status_idx").on(project.status),
+    })
+);
+
+export const projectRelations = relations(projects, ({ one, many }) => ({
+    createdBy: one(users, {
+        fields: [projects.createdBy],
+        references: [users.id],
+    }),
+    lastUpdatedBy: one(users, {
+        fields: [projects.lastUpdatedBy],
+        references: [users.id],
+    }),
+    goals: many(goals),
 }));
 
 /*{

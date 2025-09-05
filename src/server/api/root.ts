@@ -7,6 +7,7 @@ import { usersRouter } from "./routers/users";
 import { activityRouter } from "./routers/activity";
 import { readingListsRouter } from "./routers/reading-lists";
 import { bookmarksRouter } from "./routers/bookmarks";
+import { projectsRouter } from "./routers/projects";
 
 /**
  * This is the primary router for your server.
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
     habits: habitsRouter,
     habitTracker: habitTrackerRouter,
     goals: goalsRouter,
+    projects: projectsRouter,
     journals: journalsRouter,
     users: usersRouter,
     activity: activityRouter,

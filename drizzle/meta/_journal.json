@@ -134,6 +134,20 @@
       "when": 1743507460438,
       "tag": "0017_nebulous_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1757016513064,
+      "tag": "0019_fuzzy_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1757019207856,
+      "tag": "0020_lowly_la_nuit",
+      "breakpoints": true
     }
   ]
 }

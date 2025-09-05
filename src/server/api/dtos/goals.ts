@@ -44,3 +44,11 @@ export const UpdateGoalPositionsDto = z.object({
     goals: z.array(UpdateGoalPositionDto),
     sequence: z.number(),
 });
+
+export const GetGoalsDto = z
+    .object({
+        userId: z.string().optional(),
+        projectId: z.string().uuid().optional(),
+        includeArchived: z.boolean().default(false).optional(),
+    })
+    .optional();
