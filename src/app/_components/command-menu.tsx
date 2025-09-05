@@ -81,6 +81,7 @@ export const CommandMenu = () => {
         api.goals.create.useMutation({
             onSettled: () => {
                 apiUtils.goals.getAll.invalidate();
+                apiUtils.projects.getWithStats.invalidate();
                 setIsCreateGoalDialogOpen(false);
             },
         });
@@ -89,6 +90,7 @@ export const CommandMenu = () => {
         api.goals.update.useMutation({
             onSettled: () => {
                 apiUtils.goals.getAll.invalidate();
+                apiUtils.projects.getWithStats.invalidate();
                 setIsEditGoalDialogOpen(false);
             },
         });

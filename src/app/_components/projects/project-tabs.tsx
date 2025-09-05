@@ -40,7 +40,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     const { data: projects, isLoading: isLoadingProjects } =
         api.projects.getWithStats.useQuery();
 
-    const { mutate: createProject, isPending: isCreatingProject } =
+    const { mutateAsync: createProject, isPending: isCreatingProject } =
         api.projects.create.useMutation({
             onSuccess: () => {
                 apiUtils.projects.getWithStats.invalidate();
@@ -48,7 +48,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
             },
         });
 
-    const { mutate: updateProject, isPending: isUpdatingProject } =
+    const { mutateAsync: updateProject, isPending: isUpdatingProject } =
         api.projects.update.useMutation({
             onSuccess: () => {
                 apiUtils.projects.getWithStats.invalidate();
@@ -56,7 +56,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
             },
         });
 
-    const { mutate: deleteProject } = api.projects.delete.useMutation({
+    const { mutateAsync: deleteProject } = api.projects.delete.useMutation({
         onSuccess: () => {
             apiUtils.projects.getWithStats.invalidate();
             if (activeProjectId) {
@@ -65,21 +65,27 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
         },
     });
 
-    const handleCreateProject = (project: z.infer<typeof CreateProjectDto>) => {
-        createProject(project);
+    const { data: goalsCount } = api.goals.getCount.useQuery();
+
+    const handleCreateProject = async (
+        project: z.infer<typeof CreateProjectDto>
+    ) => {
+        await createProject(project);
     };
 
-    const handleUpdateProject = (project: z.infer<typeof UpdateProjectDto>) => {
-        updateProject(project);
+    const handleUpdateProject = async (
+        project: z.infer<typeof UpdateProjectDto>
+    ) => {
+        await updateProject(project);
     };
 
-    const handleDeleteProject = (projectId: string) => {
+    const handleDeleteProject = async (projectId: string) => {
         if (
             confirm(
                 "Are you sure you want to delete this project? Goals will be unassigned but not deleted."
             )
         ) {
-            deleteProject({ id: projectId });
+            await deleteProject({ id: projectId });
         }
     };
 
@@ -114,12 +120,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                         All Goals
                         {projects && (
                             <span className="text-xs opacity-70">
-                                (
-                                {projects.reduce(
-                                    (sum, p) => sum + p.goalStats.total,
-                                    0
-                                )}
-                                )
+                                ({goalsCount ?? 0})
                             </span>
                         )}
                     </Button>
@@ -198,6 +199,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                 className="flex items-center gap-2 flex-shrink-0"
                 disabled={isCreatingProject}
             >
+                New Project
                 <FolderPlus className="h-4 w-4" />
             </Button>
 

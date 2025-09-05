@@ -1,4 +1,14 @@
-import { and, asc, desc, eq, ilike, inArray, not, isNull } from "drizzle-orm";
+import {
+    and,
+    asc,
+    desc,
+    eq,
+    ilike,
+    inArray,
+    not,
+    isNull,
+    count,
+} from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
@@ -350,6 +360,32 @@ export const goalsRouter = createTRPCRouter({
                     desc(goals.createdAt),
                 ],
             });
+        }),
+
+    getCount: protectedProcedure
+        .input(GetGoalsDto)
+        .query(async ({ ctx, input }) => {
+            const whereConditions = [
+                eq(goals.userId, input?.userId ?? ctx.session.user.id),
+            ];
+
+            // Filter out archived goals unless explicitly requested
+            if (!input?.includeArchived) {
+                whereConditions.push(not(eq(goals.status, "archived")));
+            }
+
+            // Filter by project if specified
+            if (input?.projectId) {
+                whereConditions.push(eq(goals.projectId, input.projectId));
+            }
+
+            // count the total number of goals and return just the number
+            const result = await ctx.db
+                .select({ count: count() })
+                .from(goals)
+                .where(and(...whereConditions));
+
+            return result[0]?.count ?? 0;
         }),
 
     search: protectedProcedure

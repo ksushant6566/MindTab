@@ -25,7 +25,7 @@ import { projectStatusEnum } from "~/server/db/schema";
 type CreateProjectDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSave: (project: z.infer<typeof CreateProjectDto>) => void;
+    onSave: (project: z.infer<typeof CreateProjectDto>) => Promise<void>;
     onCancel: () => void;
 };
 
@@ -55,15 +55,11 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
         }));
     };
 
-    const handleSelectChange = (field: string, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            onSave(formData);
+            await onSave(formData);
             setFormData({
                 name: "",
                 description: "",
@@ -143,6 +139,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                             type="submit"
                             size="sm"
                             disabled={isSubmitting || !formData.name}
+                            loading={isSubmitting}
                         >
                             {isSubmitting ? "Creating..." : "Create Project"}
                         </Button>

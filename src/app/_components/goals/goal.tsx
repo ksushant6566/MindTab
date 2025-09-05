@@ -85,9 +85,9 @@ export const Goal: React.FC<GoalProps> = ({
                         />
                         {goal.impact}
                     </span>
-                    <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300">
+                    {/* <span className="flex items-center gap-0 rounded-md bg-secondary px-1 py-0.5 text-xs capitalize text-green-300">
                         {goal.category}
-                    </span>
+                    </span> */}
                     {goal.project && (
                         <span className="flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900 px-1 py-0.5 text-xs text-blue-800 dark:text-blue-200">
                             <FolderOpen className="h-3 w-3" />
@@ -96,7 +96,7 @@ export const Goal: React.FC<GoalProps> = ({
                     )}
                 </div>
             </div>
-            <div className="absolute right-0 bottom-0 flex z-10 -translate-y-6 gap-0 opacity-0 transition-all group-hover:translate-y-1 group-hover:opacity-100">
+            <div className="absolute right-0 bottom-0 flex z-10 -translate-y-6 gap-0 opacity-0 transition-all group-hover:translate-y-1.5 group-hover:opacity-100">
                 <Button
                     size="sm"
                     variant="ghost"

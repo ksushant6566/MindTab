@@ -206,9 +206,9 @@ export const projectsRouter = createTRPCRouter({
                         },
                     },
                 },
-                orderBy: (projects, { desc, asc }) => [
+                orderBy: (projects, { asc }) => [
                     asc(projects.status),
-                    desc(projects.createdAt),
+                    asc(projects.createdAt),
                 ],
             });
 

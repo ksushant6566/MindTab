@@ -39,7 +39,10 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
 
     const { mutate: createGoal, isPending: isCreatingGoal } =
         api.goals.create.useMutation({
-            onSuccess: () => refetch(),
+            onSuccess: () => {
+                apiUtils.projects.getWithStats.invalidate();
+                refetch();
+            },
         });
 
     const { mutate: updateGoal } = api.goals.update.useMutation({
@@ -70,6 +73,7 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
 
         onSettled() {
             apiUtils.goals.getAll.invalidate();
+            apiUtils.projects.getWithStats.invalidate();
         },
     });
 
@@ -94,6 +98,10 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                 context?.previousGoals ?? []
             );
         },
+        onSettled() {
+            apiUtils.goals.getAll.invalidate();
+            apiUtils.projects.getWithStats.invalidate();
+        },
     });
 
     const { mutate: archiveCompletedGoals, isPending: isArchiving } =
@@ -116,6 +124,7 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
             },
             onSettled() {
                 apiUtils.goals.getAll.invalidate();
+                apiUtils.projects.getWithStats.invalidate();
             },
         });
 
@@ -234,7 +243,10 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
                             onOpenChange={setIsCreateGoalOpen}
                             onSave={onCreateGoal}
                             onCancel={onCancelCreateGoal}
-                            defaultValues={{ type: "daily" }}
+                            defaultValues={{
+                                type: "daily",
+                                projectId: activeProjectId,
+                            }}
                         />
 
                         {editGoalId &&

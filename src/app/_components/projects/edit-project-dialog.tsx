@@ -26,7 +26,7 @@ type Project = {
     id: string;
     name: string | null;
     description: string | null;
-    status: typeof projectStatusEnum.enumValues[number];
+    status: (typeof projectStatusEnum.enumValues)[number];
     startDate: string;
     endDate: string | null;
 };
@@ -35,7 +35,7 @@ type EditProjectDialogProps = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     project: Project;
-    onSave: (project: z.infer<typeof UpdateProjectDto>) => void;
+    onSave: (project: z.infer<typeof UpdateProjectDto>) => Promise<void>;
     onCancel: () => void;
 };
 
@@ -81,7 +81,7 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            onSave({
+            await onSave({
                 ...formData,
                 id: project.id,
                 endDate: formData.endDate === "" ? undefined : formData.endDate,
@@ -155,29 +155,6 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                         </Select>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <Input
-                            id="startDate"
-                            name="startDate"
-                            type="date"
-                            value={formData.startDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="endDate">End Date (Optional)</Label>
-                        <Input
-                            id="endDate"
-                            name="endDate"
-                            type="date"
-                            value={formData.endDate}
-                            onChange={handleChange}
-                        />
-                    </div>
-
                     <div className="flex justify-end gap-2 pt-4">
                         <Button
                             type="button"
@@ -190,6 +167,7 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                         <Button
                             type="submit"
                             disabled={isSubmitting || !formData.name}
+                            loading={isSubmitting}
                         >
                             {isSubmitting ? "Saving..." : "Save Changes"}
                         </Button>
