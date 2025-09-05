@@ -26,7 +26,7 @@ type Project = {
     id: string;
     name: string | null;
     description: string | null;
-    status: string;
+    status: typeof projectStatusEnum.enumValues[number];
     startDate: string;
     endDate: string | null;
 };
