@@ -21,7 +21,7 @@ const layout1 = {
     col1: {
         elements: [
             {
-                element: <Goals viewMode={"list"} />,
+                element: <Goals viewMode={"list"} layoutVersion={1} />,
                 title: EActiveLayout.Goals,
             },
         ],
@@ -45,12 +45,12 @@ const layout1 = {
 
 const layout2 = {
     container: {
-        style: "max-w-screen-xl",
+        style: "w-full max-w-screen-xl",
     },
     col1: {
         elements: [
             {
-                element: <Goals viewMode={"kanban"} />,
+                element: <Goals viewMode={"kanban"} layoutVersion={2} />,
                 title: EActiveLayout.Goals,
             },
             {
@@ -77,11 +77,9 @@ export default function Component() {
     const [layoutVersion, setLayoutVersion] = useState(1);
     const layout = layoutVersion === 1 ? layout1 : layout2;
 
-
     const [activeElement, setActiveElement] = useState<EActiveLayout>(
         layout[layout.activeColumn as "col1" | "col2"].elements[0]!.title
     );
-
 
     useEffect(() => {
         setIsHydrated(true);
@@ -178,20 +176,20 @@ export default function Component() {
                         </div>
                     </div>
                 </div>
-                <div className={`${layout.col1.style}`}>
+                <div className={`${layout.col1.style} min-w-0`}>
                     {layout.col1.elements.map((element, index) => (
                         <div
-                            className={`${layout.activeColumn === "col1" ? (activeElement === element.title ? "block" : "hidden") : "block"}`}
+                            className={`${layout.activeColumn === "col1" ? (activeElement === element.title ? "block" : "hidden") : "block"} w-full`}
                             key={index}
                         >
                             {element.element}
                         </div>
                     ))}
                 </div>
-                <div className={`${layout.col2.style}`}>
+                <div className={`${layout.col2.style} min-w-0`}>
                     {layout.col2.elements.map((element, index) => (
                         <div
-                            className={`${layout.activeColumn === "col2" ? (activeElement === element.title ? "block" : "hidden") : "block"}`}
+                            className={`${layout.activeColumn === "col2" ? (activeElement === element.title ? "block" : "hidden") : "block"} w-full`}
                             key={index}
                         >
                             {element.element}

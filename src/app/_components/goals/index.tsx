@@ -19,9 +19,10 @@ export type ViewMode = "list" | "kanban";
 
 type GoalsProps = {
     viewMode: ViewMode;
+    layoutVersion: number;
 };
 
-export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
+export const Goals: React.FC<GoalsProps> = ({ viewMode, layoutVersion }) => {
     const apiUtils = api.useUtils();
 
     const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
@@ -213,17 +214,20 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
     }, [goals]);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full min-w-0">
             <div>
                 {isLoading ? (
                     <GoalSkeleton />
                 ) : (
                     <div className="flex flex-col gap-1">
                         {/* Project Tabs */}
-                        <ProjectTabs
-                            activeProjectId={activeProjectId}
-                            onProjectChange={setActiveProjectId}
-                        />
+                        <div className="-ml-0.5">
+                            <ProjectTabs
+                                activeProjectId={activeProjectId}
+                                onProjectChange={setActiveProjectId}
+                                layoutVersion={layoutVersion}
+                            />
+                        </div>
 
                         <div className="-ml-1 flex justify-start">
                             <Button

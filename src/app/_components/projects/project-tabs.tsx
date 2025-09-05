@@ -26,11 +26,13 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 type ProjectTabsProps = {
     activeProjectId: string | null;
     onProjectChange: (projectId: string | null) => void;
+    layoutVersion: number;
 };
 
 export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     activeProjectId,
     onProjectChange,
+    layoutVersion,
 }) => {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<any>(null);
@@ -198,8 +200,9 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                 onClick={() => setIsCreateDialogOpen(true)}
                 className="flex items-center gap-2 flex-shrink-0"
                 disabled={isCreatingProject}
+                title={layoutVersion === 1 ? "New Project" : undefined}
             >
-                New Project
+                {layoutVersion === 2 && "New Project"}
                 <FolderPlus className="h-4 w-4" />
             </Button>
 
