@@ -10,7 +10,6 @@ import { EditGoalDialog } from "./edit-goal-dialog";
 import { GoalSkeleton } from "./goal-skeleton";
 import { KanbanGoals } from "./kanban-goals";
 import { ListGoals } from "./list-goals";
-import { ProjectTabs } from "../projects";
 import { z } from "zod";
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
@@ -20,14 +19,18 @@ export type ViewMode = "list" | "kanban";
 type GoalsProps = {
     viewMode: ViewMode;
     layoutVersion: number;
+    activeProjectId: string | null;
 };
 
-export const Goals: React.FC<GoalsProps> = ({ viewMode, layoutVersion }) => {
+export const Goals: React.FC<GoalsProps> = ({
+    viewMode,
+    layoutVersion,
+    activeProjectId,
+}) => {
     const apiUtils = api.useUtils();
 
     const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
     const [editGoalId, setEditGoalId] = useState<string | null>(null);
-    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
 
     const {
         data: goals,
@@ -220,15 +223,6 @@ export const Goals: React.FC<GoalsProps> = ({ viewMode, layoutVersion }) => {
                     <GoalSkeleton />
                 ) : (
                     <div className="flex flex-col gap-1">
-                        {/* Project Tabs */}
-                        <div className="-ml-0.5">
-                            <ProjectTabs
-                                activeProjectId={activeProjectId}
-                                onProjectChange={setActiveProjectId}
-                                layoutVersion={layoutVersion}
-                            />
-                        </div>
-
                         <div className="-ml-1 flex justify-start">
                             <Button
                                 onClick={() => setIsCreateGoalOpen(true)}

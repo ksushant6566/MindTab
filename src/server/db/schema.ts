@@ -210,6 +210,9 @@ export const journal = createTable(
         userId: varchar("user_id", { length: 255 })
             .notNull()
             .references(() => users.id),
+        projectId: uuid("project_id").references(() => projects.id, {
+            onDelete: "set null",
+        }),
         deletedAt: timestamp("deleted_at", { withTimezone: true }),
     },
     (journal) => ({
@@ -218,13 +221,18 @@ export const journal = createTable(
             journal.title
         ),
         userIdIdx: index("journal_user_id_idx").on(journal.userId),
+        projectIdIdx: index("journal_project_id_idx").on(journal.projectId),
     })
 );
 
 export const journalRelations = relations(journal, ({ one, many }) => ({
     user: one(users, { fields: [journal.userId], references: [users.id] }),
+    project: one(projects, {
+        fields: [journal.projectId],
+        references: [projects.id],
+    }),
     journalGoals: many(journalGoals),
-    journalHabits: many(journalHabits), // Add this line
+    journalHabits: many(journalHabits),
 }));
 
 export const journalGoals = createTable(
@@ -364,6 +372,7 @@ export const projectRelations = relations(projects, ({ one, many }) => ({
         references: [users.id],
     }),
     goals: many(goals),
+    journals: many(journal),
 }));
 
 /*{

@@ -27,12 +27,14 @@ type ProjectTabsProps = {
     activeProjectId: string | null;
     onProjectChange: (projectId: string | null) => void;
     layoutVersion: number;
+    activeTab?: "Goals" | "Notes" | "Habits";
 };
 
 export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     activeProjectId,
     onProjectChange,
     layoutVersion,
+    activeTab = "Goals",
 }) => {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<any>(null);
@@ -68,6 +70,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     });
 
     const { data: goalsCount } = api.goals.getCount.useQuery();
+    const { data: journalsCount } = api.journals.getCount.useQuery();
 
     const handleCreateProject = async (
         project: z.infer<typeof CreateProjectDto>
@@ -119,10 +122,17 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                         onClick={() => handleProjectSelect(null)}
                         className="whitespace-nowrap flex items-center gap-2"
                     >
-                        All Goals
+                        All {activeTab}
                         {projects && (
                             <span className="text-xs opacity-70">
-                                ({goalsCount ?? 0})
+                                (
+                                {activeTab === "Goals"
+                                    ? (goalsCount ?? 0)
+                                    : activeTab === "Notes"
+                                      ? (journalsCount ?? 0)
+                                      : (goalsCount ?? 0) +
+                                        (journalsCount ?? 0)}
+                                )
                             </span>
                         )}
                     </Button>
@@ -145,7 +155,14 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                             >
                                 <span>{project.name || "Unnamed Project"}</span>
                                 <span className="text-xs opacity-70">
-                                    ({project.goalStats.total})
+                                    (
+                                    {activeTab === "Goals"
+                                        ? project.goalStats.total
+                                        : activeTab === "Notes"
+                                          ? project.journalStats?.total || 0
+                                          : project.goalStats.total +
+                                            (project.journalStats?.total || 0)}
+                                    )
                                 </span>
                                 {/* Project actions dropdown */}
                                 <DropdownMenu>

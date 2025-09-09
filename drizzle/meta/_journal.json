@@ -148,6 +148,13 @@
       "when": 1757019207856,
       "tag": "0020_lowly_la_nuit",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1757440978062,
+      "tag": "0021_fearless_expediter",
+      "breakpoints": true
     }
   ]
 }

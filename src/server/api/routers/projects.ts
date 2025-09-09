@@ -1,6 +1,6 @@
 import { and, eq, isNull, not } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { projects, goals } from "~/server/db/schema";
+import { projects, goals, journal } from "~/server/db/schema";
 import {
     CreateProjectDto,
     UpdateProjectDto,
@@ -82,11 +82,16 @@ export const projectsRouter = createTRPCRouter({
                 })
                 .where(eq(projects.id, input.id));
 
-            // Set project_id to null for all goals in this project
+            // Set project_id to null for all goals and journals in this project
             await ctx.db
                 .update(goals)
                 .set({ projectId: null })
                 .where(eq(goals.projectId, input.id));
+
+            await ctx.db
+                .update(journal)
+                .set({ projectId: null })
+                .where(eq(journal.projectId, input.id));
 
             return { success: true };
         }),
@@ -205,6 +210,11 @@ export const projectsRouter = createTRPCRouter({
                             status: true,
                         },
                     },
+                    journals: {
+                        columns: {
+                            id: true,
+                        },
+                    },
                 },
                 orderBy: (projects, { asc }) => [
                     asc(projects.status),
@@ -212,7 +222,7 @@ export const projectsRouter = createTRPCRouter({
                 ],
             });
 
-            // Add goal statistics
+            // Add goal and journal statistics
             return projectsWithGoals.map((project) => ({
                 ...project,
                 goalStats: {
@@ -225,6 +235,9 @@ export const projectsRouter = createTRPCRouter({
                     completed: project.goals.filter(
                         (g) => g.status === "completed"
                     ).length,
+                },
+                journalStats: {
+                    total: project.journals.length,
                 },
             }));
         }),
