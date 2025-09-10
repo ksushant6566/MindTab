@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-    Plus,
-    Settings,
-    Archive,
-    FolderPlus,
-    MoreVertical,
-} from "lucide-react";
+import { Settings, Archive, FolderPlus, MoreVertical } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
     DropdownMenu,
@@ -170,7 +164,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-6 w-6 p-0 transition-opacity -mr-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                            className={`h-6 w-6 p-0 transition-opacity -mr-3 focus-visible:ring-0 focus-visible:ring-offset-0 ${activeProjectId === project.id ? "hover:bg-transparent hover:text-primary-foreground" : ""}`}
                                             onClick={(e) => e.stopPropagation()}
                                         >
                                             <MoreVertical className="h-3 w-3" />
