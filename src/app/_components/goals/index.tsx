@@ -31,13 +31,16 @@ export const Goals: React.FC<GoalsProps> = ({
 
     const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
     const [editGoalId, setEditGoalId] = useState<string | null>(null);
+    const [showArchived, setShowArchived] = useState(false);
 
     const {
         data: goals,
         isLoading,
         refetch,
     } = api.goals.getAll.useQuery(
-        activeProjectId ? { projectId: activeProjectId } : undefined,
+        activeProjectId
+            ? { projectId: activeProjectId, includeArchived: showArchived }
+            : { includeArchived: showArchived },
         {}
     );
 
@@ -182,6 +185,10 @@ export const Goals: React.FC<GoalsProps> = ({
         archiveCompletedGoals();
     };
 
+    const handleShowArchived = () => {
+        setShowArchived(!showArchived);
+    };
+
     const priorityNumberMap = {
         priority_1: 1,
         priority_2: 2,
@@ -204,6 +211,10 @@ export const Goals: React.FC<GoalsProps> = ({
         // .sort((a, b) => new Date(b.updatedAt ?? '').getTime() - new Date(a.updatedAt ?? '').getTime())
     };
 
+    const getSortedArchivedGoals = () => {
+        return goals?.filter((goal) => goal.status === "archived");
+    };
+
     const sortedPendingGoals = useMemo(() => {
         return getSortedPendingGoals();
     }, [goals]);
@@ -214,6 +225,10 @@ export const Goals: React.FC<GoalsProps> = ({
 
     const sortedCompletedGoals = useMemo(() => {
         return getSortedCompletedGoals();
+    }, [goals]);
+
+    const sortedArchivedGoals = useMemo(() => {
+        return getSortedArchivedGoals();
     }, [goals]);
 
     return (
@@ -281,10 +296,13 @@ export const Goals: React.FC<GoalsProps> = ({
                                 pendingGoals={sortedPendingGoals}
                                 inProgressGoals={sortedInProgressGoals}
                                 completedGoals={sortedCompletedGoals}
+                                archivedGoals={sortedArchivedGoals}
                                 onEdit={setEditGoalId}
                                 onDelete={handleDeleteGoal}
                                 onToggleStatus={toggleGoalStatus}
                                 onArchiveCompleted={handleArchiveCompleted}
+                                onShowArchived={handleShowArchived}
+                                showArchived={showArchived}
                                 isDeleting={isDeletingGoal}
                                 deleteVariables={deleteGoalVariables}
                             />

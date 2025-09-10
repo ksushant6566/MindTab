@@ -44,18 +44,18 @@ export const Goal: React.FC<GoalProps> = ({
             <Checkbox
                 id={goal.id}
                 className="h-4 w-4 rounded-full mt-0.5"
-                checked={goal.status === "completed"}
+                checked={["completed", "archived"].includes(goal.status)}
                 onCheckedChange={(checked) => onToggleStatus(goal.id, checked)}
             />
             <div className="flex flex-col gap-1 min-w-0">
                 <Label
-                    className={`text-sm font-medium ${goal.status === "completed" ? "line-through" : ""}`}
+                    className={`text-sm font-medium ${["completed", "archived"].includes(goal.status) ? "line-through" : ""}`}
                 >
                     {goal.title}
                 </Label>
                 {goal.description && (
                     <p
-                        className={`text-sm text-muted-foreground ${goal.status === "completed" ? "line-through" : ""} break-words`}
+                        className={`text-sm text-muted-foreground ${["completed", "archived"].includes(goal.status) ? "line-through" : ""} break-words`}
                     >
                         {goal.description}
                     </p>

@@ -26,7 +26,24 @@ import { DroppableColumn } from "./droppable-column";
 import { Goal } from "./goal";
 import { SortableGoal } from "./sortable-goal";
 import { Button } from "~/components/ui/button";
-import { ArchiveIcon } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "~/components/ui/tooltip";
+import {
+    ArchiveIcon,
+    ChevronDownIcon,
+    EyeIcon,
+    EyeOffIcon,
+} from "lucide-react";
 
 type TGoal = InferSelectModel<typeof goals>;
 type GoalStatus = (typeof goalStatusEnum.enumValues)[number];
@@ -35,10 +52,13 @@ interface KanbanGoalsProps {
     pendingGoals?: TGoal[];
     inProgressGoals?: TGoal[];
     completedGoals?: TGoal[];
+    archivedGoals?: TGoal[];
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onToggleStatus: (id: string, checked: CheckedState) => void;
     onArchiveCompleted?: () => void;
+    onShowArchived?: () => void;
+    showArchived?: boolean;
     isDeleting: boolean;
     deleteVariables?: { id: string };
 }
@@ -47,10 +67,13 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     pendingGoals = [],
     inProgressGoals = [],
     completedGoals = [],
+    archivedGoals = [],
     onEdit,
     onDelete,
     onToggleStatus,
     onArchiveCompleted,
+    onShowArchived,
+    showArchived = false,
     isDeleting,
     deleteVariables,
 }) => {
@@ -64,6 +87,9 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     const [localCompletedGoals, setLocalCompletedGoals] = React.useState<
         TGoal[]
     >([]);
+    const [localArchivedGoals, setLocalArchivedGoals] = React.useState<TGoal[]>(
+        []
+    );
     const sequenceRef = useRef(0);
     const apiUtils = api.useUtils();
 
@@ -71,7 +97,8 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
         setLocalPendingGoals(pendingGoals);
         setLocalInProgressGoals(inProgressGoals);
         setLocalCompletedGoals(completedGoals);
-    }, [pendingGoals, inProgressGoals, completedGoals]);
+        setLocalArchivedGoals(archivedGoals);
+    }, [pendingGoals, inProgressGoals, completedGoals, archivedGoals]);
 
     const { mutate: updatePositions } = api.goals.updatePositions.useMutation({
         async onMutate(variables) {
@@ -118,6 +145,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                 setLocalPendingGoals(pendingGoals);
                 setLocalInProgressGoals(inProgressGoals);
                 setLocalCompletedGoals(completedGoals);
+                setLocalArchivedGoals(archivedGoals);
                 apiUtils.goals.getAll.setData(
                     undefined,
                     context.previousGoals ?? []
@@ -145,7 +173,12 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
     };
 
     const findContainer = (id: string): GoalStatus | undefined => {
-        if (id === "pending" || id === "in_progress" || id === "completed") {
+        if (
+            id === "pending" ||
+            id === "in_progress" ||
+            id === "completed" ||
+            id === "archived"
+        ) {
             return id;
         }
 
@@ -153,6 +186,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             ...localPendingGoals,
             ...localInProgressGoals,
             ...localCompletedGoals,
+            ...localArchivedGoals,
         ].find((goal) => goal.id === id);
         return goal?.status;
     };
@@ -169,6 +203,7 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             ...localPendingGoals,
             ...localInProgressGoals,
             ...localCompletedGoals,
+            ...localArchivedGoals,
         ].find((goal) => goal.id === active.id);
         if (!activeGoal) {
             setActiveId(null);
@@ -189,13 +224,17 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             sourceGoals = [...localPendingGoals];
         else if (activeGoal.status === "in_progress")
             sourceGoals = [...localInProgressGoals];
-        else sourceGoals = [...localCompletedGoals];
+        else if (activeGoal.status === "completed")
+            sourceGoals = [...localCompletedGoals];
+        else sourceGoals = [...localArchivedGoals];
 
         if (overContainer === "pending")
             destinationGoals = [...localPendingGoals];
         else if (overContainer === "in_progress")
             destinationGoals = [...localInProgressGoals];
-        else destinationGoals = [...localCompletedGoals];
+        else if (overContainer === "completed")
+            destinationGoals = [...localCompletedGoals];
+        else destinationGoals = [...localArchivedGoals];
 
         const oldIndex = sourceGoals.findIndex((g) => g.id === active.id);
         let newIndex: number;
@@ -231,7 +270,9 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                 setLocalPendingGoals(reorderedGoals);
             else if (overContainer === "in_progress")
                 setLocalInProgressGoals(reorderedGoals);
-            else setLocalCompletedGoals(reorderedGoals);
+            else if (overContainer === "completed")
+                setLocalCompletedGoals(reorderedGoals);
+            else setLocalArchivedGoals(reorderedGoals);
         } else {
             // Moving to a different container
             sourceGoals.splice(oldIndex, 1);
@@ -262,13 +303,17 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                 setLocalPendingGoals(sourceGoals);
             else if (activeGoal.status === "in_progress")
                 setLocalInProgressGoals(sourceGoals);
-            else setLocalCompletedGoals(sourceGoals);
+            else if (activeGoal.status === "completed")
+                setLocalCompletedGoals(sourceGoals);
+            else setLocalArchivedGoals(sourceGoals);
 
             if (overContainer === "pending")
                 setLocalPendingGoals(destinationGoals);
             else if (overContainer === "in_progress")
                 setLocalInProgressGoals(destinationGoals);
-            else setLocalCompletedGoals(destinationGoals);
+            else if (overContainer === "completed")
+                setLocalCompletedGoals(destinationGoals);
+            else setLocalArchivedGoals(destinationGoals);
         }
 
         const sequence = ++sequenceRef.current;
@@ -286,8 +331,15 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                 ...localPendingGoals,
                 ...localInProgressGoals,
                 ...localCompletedGoals,
+                ...localArchivedGoals,
             ].find((goal) => goal.id === activeId),
-        [activeId, localPendingGoals, localInProgressGoals, localCompletedGoals]
+        [
+            activeId,
+            localPendingGoals,
+            localInProgressGoals,
+            localCompletedGoals,
+            localArchivedGoals,
+        ]
     );
 
     const collisionDetectionStrategy: CollisionDetection = useCallback(
@@ -303,7 +355,12 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             const containerCollisions = pointerWithin(args);
 
             if (containerCollisions.length > 0) {
-                const columnIds = ["pending", "in_progress", "completed"];
+                const columnIds = [
+                    "pending",
+                    "in_progress",
+                    "completed",
+                    "archived",
+                ];
                 const columnCollision = containerCollisions.find((collision) =>
                     columnIds.includes(collision.id as string)
                 );
@@ -329,7 +386,11 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
             <ScrollArea className="h-[calc(100vh-18rem)] overflow-y-auto relative w-full">
                 <div
                     className="grid gap-4 pb-12 pr-4 w-full min-w-[650px]"
-                    style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
+                    style={{
+                        gridTemplateColumns: showArchived
+                            ? "1fr 1fr 1fr 1fr"
+                            : "1fr 1fr 1fr",
+                    }}
                 >
                     <DroppableColumn
                         id="pending"
@@ -401,18 +462,45 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                                         {localCompletedGoals.length}
                                     </span>
                                 </span>
-                                {localCompletedGoals.length > 0 &&
-                                    onArchiveCompleted && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-7 px-2"
-                                            onClick={onArchiveCompleted}
-                                            title="Archive all completed"
+                                {localCompletedGoals.length > -1 && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger
+                                            asChild
+                                            className="focus-visible:ring-0 focus-visible:ring-offset-0"
                                         >
-                                            <ArchiveIcon className="h-4 w-4" />
-                                        </Button>
-                                    )}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                                title="Archive options"
+                                            >
+                                                <ArchiveIcon className="h-4 w-4 mr-1" />
+                                                <ChevronDownIcon className="h-3 w-3" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                            align="end"
+                                            className="w-48 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                        >
+                                            <DropdownMenuItem
+                                                onClick={onArchiveCompleted}
+                                                className="cursor-pointer"
+                                            >
+                                                <ArchiveIcon className="h-4 w-4 mr-2" />
+                                                Archive completed
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem
+                                                onClick={onShowArchived}
+                                                className="cursor-pointer"
+                                            >
+                                                <EyeIcon className="h-4 w-4 mr-2" />
+                                                {showArchived
+                                                    ? "Hide archived"
+                                                    : "Show archived"}
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
                         }
                     >
@@ -433,6 +521,56 @@ export const KanbanGoals: React.FC<KanbanGoalsProps> = ({
                             ))}
                         </SortableContext>
                     </DroppableColumn>
+
+                    {showArchived && (
+                        <DroppableColumn
+                            id="archived"
+                            title={
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="flex items-center">
+                                        Archived
+                                        <span className="text-xs text-primary ml-2 border border-muted px-2 py-0.5 rounded-sm bg-muted">
+                                            {localArchivedGoals.length}
+                                        </span>
+                                    </span>
+                                    <TooltipProvider>
+                                        <Tooltip delayDuration={0}>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                                    onClick={onShowArchived}
+                                                >
+                                                    <EyeOffIcon className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Hide archived goals</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            }
+                        >
+                            <SortableContext
+                                items={localArchivedGoals.map((g) => g.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {localArchivedGoals.map((goal) => (
+                                    <SortableGoal
+                                        key={goal.id}
+                                        goal={goal}
+                                        onEdit={onEdit}
+                                        onDelete={onDelete}
+                                        onToggleStatus={onToggleStatus}
+                                        isDeleting={isDeleting}
+                                        deleteVariables={deleteVariables}
+                                    />
+                                ))}
+                            </SortableContext>
+                        </DroppableColumn>
+                    )}
                 </div>
             </ScrollArea>
 
