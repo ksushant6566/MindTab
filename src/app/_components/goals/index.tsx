@@ -235,7 +235,7 @@ export const Goals: React.FC<GoalsProps> = ({
         <div className="space-y-4 w-full min-w-0">
             <div>
                 {isLoading ? (
-                    <GoalSkeleton />
+                    <GoalSkeleton viewMode={viewMode} />
                 ) : (
                     <div className="flex flex-col gap-1">
                         <div className="-ml-1 flex justify-start">
