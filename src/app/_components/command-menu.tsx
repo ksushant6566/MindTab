@@ -28,8 +28,8 @@ import {
 import { api } from "~/trpc/react";
 import { CreateJournalDialog } from "./create-journal-dialog";
 import { JournalDialog } from "./journal-dialog";
-import { CreateGoalDialog } from "./create-goal-dialog";
-import { EditGoalDialog } from "./edit-goal-dialog";
+import { CreateGoalDialog } from "./goals/create-goal-dialog";
+import { EditGoalDialog } from "./goals/edit-goal-dialog";
 import { goals } from "~/server/db/schema";
 
 export const CommandMenu = () => {
