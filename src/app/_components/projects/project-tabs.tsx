@@ -124,8 +124,7 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                     ? (goalsCount ?? 0)
                                     : activeTab === "Notes"
                                       ? (journalsCount ?? 0)
-                                      : (goalsCount ?? 0) +
-                                        (journalsCount ?? 0)}
+                                      : (goalsCount ?? 0)}
                                 )
                             </span>
                         )}
