@@ -1,0 +1,1 @@
+ALTER TABLE "mindmap_journal" ADD COLUMN "archived_at" timestamp with time zone;

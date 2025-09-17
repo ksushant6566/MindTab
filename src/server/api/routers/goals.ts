@@ -285,7 +285,10 @@ export const goalsRouter = createTRPCRouter({
     delete: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async ({ ctx, input }) => {
-            await ctx.db.delete(goals).where(eq(goals.id, input.id));
+            await ctx.db
+                .update(goals)
+                .set({ deletedAt: new Date() })
+                .where(eq(goals.id, input.id));
         }),
 
     get: protectedProcedure
@@ -302,6 +305,7 @@ export const goalsRouter = createTRPCRouter({
         .query(async ({ ctx, input }) => {
             const whereConditions = [
                 eq(goals.userId, input?.userId ?? ctx.session.user.id),
+                isNull(goals.deletedAt),
             ];
 
             // Filter out archived goals unless explicitly requested
@@ -338,6 +342,7 @@ export const goalsRouter = createTRPCRouter({
         .query(async ({ ctx, input }) => {
             const whereConditions = [
                 eq(goals.userId, input?.userId ?? ctx.session.user.id),
+                isNull(goals.deletedAt),
             ];
 
             // Filter out archived goals unless explicitly requested
@@ -368,7 +373,9 @@ export const goalsRouter = createTRPCRouter({
                 .where(
                     and(
                         eq(goals.userId, ctx.session.user.id),
-                        ilike(goals.title, `%${input.query}%`)
+                        ilike(goals.title, `%${input.query}%`),
+                        isNull(goals.deletedAt),
+                        not(eq(goals.status, "archived"))
                     )
                 )
                 .limit(5);
@@ -380,7 +387,8 @@ export const goalsRouter = createTRPCRouter({
                 eq(goals.userId, ctx.session.user.id),
                 not(eq(goals.status, "archived")),
                 // Goals without project assignment
-                isNull(goals.projectId)
+                isNull(goals.projectId),
+                isNull(goals.deletedAt)
             ),
             orderBy: [
                 asc(goals.position),
@@ -392,23 +400,8 @@ export const goalsRouter = createTRPCRouter({
 
     archiveCompleted: protectedProcedure.mutation(async ({ ctx }) => {
         try {
-            // Get all completed goals for the user
-            const completedGoals = await ctx.db
-                .select()
-                .from(goals)
-                .where(
-                    and(
-                        eq(goals.userId, ctx.session.user.id),
-                        eq(goals.status, "completed")
-                    )
-                );
-
-            if (completedGoals.length === 0) {
-                return { success: true, count: 0 };
-            }
-
             // Update all completed goals to archived status
-            await ctx.db
+            const rows = await ctx.db
                 .update(goals)
                 .set({
                     status: "archived",
@@ -417,11 +410,12 @@ export const goalsRouter = createTRPCRouter({
                 .where(
                     and(
                         eq(goals.userId, ctx.session.user.id),
-                        eq(goals.status, "completed")
+                        eq(goals.status, "completed"),
+                        isNull(goals.deletedAt)
                     )
                 );
 
-            return { success: true, count: completedGoals.length };
+            return { success: true, count: rows.length };
         } catch (error) {
             console.error("Failed to archive completed goals:", error);
             return { success: false, error };

@@ -57,6 +57,7 @@ export const goals = createTable(
             () => new Date()
         ),
         completedAt: timestamp("completed_at", { withTimezone: true }),
+        deletedAt: timestamp("deleted_at", { withTimezone: true }),
         userId: varchar("user_id", { length: 255 })
             .notNull()
             .references(() => users.id),
@@ -194,6 +195,7 @@ export const journal = createTable(
             onDelete: "set null",
         }),
         deletedAt: timestamp("deleted_at", { withTimezone: true }),
+        archivedAt: timestamp("archived_at", { withTimezone: true }),
     },
     (journal) => ({
         userTitleIndex: uniqueIndex("journal_title_user_id_unique_idx").on(

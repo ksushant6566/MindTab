@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, Archive, FolderPlus, MoreVertical } from "lucide-react";
+import {
+    Settings,
+    Archive,
+    FolderPlus,
+    MoreVertical,
+    Trash,
+    Trash2,
+} from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
     DropdownMenu,
@@ -63,6 +70,15 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
         },
     });
 
+    const { mutateAsync: archiveProject } = api.projects.archive.useMutation({
+        onSuccess: () => {
+            apiUtils.projects.getWithStats.invalidate();
+            if (activeProjectId) {
+                onProjectChange(null); // Switch to "All Goals" when project is archived
+            }
+        },
+    });
+
     const { data: goalsCount } = api.goals.getCount.useQuery();
     const { data: journalsCount } = api.journals.getCount.useQuery();
 
@@ -81,10 +97,20 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
     const handleDeleteProject = async (projectId: string) => {
         if (
             confirm(
-                "Are you sure you want to delete this project? Goals will be unassigned but not deleted."
+                "Are you sure you want to delete this project? Goals and Notes in this project will be deleted."
             )
         ) {
             await deleteProject({ id: projectId });
+        }
+    };
+
+    const handleArchiveProject = async (projectId: string) => {
+        if (
+            confirm(
+                "Are you sure you want to archive this project? Goals and Notes in this project will be archived."
+            )
+        ) {
+            await archiveProject({ id: projectId });
         }
     };
 
@@ -181,15 +207,23 @@ export const ProjectTabs: React.FC<ProjectTabsProps> = ({
                                             <Settings className="mr-2 h-4 w-4" />
                                             Edit Project
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() =>
+                                                handleArchiveProject(project.id)
+                                            }
+                                            className="text-red-600"
+                                        >
+                                            <Archive className="mr-2 h-4 w-4" />
+                                            Archive Project
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem
                                             onClick={() =>
                                                 handleDeleteProject(project.id)
                                             }
                                             className="text-red-600"
                                         >
-                                            <Archive className="mr-2 h-4 w-4" />
-                                            Archive Project
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete Project
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

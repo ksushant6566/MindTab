@@ -73,25 +73,28 @@ export const projectsRouter = createTRPCRouter({
                 throw new Error("Project not found or access denied");
             }
 
-            // Soft delete the project
-            await ctx.db
-                .update(projects)
-                .set({
-                    deletedAt: new Date(),
-                    lastUpdatedBy: ctx.session.user.id,
-                })
-                .where(eq(projects.id, input.id));
+            // Soft delete the project, its goals, and journals in a transaction
+            await ctx.db.transaction(async (trx) => {
+                const now = new Date();
 
-            // Set project_id to null for all goals and journals in this project
-            await ctx.db
-                .update(goals)
-                .set({ projectId: null })
-                .where(eq(goals.projectId, input.id));
+                await trx
+                    .update(projects)
+                    .set({
+                        deletedAt: now,
+                        lastUpdatedBy: ctx.session.user.id,
+                    })
+                    .where(eq(projects.id, input.id));
 
-            await ctx.db
-                .update(journal)
-                .set({ projectId: null })
-                .where(eq(journal.projectId, input.id));
+                await trx
+                    .update(goals)
+                    .set({ deletedAt: now })
+                    .where(eq(goals.projectId, input.id));
+
+                await trx
+                    .update(journal)
+                    .set({ deletedAt: now })
+                    .where(eq(journal.projectId, input.id));
+            });
 
             return { success: true };
         }),
@@ -170,17 +173,33 @@ export const projectsRouter = createTRPCRouter({
                 throw new Error("Project not found or access denied");
             }
 
-            const archivedProject = await ctx.db
-                .update(projects)
-                .set({
-                    status: "archived",
-                    lastUpdatedBy: ctx.session.user.id,
-                    updatedAt: new Date(),
-                })
-                .where(eq(projects.id, input.id))
-                .returning();
+            const result = await ctx.db.transaction(async (trx) => {
+                const now = new Date();
 
-            return archivedProject[0];
+                const archivedProject = await trx
+                    .update(projects)
+                    .set({
+                        status: "archived",
+                        lastUpdatedBy: ctx.session.user.id,
+                        updatedAt: now,
+                    })
+                    .where(eq(projects.id, input.id))
+                    .returning();
+
+                await trx
+                    .update(goals)
+                    .set({ status: "archived", updatedAt: now })
+                    .where(eq(goals.projectId, input.id));
+
+                await trx
+                    .update(journal)
+                    .set({ archivedAt: now, updatedAt: now })
+                    .where(eq(journal.projectId, input.id));
+
+                return archivedProject[0];
+            });
+
+            return result;
         }),
 
     // Get projects with goal counts for UI
