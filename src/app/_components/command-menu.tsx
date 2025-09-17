@@ -31,6 +31,7 @@ import { JournalDialog } from "./journal-dialog";
 import { CreateGoalDialog } from "./goals/create-goal-dialog";
 import { EditGoalDialog } from "./goals/edit-goal-dialog";
 import { goals } from "~/server/db/schema";
+import { useAppStore } from "~/lib/store";
 
 export const CommandMenu = () => {
     const { setTheme } = useTheme();
@@ -300,6 +301,8 @@ export const CommandMenu = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const activeProjectId = useAppStore((state) => state.activeProjectId);
+
     return (
         <div className="flex items-center justify-center">
             <Button
@@ -347,6 +350,7 @@ export const CommandMenu = () => {
             <CreateJournalDialog
                 isOpen={isCreateJournalDialogOpen}
                 onOpenChange={onCreateJournalDialogOpenChange}
+                activeProjectId={activeProjectId}
             />
             <JournalDialog
                 isOpen={isJournalDialogOpen}
@@ -360,6 +364,9 @@ export const CommandMenu = () => {
                 onSave={createGoal}
                 onCancel={() => setIsCreateGoalDialogOpen(false)}
                 loading={isCreatingGoal}
+                defaultValues={{
+                    projectId: activeProjectId,
+                }}
             />
             {currentGoal && (
                 <EditGoalDialog

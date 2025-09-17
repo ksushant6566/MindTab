@@ -8,12 +8,7 @@ import { Button } from "~/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { Clock } from "./clock";
 import { ProjectTabs } from "./projects";
-
-enum EActiveLayout {
-    Goals = "Goals",
-    Habits = "Habits",
-    Notes = "Notes",
-}
+import { useAppStore, EActiveLayout } from "~/lib/store";
 
 const getLayout1 = (activeProjectId: string | null) => ({
     container: {
@@ -22,13 +17,7 @@ const getLayout1 = (activeProjectId: string | null) => ({
     col1: {
         elements: [
             {
-                element: (
-                    <Goals
-                        viewMode={"list"}
-                        layoutVersion={1}
-                        activeProjectId={activeProjectId}
-                    />
-                ),
+                element: <Goals viewMode={"list"} />,
                 title: EActiveLayout.Goals,
             },
         ],
@@ -41,7 +30,7 @@ const getLayout1 = (activeProjectId: string | null) => ({
                 title: EActiveLayout.Habits,
             },
             {
-                element: <Journals activeProjectId={activeProjectId} />,
+                element: <Journals />,
                 title: EActiveLayout.Notes,
             },
         ],
@@ -57,17 +46,11 @@ const getLayout2 = (activeProjectId: string | null) => ({
     col1: {
         elements: [
             {
-                element: (
-                    <Goals
-                        viewMode={"kanban"}
-                        layoutVersion={2}
-                        activeProjectId={activeProjectId}
-                    />
-                ),
+                element: <Goals viewMode={"kanban"} />,
                 title: EActiveLayout.Goals,
             },
             {
-                element: <Journals activeProjectId={activeProjectId} />,
+                element: <Journals />,
                 title: EActiveLayout.Notes,
             },
         ],
@@ -87,40 +70,41 @@ const getLayout2 = (activeProjectId: string | null) => ({
 
 export default function Component() {
     const [isHydrated, setIsHydrated] = useState(false);
-    const [layoutVersion, setLayoutVersion] = useState(1);
-    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+
+    const {
+        layoutVersion,
+        activeElement,
+        activeProjectId,
+        setLayoutVersion: setStoreLayoutVersion,
+        setActiveElement: setStoreActiveElement,
+        setActiveProjectId: setStoreActiveProjectId,
+    } = useAppStore();
+
     const layout =
         layoutVersion === 1
             ? getLayout1(activeProjectId)
             : getLayout2(activeProjectId);
 
-    const [activeElement, setActiveElement] = useState<EActiveLayout>(
-        layout[layout.activeColumn as "col1" | "col2"].elements[0]!.title
-    );
-
     useEffect(() => {
         setIsHydrated(true);
     }, []);
 
+    // Initialize activeElement if not set, based on the current layout
     useEffect(() => {
-        const storedLayoutVersion = localStorage.getItem("layoutVersion");
-        if (storedLayoutVersion) {
-            setLayoutVersion(parseInt(storedLayoutVersion));
+        if (!activeElement) {
+            const defaultElement =
+                layout[layout.activeColumn as "col1" | "col2"].elements[0]!
+                    .title;
+            setStoreActiveElement(defaultElement);
         }
+    }, [activeElement, layout, setStoreActiveElement]);
 
-        const storedActiveElement = localStorage.getItem("activeElement");
-        if (storedActiveElement) {
-            setActiveElement(storedActiveElement as EActiveLayout);
-        }
-    }, []);
-
-    const handleLayoutVersionChange = (layoutVersion: number) => {
-        setLayoutVersion(layoutVersion);
-        localStorage.setItem("layoutVersion", layoutVersion.toString());
+    const handleLayoutVersionChange = (newLayoutVersion: number) => {
+        setStoreLayoutVersion(newLayoutVersion);
 
         // if active layout includes activeElement, set activeElement do nothing else update to the first element in the new layout
         const activeLayout =
-            layoutVersion === 1
+            newLayoutVersion === 1
                 ? getLayout1(activeProjectId)
                 : getLayout2(activeProjectId);
         const activeColumn =
@@ -135,9 +119,8 @@ export default function Component() {
         handleActiveElementChange(activeColumn.elements[0]!.title);
     };
 
-    const handleActiveElementChange = (activeElement: EActiveLayout) => {
-        setActiveElement(activeElement);
-        localStorage.setItem("activeElement", activeElement);
+    const handleActiveElementChange = (newActiveElement: EActiveLayout) => {
+        setStoreActiveElement(newActiveElement);
     };
 
     if (!isHydrated) return null;
@@ -201,7 +184,7 @@ export default function Component() {
                     <div className="-ml-0.5">
                         <ProjectTabs
                             activeProjectId={activeProjectId}
-                            onProjectChange={setActiveProjectId}
+                            onProjectChange={setStoreActiveProjectId}
                             layoutVersion={layoutVersion}
                             activeTab={activeElement}
                         />

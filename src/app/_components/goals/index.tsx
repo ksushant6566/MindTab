@@ -10,6 +10,7 @@ import { EditGoalDialog } from "./edit-goal-dialog";
 import { GoalSkeleton } from "./goal-skeleton";
 import { KanbanGoals } from "./kanban-goals";
 import { ListGoals } from "./list-goals";
+import { useAppStore } from "~/lib/store";
 import { z } from "zod";
 
 const ZInsertGoal = createInsertSchema(goals).omit({ userId: true });
@@ -18,16 +19,13 @@ export type ViewMode = "list" | "kanban";
 
 type GoalsProps = {
     viewMode: ViewMode;
-    layoutVersion: number;
-    activeProjectId: string | null;
 };
 
-export const Goals: React.FC<GoalsProps> = ({
-    viewMode,
-    layoutVersion,
-    activeProjectId,
-}) => {
+export const Goals: React.FC<GoalsProps> = ({ viewMode }) => {
     const apiUtils = api.useUtils();
+
+    // Get activeProjectId from zustand store
+    const { activeProjectId } = useAppStore();
 
     const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
     const [editGoalId, setEditGoalId] = useState<string | null>(null);
@@ -257,7 +255,6 @@ export const Goals: React.FC<GoalsProps> = ({
                             onSave={onCreateGoal}
                             onCancel={onCancelCreateGoal}
                             defaultValues={{
-                                type: "daily",
                                 projectId: activeProjectId,
                             }}
                         />

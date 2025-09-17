@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { api } from "~/trpc/react";
+import { useAppStore } from "~/lib/store";
 
 import "~/styles/text-editor.css";
 import { JournalDialog } from "./journal-dialog";
@@ -40,12 +41,13 @@ const JournalSkeleton: React.FC = () => {
     );
 };
 
-type JournalsProps = {
-    activeProjectId: string | null;
-};
+type JournalsProps = {};
 
-export const Journals: React.FC<JournalsProps> = ({ activeProjectId }) => {
+export const Journals: React.FC<JournalsProps> = () => {
     const apiUtils = api.useUtils();
+
+    // Get activeProjectId from zustand store
+    const { activeProjectId } = useAppStore();
 
     const { data: journals, isFetching: isFetchingJournals } =
         api.journals.getAll.useQuery(
