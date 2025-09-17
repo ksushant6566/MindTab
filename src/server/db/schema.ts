@@ -38,22 +38,6 @@ export const goalPriorityEnum = pgEnum("goal_priority", [
 
 export const goalImpactEnum = pgEnum("goal_impact", ["low", "medium", "high"]);
 
-export const goalCategoryEnum = pgEnum("goal_category", [
-    "health",
-    "finance",
-    "career",
-    "relationships",
-    "personal",
-    "work",
-]);
-
-export const goalTypeEnum = pgEnum("goal_type", [
-    "daily",
-    "weekly",
-    "monthly",
-    "yearly",
-]);
-
 export const goals = createTable(
     "goal",
     {
@@ -65,10 +49,6 @@ export const goals = createTable(
             .default(goalPriorityEnum.enumValues[0])
             .notNull(),
         impact: goalImpactEnum("impact").default("medium").notNull(),
-        category: goalCategoryEnum("category").default("health").notNull(),
-        type: goalTypeEnum("type")
-            .default(goalTypeEnum.enumValues[0])
-            .notNull(),
         position: integer("position").notNull().default(0),
         createdAt: timestamp("created_at", { withTimezone: true })
             .default(sql`CURRENT_TIMESTAMP`)

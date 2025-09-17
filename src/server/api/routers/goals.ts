@@ -11,13 +11,7 @@ import {
 } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import {
-    goals,
-    goalPriorityEnum,
-    goalImpactEnum,
-    goalCategoryEnum,
-    goalTypeEnum,
-} from "~/server/db/schema";
+import { goals, goalPriorityEnum, goalImpactEnum } from "~/server/db/schema";
 import {
     CreateGoalDto,
     UpdateGoalDto,
@@ -33,8 +27,6 @@ type updateGoalStatusParams = {
     description?: string;
     priority?: (typeof goalPriorityEnum.enumValues)[number];
     impact?: (typeof goalImpactEnum.enumValues)[number];
-    category?: (typeof goalCategoryEnum.enumValues)[number];
-    type?: (typeof goalTypeEnum.enumValues)[number];
     projectId?: string | null;
     executor?: typeof db;
 };
@@ -46,8 +38,6 @@ async function setGoalCompleted({
     description,
     priority,
     impact,
-    category,
-    type,
     projectId,
     executor = db,
 }: updateGoalStatusParams) {
@@ -83,8 +73,6 @@ async function setGoalCompleted({
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
     if (impact !== undefined) updateData.impact = impact;
-    if (category !== undefined) updateData.category = category;
-    if (type !== undefined) updateData.type = type;
     if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
@@ -99,8 +87,6 @@ async function setGoalInprogress({
     description,
     priority,
     impact,
-    category,
-    type,
     projectId,
     executor = db,
 }: updateGoalStatusParams) {
@@ -124,8 +110,6 @@ async function setGoalInprogress({
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
     if (impact !== undefined) updateData.impact = impact;
-    if (category !== undefined) updateData.category = category;
-    if (type !== undefined) updateData.type = type;
     if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
@@ -140,8 +124,6 @@ async function setGoalPending({
     description,
     priority,
     impact,
-    category,
-    type,
     projectId,
     executor = db,
 }: updateGoalStatusParams) {
@@ -166,8 +148,6 @@ async function setGoalPending({
     if (description !== undefined) updateData.description = description;
     if (priority !== undefined) updateData.priority = priority;
     if (impact !== undefined) updateData.impact = impact;
-    if (category !== undefined) updateData.category = category;
-    if (type !== undefined) updateData.type = type;
     if (projectId !== undefined) updateData.projectId = projectId;
 
     await executor.update(goals).set(updateData).where(eq(goals.id, id));
@@ -204,8 +184,6 @@ export const goalsRouter = createTRPCRouter({
                     description: input.description,
                     priority: input.priority,
                     impact: input.impact,
-                    category: input.category,
-                    type: input.type,
                     projectId: input.projectId,
                 });
             } else if (input.status === "in_progress") {
@@ -216,8 +194,6 @@ export const goalsRouter = createTRPCRouter({
                     description: input.description,
                     priority: input.priority,
                     impact: input.impact,
-                    category: input.category,
-                    type: input.type,
                     projectId: input.projectId,
                 });
             } else if (input.status === "pending") {
@@ -228,8 +204,6 @@ export const goalsRouter = createTRPCRouter({
                     description: input.description,
                     priority: input.priority,
                     impact: input.impact,
-                    category: input.category,
-                    type: input.type,
                     projectId: input.projectId,
                 });
             } else {
@@ -244,9 +218,6 @@ export const goalsRouter = createTRPCRouter({
                     updateData.priority = input.priority;
                 if (input.impact !== undefined)
                     updateData.impact = input.impact;
-                if (input.category !== undefined)
-                    updateData.category = input.category;
-                if (input.type !== undefined) updateData.type = input.type;
                 if (input.projectId !== undefined)
                     updateData.projectId = input.projectId;
                 if (input.position !== undefined)

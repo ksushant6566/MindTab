@@ -3,8 +3,6 @@ import {
     goalImpactEnum,
     goalPriorityEnum,
     goalStatusEnum,
-    goalCategoryEnum,
-    goalTypeEnum,
 } from "~/server/db/schema";
 
 import { createInsertSchema } from "drizzle-zod";
@@ -30,8 +28,6 @@ export const UpdateGoalDto = CreateGoalDto.partial().extend({
     title: z.string().optional(),
     priority: z.enum(goalPriorityEnum.enumValues).optional(),
     impact: z.enum(goalImpactEnum.enumValues).optional(),
-    category: z.enum(goalCategoryEnum.enumValues).optional(),
-    type: z.enum(goalTypeEnum.enumValues).optional(),
 });
 
 export const UpdateGoalPositionDto = z.object({

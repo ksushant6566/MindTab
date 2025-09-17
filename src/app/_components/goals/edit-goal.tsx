@@ -12,13 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "~/components/ui/select";
-import {
-    goalCategoryEnum,
-    goalImpactEnum,
-    goalPriorityEnum,
-    goalTypeEnum,
-    goals,
-} from "~/server/db/schema";
+import { goalImpactEnum, goalPriorityEnum, goals } from "~/server/db/schema";
 import { api } from "~/trpc/react";
 
 const priorityColors = {
@@ -58,8 +52,6 @@ export const EditGoal: React.FC<EditGoalProps> = ({
             description: goal.description,
             priority: goal.priority,
             impact: goal.impact,
-            category: goal.category,
-            type: goal.type,
             status: goal.status,
             projectId: goal.projectId,
         }
@@ -214,73 +206,6 @@ export const EditGoal: React.FC<EditGoalProps> = ({
                     </SelectContent>
                 </Select>
 
-                <Select
-                    onValueChange={(value) =>
-                        setFormData({
-                            ...formData,
-                            category:
-                                value as (typeof goalCategoryEnum.enumValues)[number],
-                        })
-                    }
-                    value={formData.category}
-                >
-                    <SelectTrigger className="size-8 w-fit focus:ring-0">
-                        <SelectValue placeholder="Category">
-                            <span className="mr-0.5 flex text-xs capitalize">
-                                {formData.category?.replace("_", " ")}
-                            </span>
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="text-sm">
-                        <SelectGroup>
-                            <SelectLabel>Category</SelectLabel>
-                            {goalCategoryEnum.enumValues
-                                .map((value) => (
-                                    <SelectItem value={value} className="">
-                                        <span className="flex items-center gap-0 capitalize">
-                                            <span className="mr-1 text-sm">
-                                                {value.replace("_", " ")}
-                                            </span>
-                                        </span>
-                                    </SelectItem>
-                                ))
-                                .reverse()}
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-
-                <Select
-                    onValueChange={(value) =>
-                        setFormData({
-                            ...formData,
-                            type: value as (typeof goalTypeEnum.enumValues)[number],
-                        })
-                    }
-                    value={formData.type}
-                >
-                    <SelectTrigger className="size-8 w-fit focus:ring-0">
-                        <SelectValue placeholder="Type">
-                            <span className="mr-0.5 flex text-xs capitalize">
-                                {formData.type?.replace("_", " ")}
-                            </span>
-                        </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="text-sm">
-                        <SelectGroup>
-                            {goalTypeEnum.enumValues.map((value) => (
-                                <SelectItem value={value} className="">
-                                    <span className="flex items-center gap-0 capitalize">
-                                        <span className="mr-1 text-sm">
-                                            {value.replace("_", " ")}
-                                        </span>
-                                    </span>
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-
-                {/* Project Selection */}
                 <Select
                     onValueChange={(value) =>
                         setFormData({
