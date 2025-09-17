@@ -96,7 +96,7 @@ export const Goal: React.FC<GoalProps> = ({
                     )}
                 </div>
             </div>
-            <div className="absolute right-0 bottom-0 flex z-10 -translate-y-6 gap-0 opacity-0 transition-all group-hover:translate-y-1.5 group-hover:opacity-100">
+            <div className="absolute -right-3.5 bottom-0 flex z-10 -translate-y-6 gap-0 opacity-0 transition-all group-hover:translate-y-1.5 group-hover:opacity-100">
                 <Button
                     size="sm"
                     variant="ghost"
