@@ -1,11 +1,12 @@
 import { type CheckedState } from "@radix-ui/react-checkbox";
 import { type InferSelectModel } from "drizzle-orm";
-import { Edit3, Flag, Trash2, Zap, FolderOpen } from "lucide-react";
+import { Edit3, Flag, Trash2, Zap, FolderOpen, Clock } from "lucide-react";
 import React from "react";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { type goals } from "~/server/db/schema";
+import { getTimeAgo } from "~/lib/utils";
 
 type TGoal = InferSelectModel<typeof goals> & {
     project?: {
@@ -95,6 +96,12 @@ export const Goal: React.FC<GoalProps> = ({
                         </span>
                     )}
                 </div>
+                {goal.createdAt && (
+                    <div className="mt-2 -mb-2.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {getTimeAgo(goal.createdAt)}
+                    </div>
+                )}
             </div>
             <div className="absolute -right-3.5 bottom-0 flex z-10 -translate-y-6 gap-0 opacity-0 transition-all group-hover:translate-y-1.5 group-hover:opacity-100">
                 <Button
