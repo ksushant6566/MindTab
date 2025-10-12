@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { habits, habitTracker } from "~/server/db/schema";
 import { HabitCell } from "./habit-cell";
 import { StreakBoxes } from "./streak-boxes";
+import { ScrollArea } from "~/components/ui/scroll-area";
 
 type THabit = InferSelectModel<typeof habits>;
 type THabitTracker = InferSelectModel<typeof habitTracker>;
@@ -60,57 +61,61 @@ export const CollapsedHabits: React.FC<CollapsedHabitsProps> = ({
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 auto-cols-fr gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-                {habits.map((habit) => {
-                    const isChecked = habitTracker.some(
-                        (tracker) =>
-                            tracker.habitId === habit.id &&
-                            tracker.status === "completed" &&
-                            tracker.date === today
-                    );
+            <ScrollArea className="h-[calc(100vh-18rem)]">
+                <div className="grid grid-cols-1 auto-cols-fr gap-4 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] pr-4">
+                    {habits.map((habit) => {
+                        const isChecked = habitTracker.some(
+                            (tracker) =>
+                                tracker.habitId === habit.id &&
+                                tracker.status === "completed" &&
+                                tracker.date === today
+                        );
 
-                    return (
-                        <Card
-                            key={habit.id}
-                            className="hover:bg-accent/50 transition-colors"
-                        >
-                            <CardContent className="p-4 flex flex-col justify-between h-full">
-                                <div className="flex-1 flex flex-col gap-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-sm font-semibold">
-                                            {habit.title}
-                                        </h3>
-                                        <div className="w-5 h-5">
-                                            <HabitCell
-                                                habit={habit}
-                                                date={today}
-                                                isEditable={true}
-                                                isChecked={isChecked}
-                                                onCheckedChange={(checked) =>
-                                                    onCheckedChange(
-                                                        checked,
-                                                        habit.id
-                                                    )
-                                                }
-                                            />
+                        return (
+                            <Card
+                                key={habit.id}
+                                className="hover:bg-accent/50 transition-colors"
+                            >
+                                <CardContent className="p-4 flex flex-col justify-between h-full">
+                                    <div className="flex-1 flex flex-col gap-1">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold">
+                                                {habit.title}
+                                            </h3>
+                                            <div className="w-5 h-5">
+                                                <HabitCell
+                                                    habit={habit}
+                                                    date={today}
+                                                    isEditable={true}
+                                                    isChecked={isChecked}
+                                                    onCheckedChange={(
+                                                        checked
+                                                    ) =>
+                                                        onCheckedChange(
+                                                            checked,
+                                                            habit.id
+                                                        )
+                                                    }
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    {/* <p className="text-sm text-muted-foreground">
+                                        {/* <p className="text-sm text-muted-foreground">
                                     {habit.description ||
                                         "Description unavailable"}
                                 </p> */}
-                                </div>
-                                <div className="mt-auto pt-2">
-                                    <StreakBoxes
-                                        habit={habit}
-                                        habitTracker={habitTracker}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    );
-                })}
-            </div>
+                                    </div>
+                                    <div className="mt-auto pt-2">
+                                        <StreakBoxes
+                                            habit={habit}
+                                            habitTracker={habitTracker}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
+                </div>
+            </ScrollArea>
         </>
     );
 };
