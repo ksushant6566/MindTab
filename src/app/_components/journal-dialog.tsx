@@ -18,6 +18,7 @@ import {
     SelectValue,
 } from "~/components/ui/select";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { TipTapEditor } from "~/components/text-editor";
 import { api } from "~/trpc/react";
 import { Edit3, FolderOpen } from "lucide-react";
@@ -71,11 +72,15 @@ export const JournalDialog = ({
 
     const { mutate: updateJournal, isPending: isUpdatingJournal } =
         api.journals.update.useMutation({
+            onSuccess: () => {
+                setMode("view");
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to update note");
+            },
             onSettled: () => {
                 apiUtils.journals.getAll.invalidate();
                 apiUtils.journals.search.invalidate();
-                // onOpenChange(false)
-                setMode("view");
             },
         });
 

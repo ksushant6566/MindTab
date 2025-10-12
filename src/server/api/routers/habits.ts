@@ -1,5 +1,6 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { habits, habitTracker, users } from "~/server/db/schema";
 import { CreateHabitDto, UpdateHabitDto } from "../dtos/habits";
@@ -8,21 +9,50 @@ export const habitsRouter = createTRPCRouter({
     create: protectedProcedure
         .input(CreateHabitDto)
         .mutation(async ({ ctx, input }) => {
-            await ctx.db
-                .insert(habits)
-                .values({
-                    ...input,
-                    userId: ctx.session.user.id,
-                })
-                .onConflictDoUpdate({
-                    target: [habits.title, habits.userId],
-                    set: { deletedAt: null },
+            // Check if a habit with the same title already exists for this user (not deleted)
+            const existingHabit = await ctx.db.query.habits.findFirst({
+                where: and(
+                    eq(habits.userId, ctx.session.user.id),
+                    eq(habits.title, input.title ?? ""),
+                    isNull(habits.deletedAt)
+                ),
+            });
+
+            if (existingHabit) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: `A habit named "${input.title}" already exists. Please choose a different name.`,
                 });
+            }
+
+            await ctx.db.insert(habits).values({
+                ...input,
+                userId: ctx.session.user.id,
+            });
         }),
 
     update: protectedProcedure
         .input(UpdateHabitDto)
         .mutation(async ({ ctx, input }) => {
+            // If title is being updated, check for duplicates
+            if (input.title) {
+                const existingHabit = await ctx.db.query.habits.findFirst({
+                    where: and(
+                        eq(habits.userId, ctx.session.user.id),
+                        eq(habits.title, input.title),
+                        isNull(habits.deletedAt),
+                        not(eq(habits.id, input.id)) // Exclude the current habit
+                    ),
+                });
+
+                if (existingHabit) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message: `A habit named "${input.title}" already exists. Please choose a different name.`,
+                    });
+                }
+            }
+
             await ctx.db
                 .update(habits)
                 .set(input)

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS "goal_title_user_id_unique_idx";

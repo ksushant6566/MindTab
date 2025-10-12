@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/select";
 import { FolderOpen } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { TipTapEditor } from "~/components/text-editor/index";
 import { api } from "~/trpc/react";
 
@@ -44,8 +45,7 @@ export const CreateJournalDialog = ({
 
     const { mutate: createJournal, isPending: isCreatingJournal } =
         api.journals.create.useMutation({
-            onSettled: () => {
-                apiUtils.journals.getAll.invalidate();
+            onSuccess: () => {
                 onOpenChange(false);
                 // Reset form
                 setInfo({
@@ -53,6 +53,12 @@ export const CreateJournalDialog = ({
                     content: "",
                     projectId: activeProjectId || null,
                 });
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to create note");
+            },
+            onSettled: () => {
+                apiUtils.journals.getAll.invalidate();
             },
         });
 

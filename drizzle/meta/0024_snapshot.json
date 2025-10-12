@@ -1,0 +1,1331 @@
+{
+  "id": "df16c9e7-605d-4eaf-bc56-73fe2d4de812",
+  "prevId": "d5c0f11f-1145-47fb-a106-771e48093848",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.mindmap_account": {
+      "name": "mindmap_account",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_account_id": {
+          "name": "provider_account_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "token_type": {
+          "name": "token_type",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session_state": {
+          "name": "session_state",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "account_user_id_idx": {
+          "name": "account_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_account_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_account_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_account",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "mindmap_account_provider_provider_account_id_pk": {
+          "name": "mindmap_account_provider_provider_account_id_pk",
+          "columns": [
+            "provider",
+            "provider_account_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_goal": {
+      "name": "mindmap_goal",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "goal_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "priority": {
+          "name": "priority",
+          "type": "goal_priority",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'priority_1'"
+        },
+        "impact": {
+          "name": "impact",
+          "type": "goal_impact",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'medium'"
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "goal_user_id_idx": {
+          "name": "goal_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "goal_position_idx": {
+          "name": "goal_position_idx",
+          "columns": [
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "goal_project_id_idx": {
+          "name": "goal_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_goal_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_goal_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_goal",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mindmap_goal_project_id_mindmap_project_id_fk": {
+          "name": "mindmap_goal_project_id_mindmap_project_id_fk",
+          "tableFrom": "mindmap_goal",
+          "tableTo": "mindmap_project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_habit_tracker": {
+      "name": "mindmap_habit_tracker",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "habit_id": {
+          "name": "habit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "habit_tracker_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "habit_tracker_habit_id_user_id_idx": {
+          "name": "habit_tracker_habit_id_user_id_idx",
+          "columns": [
+            {
+              "expression": "habit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "habit_tracker_habit_id_user_id_date_idx": {
+          "name": "habit_tracker_habit_id_user_id_date_idx",
+          "columns": [
+            {
+              "expression": "habit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_habit_tracker_habit_id_mindmap_habit_id_fk": {
+          "name": "mindmap_habit_tracker_habit_id_mindmap_habit_id_fk",
+          "tableFrom": "mindmap_habit_tracker",
+          "tableTo": "mindmap_habit",
+          "columnsFrom": [
+            "habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "mindmap_habit_tracker_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_habit_tracker_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_habit_tracker",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_habit": {
+      "name": "mindmap_habit",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "frequency": {
+          "name": "frequency",
+          "type": "habit_frequency",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'daily'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "habit_title_user_id_unique_idx": {
+          "name": "habit_title_user_id_unique_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "habit_user_id_idx": {
+          "name": "habit_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_habit_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_habit_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_habit",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_journal": {
+      "name": "mindmap_journal",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "journal_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'article'"
+        },
+        "source": {
+          "name": "source",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'mindmap'"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "journal_title_user_id_unique_idx": {
+          "name": "journal_title_user_id_unique_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_user_id_idx": {
+          "name": "journal_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_project_id_idx": {
+          "name": "journal_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_journal_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_journal_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_journal",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mindmap_journal_project_id_mindmap_project_id_fk": {
+          "name": "mindmap_journal_project_id_mindmap_project_id_fk",
+          "tableFrom": "mindmap_journal",
+          "tableTo": "mindmap_project",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_journal_goal": {
+      "name": "mindmap_journal_goal",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "journal_goal_journal_id_idx": {
+          "name": "journal_goal_journal_id_idx",
+          "columns": [
+            {
+              "expression": "journal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_goal_goal_id_idx": {
+          "name": "journal_goal_goal_id_idx",
+          "columns": [
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_goal_idx": {
+          "name": "journal_goal_idx",
+          "columns": [
+            {
+              "expression": "journal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_journal_goal_journal_id_mindmap_journal_id_fk": {
+          "name": "mindmap_journal_goal_journal_id_mindmap_journal_id_fk",
+          "tableFrom": "mindmap_journal_goal",
+          "tableTo": "mindmap_journal",
+          "columnsFrom": [
+            "journal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "mindmap_journal_goal_goal_id_mindmap_goal_id_fk": {
+          "name": "mindmap_journal_goal_goal_id_mindmap_goal_id_fk",
+          "tableFrom": "mindmap_journal_goal",
+          "tableTo": "mindmap_goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_journal_habits": {
+      "name": "mindmap_journal_habits",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "journal_id": {
+          "name": "journal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "habit_id": {
+          "name": "habit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "journal_habit_idx": {
+          "name": "journal_habit_idx",
+          "columns": [
+            {
+              "expression": "journal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "habit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_habits_journal_id_idx": {
+          "name": "journal_habits_journal_id_idx",
+          "columns": [
+            {
+              "expression": "journal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "journal_habits_habit_id_idx": {
+          "name": "journal_habits_habit_id_idx",
+          "columns": [
+            {
+              "expression": "habit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_journal_habits_journal_id_mindmap_journal_id_fk": {
+          "name": "mindmap_journal_habits_journal_id_mindmap_journal_id_fk",
+          "tableFrom": "mindmap_journal_habits",
+          "tableTo": "mindmap_journal",
+          "columnsFrom": [
+            "journal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "mindmap_journal_habits_habit_id_mindmap_habit_id_fk": {
+          "name": "mindmap_journal_habits_habit_id_mindmap_habit_id_fk",
+          "tableFrom": "mindmap_journal_habits",
+          "tableTo": "mindmap_habit",
+          "columnsFrom": [
+            "habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_project": {
+      "name": "mindmap_project",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "project_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "project_created_by_idx": {
+          "name": "project_created_by_idx",
+          "columns": [
+            {
+              "expression": "created_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_last_updated_by_idx": {
+          "name": "project_last_updated_by_idx",
+          "columns": [
+            {
+              "expression": "last_updated_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_status_idx": {
+          "name": "project_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_project_created_by_mindmap_user_id_fk": {
+          "name": "mindmap_project_created_by_mindmap_user_id_fk",
+          "tableFrom": "mindmap_project",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "mindmap_project_last_updated_by_mindmap_user_id_fk": {
+          "name": "mindmap_project_last_updated_by_mindmap_user_id_fk",
+          "tableFrom": "mindmap_project",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "last_updated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_session": {
+      "name": "mindmap_session",
+      "schema": "",
+      "columns": {
+        "session_token": {
+          "name": "session_token",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "session_user_id_idx": {
+          "name": "session_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "mindmap_session_user_id_mindmap_user_id_fk": {
+          "name": "mindmap_session_user_id_mindmap_user_id_fk",
+          "tableFrom": "mindmap_session",
+          "tableTo": "mindmap_user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_user": {
+      "name": "mindmap_user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "image": {
+          "name": "image",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "xp": {
+          "name": "xp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.mindmap_verification_token": {
+      "name": "mindmap_verification_token",
+      "schema": "",
+      "columns": {
+        "identifier": {
+          "name": "identifier",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "mindmap_verification_token_identifier_token_pk": {
+          "name": "mindmap_verification_token_identifier_token_pk",
+          "columns": [
+            "identifier",
+            "token"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {
+    "public.goal_impact": {
+      "name": "goal_impact",
+      "schema": "public",
+      "values": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "public.goal_priority": {
+      "name": "goal_priority",
+      "schema": "public",
+      "values": [
+        "priority_1",
+        "priority_2",
+        "priority_3",
+        "priority_4"
+      ]
+    },
+    "public.goal_status": {
+      "name": "goal_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "in_progress",
+        "completed",
+        "archived"
+      ]
+    },
+    "public.habit_frequency": {
+      "name": "habit_frequency",
+      "schema": "public",
+      "values": [
+        "daily",
+        "weekly"
+      ]
+    },
+    "public.habit_tracker": {
+      "name": "habit_tracker",
+      "schema": "public",
+      "values": [
+        "daily",
+        "weekly",
+        "monthly"
+      ]
+    },
+    "public.habit_tracker_status": {
+      "name": "habit_tracker_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "completed"
+      ]
+    },
+    "public.journal_type": {
+      "name": "journal_type",
+      "schema": "public",
+      "values": [
+        "article",
+        "book",
+        "video",
+        "podcast",
+        "website"
+      ]
+    },
+    "public.project_status": {
+      "name": "project_status",
+      "schema": "public",
+      "values": [
+        "active",
+        "paused",
+        "completed",
+        "archived"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

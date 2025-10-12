@@ -1,5 +1,6 @@
-import { and, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { journal as journals } from "~/server/db/schema";
 import { CreateJournalDto, UpdateJournalDto } from "../dtos/journals";
@@ -8,6 +9,22 @@ export const journalsRouter = createTRPCRouter({
     create: protectedProcedure
         .input(CreateJournalDto)
         .mutation(async ({ ctx, input }) => {
+            // Check if a journal with the same title already exists for this user (not deleted)
+            const existingJournal = await ctx.db.query.journal.findFirst({
+                where: and(
+                    eq(journals.userId, ctx.session.user.id),
+                    eq(journals.title, input.title),
+                    isNull(journals.deletedAt)
+                ),
+            });
+
+            if (existingJournal) {
+                throw new TRPCError({
+                    code: "CONFLICT",
+                    message: `A note named "${input.title}" already exists. Please choose a different name.`,
+                });
+            }
+
             await ctx.db.insert(journals).values({
                 ...input,
                 userId: ctx.session.user.id,
@@ -17,6 +34,25 @@ export const journalsRouter = createTRPCRouter({
     update: protectedProcedure
         .input(UpdateJournalDto)
         .mutation(async ({ ctx, input }) => {
+            // If title is being updated, check for duplicates
+            if (input.title) {
+                const existingJournal = await ctx.db.query.journal.findFirst({
+                    where: and(
+                        eq(journals.userId, ctx.session.user.id),
+                        eq(journals.title, input.title),
+                        isNull(journals.deletedAt),
+                        not(eq(journals.id, input.id)) // Exclude the current journal
+                    ),
+                });
+
+                if (existingJournal) {
+                    throw new TRPCError({
+                        code: "CONFLICT",
+                        message: `A note named "${input.title}" already exists. Please choose a different name.`,
+                    });
+                }
+            }
+
             await ctx.db
                 .update(journals)
                 .set(input)

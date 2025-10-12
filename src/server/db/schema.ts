@@ -66,10 +66,6 @@ export const goals = createTable(
         }),
     },
     (goal) => ({
-        userTitleIndex: uniqueIndex("goal_title_user_id_unique_idx").on(
-            goal.userId,
-            goal.title
-        ),
         userIdIdx: index("goal_user_id_idx").on(goal.userId),
         positionIdx: index("goal_position_idx").on(goal.position),
         projectIdIdx: index("goal_project_id_idx").on(goal.projectId),

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
+import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { CollapsedHabits } from "./collapsed-habits";
 import { HabitTable } from "./habit-table";
@@ -98,6 +99,7 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
                     undefined,
                     context?.previousHabits ?? []
                 );
+                toast.error(error.message || "Failed to create habit");
             },
             onSettled() {
                 apiUtils.habits.getAll.invalidate();
@@ -106,6 +108,9 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
 
     const { mutate: updateHabit, isPending: isUpdatingHabit } =
         api.habits.update.useMutation({
+            onError(error) {
+                toast.error(error.message || "Failed to update habit");
+            },
             onSettled() {
                 apiUtils.habits.getAll.invalidate();
             },

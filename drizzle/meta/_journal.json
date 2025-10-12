@@ -169,6 +169,13 @@
       "when": 1758120575712,
       "tag": "0023_rare_maelstrom",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1760296440451,
+      "tag": "0024_useful_switch",
+      "breakpoints": true
     }
   ]
 }
