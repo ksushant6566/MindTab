@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import { api } from "~/trpc/react";
 import { CollapsedHabits } from "./collapsed-habits";
 import { HabitTable } from "./habit-table";
-import { HabitTableSkeleton } from "./habit-table-skeleton";
+import { CreateHabitDialog } from "./create-habit-dialog";
 
+import { HabitTableSkeleton } from "./habit-table-skeleton";
 export type ViewMode = "table" | "cards";
 
 type HabitsProps = {
@@ -17,6 +18,7 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
     const apiUtils = api.useUtils();
     const successAudioRef = useRef<HTMLAudioElement | null>(null);
     const errorAudioRef = useRef<HTMLAudioElement | null>(null);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
     useEffect(() => {
         successAudioRef.current = new Audio("/audio/success.mp3");
@@ -76,30 +78,13 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
 
     const { mutate: createHabit, isPending: isCreatingHabit } =
         api.habits.create.useMutation({
-            async onMutate(variables) {
-                await apiUtils.habits.getAll.cancel();
-                const previousHabits = apiUtils.habits.getAll.getData() ?? [];
-
-                const newHabit = {
-                    ...variables,
-                    id: "1",
-                    userId: "1",
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                } as any;
-
-                apiUtils.habits.getAll.setData(undefined, [
-                    ...previousHabits,
-                    newHabit,
-                ]);
-                return { previousHabits };
+            onSuccess() {
+                setIsCreateDialogOpen(false);
             },
-            onError(error, variables, context) {
-                apiUtils.habits.getAll.setData(
-                    undefined,
-                    context?.previousHabits ?? []
-                );
-                toast.error(error.message || "Failed to create habit");
+            onError(error) {
+                toast.error(error.message || "Failed to create habit", {
+                    position: "top-right",
+                });
             },
             onSettled() {
                 apiUtils.habits.getAll.invalidate();
@@ -109,7 +94,9 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
     const { mutate: updateHabit, isPending: isUpdatingHabit } =
         api.habits.update.useMutation({
             onError(error) {
-                toast.error(error.message || "Failed to update habit");
+                toast.error(error.message || "Failed to update habit", {
+                    position: "top-right",
+                });
             },
             onSettled() {
                 apiUtils.habits.getAll.invalidate();
@@ -209,25 +196,6 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
 
     return (
         <div className="flex flex-col gap-4">
-            {/* <div className="flex justify-end">
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleViewModeChange('table')}
-          >
-            <Table2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === 'collapsed' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => handleViewModeChange('collapsed')}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-        </div>
-      </div> */}
-
             {isFetchingHabits ? (
                 <HabitTableSkeleton />
             ) : viewMode === "table" ? (
@@ -245,15 +213,22 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
                     habitTracker={habitTracker ?? []}
                 />
             ) : (
-                <div className="">
-                    <CollapsedHabits
-                        habits={habits ?? []}
-                        habitTracker={habitTracker ?? []}
-                        trackHabit={trackHabit}
-                        untrackHabit={untrackHabit}
-                    />
-                </div>
+                <CollapsedHabits
+                    habits={habits ?? []}
+                    habitTracker={habitTracker ?? []}
+                    trackHabit={trackHabit}
+                    untrackHabit={untrackHabit}
+                    setIsCreateDialogOpen={setIsCreateDialogOpen}
+                    isCreatingHabit={isCreatingHabit}
+                />
             )}
+            <CreateHabitDialog
+                isOpen={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                onSave={createHabit}
+                onCancel={() => setIsCreateDialogOpen(false)}
+                loading={isCreatingHabit}
+            />
         </div>
     );
 };

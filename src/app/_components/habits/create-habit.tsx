@@ -1,5 +1,5 @@
 import { createInsertSchema } from "drizzle-zod";
-import { useState } from "react";
+import { useRef, useState, KeyboardEvent } from "react";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -10,17 +10,22 @@ const ZInsertHabit = createInsertSchema(habits).omit({ userId: true });
 export type CreateHabitProps = {
     onSave: (habit: z.infer<typeof ZInsertHabit>) => void;
     onCancel: () => void;
+    loading?: boolean;
 };
 
 export const CreateHabit: React.FC<CreateHabitProps> = ({
     onSave,
     onCancel,
+    loading,
 }) => {
     const [formData, setFormData] = useState<z.infer<typeof ZInsertHabit>>({
         title: "",
         description: "",
         frequency: "daily",
     });
+
+    const titleRef = useRef<HTMLInputElement>(null);
+    const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
     const handleChange = (
         e: React.ChangeEvent<
@@ -36,12 +41,24 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
         onSave(formData);
     };
 
+    const handleKeyDown = (
+        e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        if (e.key === "ArrowUp" && e.target === descriptionRef.current) {
+            e.preventDefault();
+            titleRef.current?.focus();
+        } else if (e.key === "ArrowDown" && e.target === titleRef.current) {
+            e.preventDefault();
+            descriptionRef.current?.focus();
+        }
+    };
+
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-2 rounded-lg border p-4"
+            className="flex flex-col gap-2 rounded-lg border p-6"
         >
-            <div className="">
+            <div className="space-y-2">
                 <input
                     type="text"
                     id="title"
@@ -49,8 +66,10 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
                     placeholder="Habit"
                     value={formData.title || ""}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     required
-                    className="w-full bg-inherit text-base font-semibold focus:border-none focus:outline-none"
+                    className="w-full bg-inherit text-xl font-semibold focus:border-none focus:outline-none"
+                    ref={titleRef}
                 />
                 <textarea
                     id="description"
@@ -58,13 +77,15 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
                     placeholder="Description"
                     value={formData.description || ""}
                     onChange={handleChange}
-                    className="w-full resize-none overflow-hidden bg-inherit text-sm font-normal focus:border-none focus:outline-none"
+                    onKeyDown={handleKeyDown}
+                    className="w-full resize-none overflow-hidden bg-inherit text-base font-normal focus:border-none focus:outline-none"
                     style={{ height: "auto" }}
                     onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
                         target.style.height = "auto";
                         target.style.height = `${target.scrollHeight}px`;
                     }}
+                    ref={descriptionRef}
                 />
             </div>
             <div className="flex justify-end items-center gap-2">
@@ -77,7 +98,13 @@ export const CreateHabit: React.FC<CreateHabitProps> = ({
                 >
                     Cancel
                 </Button>
-                <Button size={"sm"} type="submit" className="h-8 text-xs">
+                <Button
+                    size={"sm"}
+                    type="submit"
+                    className="h-8 text-xs"
+                    loading={loading}
+                    disabled={loading || !formData.title}
+                >
                     Add habit
                 </Button>
             </div>
