@@ -197,7 +197,7 @@ export const Habits: React.FC<HabitsProps> = ({ viewMode }) => {
     return (
         <div className="flex flex-col gap-4">
             {isFetchingHabits ? (
-                <HabitTableSkeleton />
+                <HabitTableSkeleton viewMode={viewMode} />
             ) : viewMode === "table" ? (
                 <HabitTable
                     habits={habits ?? []}

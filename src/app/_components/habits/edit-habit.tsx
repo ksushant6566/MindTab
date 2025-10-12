@@ -1,5 +1,5 @@
 import { createInsertSchema } from "drizzle-zod";
-import { useState } from "react";
+import { KeyboardEvent, useRef, useState } from "react";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -11,21 +11,24 @@ export type EditHabitProps = {
     onSave: (habit: z.infer<typeof ZInsertHabit>) => void;
     onCancel: () => void;
     habit: typeof habits.$inferSelect;
+    loading?: boolean;
 };
 
 export const EditHabit: React.FC<EditHabitProps> = ({
     onSave,
     onCancel,
     habit,
+    loading,
 }) => {
-    console.log(habit);
-
     const [formData, setFormData] = useState<z.infer<typeof ZInsertHabit>>({
         id: habit.id,
         title: habit.title,
         description: habit.description,
         frequency: habit.frequency,
     });
+
+    const titleRef = useRef<HTMLInputElement>(null);
+    const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
     const handleChange = (
         e: React.ChangeEvent<
@@ -41,12 +44,26 @@ export const EditHabit: React.FC<EditHabitProps> = ({
         onSave(formData);
     };
 
+    const handleKeyDown = (
+        e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        if (e.key === "ArrowUp" && e.target === descriptionRef.current) {
+            e.preventDefault();
+            titleRef.current?.focus();
+        } else if (e.key === "ArrowDown" && e.target === titleRef.current) {
+            e.preventDefault();
+            descriptionRef.current?.focus();
+        }
+    };
+
+    titleRef.current?.focus();
+
     return (
         <form
             onSubmit={handleSubmit}
-            className="flex flex-col gap-2 rounded-lg border p-4"
+            className="flex flex-col gap-2 rounded-lg border p-6"
         >
-            <div className="">
+            <div className="space-y-2">
                 <input
                     type="text"
                     id="title"
@@ -55,7 +72,9 @@ export const EditHabit: React.FC<EditHabitProps> = ({
                     value={formData.title || ""}
                     onChange={handleChange}
                     required
-                    className="w-full bg-inherit text-base font-semibold focus:border-none focus:outline-none"
+                    className="w-full bg-inherit text-xl font-semibold focus:border-none focus:outline-none"
+                    ref={titleRef}
+                    onKeyDown={handleKeyDown}
                 />
                 <textarea
                     id="description"
@@ -63,13 +82,15 @@ export const EditHabit: React.FC<EditHabitProps> = ({
                     placeholder="Description"
                     value={formData.description || ""}
                     onChange={handleChange}
-                    className="w-full resize-none overflow-hidden bg-inherit text-sm font-normal focus:border-none focus:outline-none"
+                    className="w-full resize-none overflow-hidden bg-inherit text-base font-normal focus:border-none focus:outline-none"
                     style={{ height: "auto" }}
                     onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
                         target.style.height = "auto";
                         target.style.height = `${target.scrollHeight}px`;
                     }}
+                    ref={descriptionRef}
+                    onKeyDown={handleKeyDown}
                 />
             </div>
             <div className="flex justify-end items-center gap-2">
@@ -79,10 +100,17 @@ export const EditHabit: React.FC<EditHabitProps> = ({
                     className="h-8 text-xs"
                     onClick={onCancel}
                     type="button"
+                    disabled={loading}
                 >
                     Cancel
                 </Button>
-                <Button size={"sm"} type="submit" className="h-8 text-xs">
+                <Button
+                    size={"sm"}
+                    type="submit"
+                    className="h-8 text-xs"
+                    loading={loading}
+                    disabled={loading}
+                >
                     Save
                 </Button>
             </div>

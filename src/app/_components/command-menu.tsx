@@ -3,6 +3,7 @@
 import {
     FileText,
     Goal,
+    Grid,
     Laptop,
     Loader,
     LogOut,
@@ -30,8 +31,11 @@ import { CreateJournalDialog } from "./create-journal-dialog";
 import { JournalDialog } from "./journal-dialog";
 import { CreateGoalDialog } from "./goals/create-goal-dialog";
 import { EditGoalDialog } from "./goals/edit-goal-dialog";
-import { goals } from "~/server/db/schema";
+import { EditHabitDialog } from "./habits/edit-habit-dialog";
+import { goals, habits } from "~/server/db/schema";
 import { useAppStore } from "~/lib/store";
+import { toast } from "sonner";
+import { CreateHabitDialog } from "./habits/create-habit-dialog";
 
 export const CommandMenu = () => {
     const { setTheme } = useTheme();
@@ -65,17 +69,39 @@ export const CommandMenu = () => {
     };
 
     const [isCreateGoalDialogOpen, setIsCreateGoalDialogOpen] = useState(false);
+
     const onCreateGoalDialogOpenChange = (open: boolean) => {
         setIsCreateGoalDialogOpen(open);
     };
 
     const [isEditGoalDialogOpen, setIsEditGoalDialogOpen] = useState(false);
+
     const [currentGoal, setCurrentGoal] = useState<
         typeof goals.$inferSelect | null
     >(null);
 
     const onEditGoalDialogOpenChange = (open: boolean) => {
         setIsEditGoalDialogOpen(open);
+    };
+
+    const [currentHabit, setCurrentHabit] = useState<
+        typeof habits.$inferSelect | null
+    >(null);
+
+    const [isEditHabitDialogOpen, setIsEditHabitDialogOpen] = useState(false);
+
+    const onEditHabitDialogOpenChange = (open: boolean) => {
+        setIsEditHabitDialogOpen(open);
+        if (!open) {
+            setCurrentHabit(null);
+        }
+    };
+
+    const [isCreateHabitDialogOpen, setIsCreateHabitDialogOpen] =
+        useState(false);
+
+    const onCreateHabitDialogOpenChange = (open: boolean) => {
+        setIsCreateHabitDialogOpen(open);
     };
 
     const { mutate: createGoal, isPending: isCreatingGoal } =
@@ -96,6 +122,36 @@ export const CommandMenu = () => {
             },
         });
 
+    const { mutate: updateHabit, isPending: isUpdatingHabit } =
+        api.habits.update.useMutation({
+            onSuccess: () => {
+                setIsEditHabitDialogOpen(false);
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to update habit", {
+                    position: "top-right",
+                });
+            },
+            onSettled: () => {
+                apiUtils.habits.getAll.invalidate();
+            },
+        });
+
+    const { mutate: createHabit, isPending: isCreatingHabit } =
+        api.habits.create.useMutation({
+            onSuccess: () => {
+                setIsCreateHabitDialogOpen(false);
+            },
+            onError: (error) => {
+                toast.error(error.message || "Failed to create habit", {
+                    position: "top-right",
+                });
+            },
+            onSettled: () => {
+                apiUtils.habits.getAll.invalidate();
+            },
+        });
+
     const { data: journalsSearchResults, isFetching: isFetchingSearchResults } =
         api.journals.search.useQuery(
             {
@@ -110,6 +166,18 @@ export const CommandMenu = () => {
 
     const { data: goalsSearchResults, isFetching: isFetchingGoals } =
         api.goals.search.useQuery(
+            {
+                query: searchQuery ?? "",
+            },
+            {
+                enabled: open,
+                refetchOnWindowFocus: false,
+                refetchOnMount: false,
+            }
+        );
+
+    const { data: habitsSearchResults, isFetching: isFetchingHabits } =
+        api.habits.search.useQuery(
             {
                 query: searchQuery ?? "",
             },
@@ -154,33 +222,13 @@ export const CommandMenu = () => {
                     {
                         label: "Search Goals",
                         icon: Goal,
+                        shortcut: "Type to search...",
                         onClick: () => {
-                            setOpen(false);
+                            // setOpen(false);
                         },
                     },
                 ],
             },
-            // {
-            //   heading: 'Habits',
-            //   items: [
-            //     {
-            //       label: 'Create Habit',
-            //       icon: PlusIcon,
-            //       shortcut: '⌘ + H',
-            //       onClick: () => {
-            //         setOpen(false)
-            //       },
-            //     },
-            //     {
-            //       label: 'Search Habits',
-            //       icon: Grid,
-            //       onClick: () => {
-            //         console.log('Create Habit')
-            //         setOpen(false)
-            //       },
-            //     },
-            //   ],
-            // },
             {
                 heading: "Notes",
                 items: [
@@ -199,6 +247,27 @@ export const CommandMenu = () => {
                         shortcut: "Type to search...",
                         onClick: () => {
                             // console.log("Search Notes");
+                        },
+                    },
+                ],
+            },
+            {
+                heading: "Habits",
+                items: [
+                    {
+                        label: "Create Habit",
+                        icon: PlusIcon,
+                        onClick: () => {
+                            setIsCreateHabitDialogOpen(true);
+                            setOpen(false);
+                        },
+                    },
+                    {
+                        label: "Search Habits",
+                        icon: Grid,
+                        shortcut: "Type to search...",
+                        onClick: () => {
+                            // console.log("Search Habits");
                         },
                     },
                 ],
@@ -274,8 +343,20 @@ export const CommandMenu = () => {
                 },
             })) || [];
 
-        return [...journalResults, ...goalResults];
-    }, [journalsSearchResults, goalsSearchResults]);
+        const habitResults =
+            habitsSearchResults?.map((habit) => ({
+                label: habit.title!,
+                icon: Grid,
+                onClick: () => {
+                    setCurrentHabit(habit);
+                    setSearchQuery(null);
+                    setIsEditHabitDialogOpen(true);
+                    setOpen(false);
+                },
+            })) || [];
+
+        return [...journalResults, ...goalResults, ...habitResults];
+    }, [journalsSearchResults, goalsSearchResults, habitsSearchResults]);
 
     const placeholders = [
         "Search for anything ...",
@@ -322,7 +403,9 @@ export const CommandMenu = () => {
                 />
                 <CommandList>
                     <CommandEmpty>
-                        {isFetchingSearchResults || isFetchingGoals ? (
+                        {isFetchingSearchResults ||
+                        isFetchingGoals ||
+                        isFetchingHabits ? (
                             <div className="flex items-center justify-center">
                                 <span className="animate-spin">
                                     <Loader className="h-5 w-5" />
@@ -385,6 +468,31 @@ export const CommandMenu = () => {
                     loading={isUpdatingGoal}
                 />
             )}
+            {currentHabit && (
+                <EditHabitDialog
+                    isOpen={isEditHabitDialogOpen}
+                    onOpenChange={onEditHabitDialogOpenChange}
+                    habit={currentHabit}
+                    onSave={(values) =>
+                        updateHabit({
+                            ...values,
+                            id: values.id!,
+                            title: values.title ?? undefined,
+                            description: values.description ?? undefined,
+                        })
+                    }
+                    onCancel={() => setIsEditHabitDialogOpen(false)}
+                    loading={isUpdatingHabit}
+                    defaultMode="view"
+                />
+            )}
+            <CreateHabitDialog
+                isOpen={isCreateHabitDialogOpen}
+                onOpenChange={onCreateHabitDialogOpenChange}
+                onSave={createHabit}
+                onCancel={() => setIsCreateHabitDialogOpen(false)}
+                loading={isCreatingHabit}
+            />
         </div>
     );
 };

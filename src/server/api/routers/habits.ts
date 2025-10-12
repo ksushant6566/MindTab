@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, not, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -13,8 +13,7 @@ export const habitsRouter = createTRPCRouter({
             const existingHabit = await ctx.db.query.habits.findFirst({
                 where: and(
                     eq(habits.userId, ctx.session.user.id),
-                    eq(habits.title, input.title ?? ""),
-                    isNull(habits.deletedAt)
+                    eq(habits.title, input.title ?? "")
                 ),
             });
 
@@ -62,11 +61,7 @@ export const habitsRouter = createTRPCRouter({
     delete: protectedProcedure
         .input(z.object({ id: z.string().uuid() }))
         .mutation(async ({ ctx, input }) => {
-            // shadow delete
-            await ctx.db
-                .update(habits)
-                .set({ deletedAt: new Date() })
-                .where(eq(habits.id, input.id));
+            await ctx.db.delete(habits).where(eq(habits.id, input.id));
         }),
 
     get: protectedProcedure
@@ -146,5 +141,20 @@ export const habitsRouter = createTRPCRouter({
                     .set({ xp: sql`${users.xp} - 10` })
                     .where(eq(users.id, ctx.session.user.id));
             });
+        }),
+    search: protectedProcedure
+        .input(z.object({ query: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.db
+                .select()
+                .from(habits)
+                .where(
+                    and(
+                        eq(habits.userId, ctx.session.user.id),
+                        ilike(habits.title, `%${input.query}%`),
+                        isNull(habits.deletedAt)
+                    )
+                )
+                .limit(5);
         }),
 });
