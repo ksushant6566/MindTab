@@ -56,4 +56,4 @@ We're continuously working to improve MindTab. If you have any feedback or sugge
 
 ---
 
-Thanks for checking out MindTab! We're excited to help you achieve your goals and capture your thoughts in the most efficient way possible. Happy goal-setting and journaling!
+Happy goal-setting and journaling!
