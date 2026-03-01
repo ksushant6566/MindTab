@@ -5,6 +5,7 @@ import Auth from '~/app/_components/auth'
 import { Header } from './_components/header'
 import { headers } from 'next/headers'
 import MobilePlaceholder from './_components/mobile-layout-placeholder'
+import { Onboarding } from './_components/onboarding'
 
 export default async function App() {
   const session = await getServerAuthSession()
@@ -20,6 +21,14 @@ export default async function App() {
   if (isMobile) {
     return (
       <MobilePlaceholder />
+    )
+  }
+
+  if (!user.onboardingCompleted) {
+    return (
+      <HydrateClient>
+        <Onboarding userName={user.name || 'there'} />
+      </HydrateClient>
     )
   }
 
