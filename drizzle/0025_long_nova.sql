@@ -1,0 +1,1 @@
+ALTER TABLE "mindmap_user" ADD COLUMN "onboarding_completed" boolean DEFAULT false NOT NULL;

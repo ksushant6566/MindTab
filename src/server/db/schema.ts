@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+    boolean,
     date,
     index,
     integer,
@@ -398,6 +399,7 @@ export const users = createTable("user", {
     }).default(sql`CURRENT_TIMESTAMP`),
     image: varchar("image", { length: 255 }),
     xp: integer("xp").notNull().default(0),
+    onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
         .default(sql`CURRENT_TIMESTAMP`)
         .notNull(),

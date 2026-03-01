@@ -176,6 +176,13 @@
       "when": 1760296440451,
       "tag": "0024_useful_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1772385240606,
+      "tag": "0025_long_nova",
+      "breakpoints": true
     }
   ]
 }
