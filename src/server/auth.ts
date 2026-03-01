@@ -27,15 +27,13 @@ declare module 'next-auth' {
     user: {
       id: string
       xp: number
-      // ...other properties
-      // role: UserRole;
+      onboardingCompleted: boolean
     } & DefaultSession['user']
   }
 
   interface User {
-    // ...other properties
-    // role: UserRole;
     xp: number
+    onboardingCompleted: boolean
   }
 }
 
@@ -52,6 +50,7 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         id: user.id,
         xp: user.xp,
+        onboardingCompleted: user.onboardingCompleted,
       },
     }),
     redirect: async () => '/',
