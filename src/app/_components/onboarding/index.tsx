@@ -29,12 +29,12 @@ export function Onboarding({ userName }: OnboardingProps) {
 
     const completeOnboarding = api.users.completeOnboarding.useMutation({
         onSuccess: () => {
-            setIsCompleting(true);
             setTimeout(() => {
                 router.refresh();
             }, 1500);
         },
         onError: (error) => {
+            setIsCompleting(false);
             toast.error(error.message || "Failed to complete onboarding");
         },
     });
@@ -53,6 +53,7 @@ export function Onboarding({ userName }: OnboardingProps) {
     };
 
     const handleOnboardingComplete = () => {
+        setIsCompleting(true);
         completeOnboarding.mutate();
     };
 
@@ -116,6 +117,8 @@ export function Onboarding({ userName }: OnboardingProps) {
                     ))}
                 </div>
             </div>
+
+            <p className="sr-only">Step {currentStep} of 4: {STEPS[currentStep - 1]!.label}</p>
 
             {/* Step Content */}
             <div className="w-full max-w-xl px-6">

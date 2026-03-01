@@ -14,9 +14,10 @@ import {
 } from "~/components/ui/select";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { goalPriorityEnum, goalImpactEnum } from "~/server/db/schema";
 
-type Priority = "priority_1" | "priority_2" | "priority_3" | "priority_4";
-type Impact = "low" | "medium" | "high";
+type Priority = (typeof goalPriorityEnum.enumValues)[number];
+type Impact = (typeof goalImpactEnum.enumValues)[number];
 
 const PRIORITY_CONFIG: Record<Priority, { label: string; color: string }> = {
     priority_1: { label: "Urgent", color: "text-red-500" },
