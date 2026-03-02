@@ -4,19 +4,31 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { WelcomeStep } from "./welcome-step";
-import { CreateProjectStep } from "./create-project-step";
-import { CreateGoalStep } from "./create-goal-step";
-import { CreateHabitStep } from "./create-habit-step";
 import { Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STEPS = [
-    { label: "Welcome", number: 1 },
-    { label: "Project", number: 2 },
-    { label: "Goal", number: 3 },
-    { label: "Habit", number: 4 },
+import { WelcomeStep } from "./welcome-step";
+import { CreateProjectStep } from "./create-project-step";
+import { CreateGoalStep, type CreatedGoalData } from "./create-goal-step";
+import { CreateHabitStep, type CreatedHabitData } from "./create-habit-step";
+import { NotesIntroStep } from "./notes-intro-step";
+import { ChromeExtensionStep } from "./chrome-extension-step";
+import { ChooseLayoutStep } from "./choose-layout-step";
+
+const TOTAL_STEPS = 7;
+
+const STEP_LABELS = [
+    "Welcome",
+    "Project",
+    "Goal",
+    "Habit",
+    "Notes",
+    "Extension",
+    "Layout",
 ] as const;
+
+// Steps that use wider container
+const WIDE_STEPS = new Set([1, 5, 7]);
 
 type OnboardingProps = {
     userName: string;
@@ -44,8 +56,13 @@ export function Onboarding({ userName }: OnboardingProps) {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [direction, setDirection] = useState(1);
-    const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
     const [isCompleting, setIsCompleting] = useState(false);
+
+    // Data passed between steps (also used as initial values when navigating back)
+    const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
+    const [createdProjectName, setCreatedProjectName] = useState<string | null>(null);
+    const [createdGoalData, setCreatedGoalData] = useState<CreatedGoalData | null>(null);
+    const [createdHabitData, setCreatedHabitData] = useState<CreatedHabitData | null>(null);
 
     const completeOnboarding = api.users.completeOnboarding.useMutation({
         onSuccess: () => {
@@ -61,7 +78,7 @@ export function Onboarding({ userName }: OnboardingProps) {
 
     const handleNext = () => {
         setDirection(1);
-        setCurrentStep((prev) => Math.min(prev + 1, 4));
+        setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
     };
 
     const handleBack = () => {
@@ -69,15 +86,27 @@ export function Onboarding({ userName }: OnboardingProps) {
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
-    const handleProjectCreated = (projectId: string) => {
+    const handleProjectCreated = (projectId: string, projectName: string) => {
         setCreatedProjectId(projectId);
+        setCreatedProjectName(projectName);
         handleNext();
+    };
+
+    const handleGoalCreated = (data: CreatedGoalData) => {
+        setCreatedGoalData(data);
+        handleNext();
+    };
+
+    const handleHabitCreated = (data: CreatedHabitData) => {
+        setCreatedHabitData(data);
     };
 
     const handleOnboardingComplete = () => {
         setIsCompleting(true);
         completeOnboarding.mutate();
     };
+
+    const useWideContainer = WIDE_STEPS.has(currentStep);
 
     if (isCompleting) {
         return (
@@ -106,8 +135,8 @@ export function Onboarding({ userName }: OnboardingProps) {
                         animate={{
                             opacity: [0, 1, 0],
                             scale: [0, 1.5, 0],
-                            x: Math.cos((i * 30 * Math.PI) / 180) * (120 + Math.random() * 80),
-                            y: Math.sin((i * 30 * Math.PI) / 180) * (120 + Math.random() * 80),
+                            x: Math.cos((i * 30 * Math.PI) / 180) * (120 + i * 8),
+                            y: Math.sin((i * 30 * Math.PI) / 180) * (120 + i * 8),
                         }}
                         transition={{
                             duration: 1.4,
@@ -173,67 +202,38 @@ export function Onboarding({ userName }: OnboardingProps) {
             {/* Subtle atmospheric glow */}
             <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-[600px] w-[800px] rounded-full bg-primary/[0.03] blur-[120px]" />
 
-            {/* Progress indicator */}
-            <div className="w-full max-w-md px-6 pt-12 pb-8 relative z-10">
-                <div className="flex items-center justify-between">
-                    {STEPS.map((step, index) => (
-                        <React.Fragment key={step.number}>
-                            <div className="flex flex-col items-center gap-2.5">
-                                <motion.div
-                                    className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-all duration-500 ${
-                                        currentStep > step.number
-                                            ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
-                                            : currentStep === step.number
-                                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                                              : "bg-muted/50 text-muted-foreground/50 border border-border/50"
-                                    }`}
-                                    layout
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    {currentStep > step.number ? (
-                                        <motion.div
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                                        >
-                                            <Check className="h-4 w-4" />
-                                        </motion.div>
-                                    ) : (
-                                        step.number
-                                    )}
-                                </motion.div>
-                                <span
-                                    className={`text-xs font-medium transition-colors duration-300 ${
-                                        currentStep >= step.number
-                                            ? "text-foreground/80"
-                                            : "text-muted-foreground/40"
-                                    }`}
-                                >
-                                    {step.label}
-                                </span>
-                            </div>
-                            {index < STEPS.length - 1 && (
-                                <div className="relative flex-1 mx-3 mb-6 h-px">
-                                    <div className="absolute inset-0 bg-border/30" />
-                                    <motion.div
-                                        className="absolute inset-y-0 left-0 bg-emerald-500/40"
-                                        initial={{ width: "0%" }}
-                                        animate={{
-                                            width: currentStep > step.number ? "100%" : "0%",
-                                        }}
-                                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                                    />
-                                </div>
-                            )}
-                        </React.Fragment>
-                    ))}
+            {/* Progress bar */}
+            <div className="w-full max-w-xl px-6 pt-12 pb-8 relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-muted-foreground">
+                        Step {currentStep} of {TOTAL_STEPS}{" "}
+                        <span className="text-foreground/70 font-medium">
+                            · {STEP_LABELS[currentStep - 1]}
+                        </span>
+                    </span>
+                </div>
+                <div className="relative h-1 w-full rounded-full bg-border/30 overflow-hidden">
+                    <motion.div
+                        className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                        initial={{ width: "0%" }}
+                        animate={{
+                            width: `${(currentStep / TOTAL_STEPS) * 100}%`,
+                        }}
+                        transition={{ duration: 0.5, ease: "easeInOut" }}
+                    />
                 </div>
             </div>
 
-            <p className="sr-only">Step {currentStep} of 4: {STEPS[currentStep - 1]!.label}</p>
+            <p className="sr-only">
+                Step {currentStep} of {TOTAL_STEPS}: {STEP_LABELS[currentStep - 1]}
+            </p>
 
-            {/* Step Content with AnimatePresence */}
-            <div className="w-full max-w-xl px-6 relative z-10">
+            {/* Step Content */}
+            <div
+                className={`w-full px-6 relative z-10 transition-all duration-300 ${
+                    useWideContainer ? "max-w-3xl" : "max-w-xl"
+                }`}
+            >
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={currentStep}
@@ -248,26 +248,66 @@ export function Onboarding({ userName }: OnboardingProps) {
                             filter: { duration: 0.25 },
                         }}
                     >
+                        {/* Step 1: Welcome */}
                         {currentStep === 1 && (
                             <WelcomeStep userName={userName} onNext={handleNext} />
                         )}
+
+                        {/* Step 2: Create Project */}
                         {currentStep === 2 && (
                             <CreateProjectStep
                                 onProjectCreated={handleProjectCreated}
                                 onBack={handleBack}
+                                initialName={createdProjectName ?? ""}
+                                initialDescription=""
+                                alreadyCreated={!!createdProjectId}
                             />
                         )}
+
+                        {/* Step 3: Create Goal */}
                         {currentStep === 3 && (
                             <CreateGoalStep
                                 projectId={createdProjectId}
+                                projectName={createdProjectName}
+                                onGoalCreated={handleGoalCreated}
+                                onBack={handleBack}
+                                initialData={createdGoalData}
+                            />
+                        )}
+
+                        {/* Step 4: Create Habit */}
+                        {currentStep === 4 && (
+                            <CreateHabitStep
+                                onHabitCreated={handleHabitCreated}
+                                onNext={handleNext}
+                                onBack={handleBack}
+                                initialData={createdHabitData}
+                            />
+                        )}
+
+                        {/* Step 5: Notes Intro */}
+                        {currentStep === 5 && (
+                            <NotesIntroStep
+                                goalTitle={createdGoalData?.title ?? null}
                                 onNext={handleNext}
                                 onBack={handleBack}
                             />
                         )}
-                        {currentStep === 4 && (
-                            <CreateHabitStep
-                                onComplete={handleOnboardingComplete}
+
+                        {/* Step 6: Chrome Extension */}
+                        {currentStep === 6 && (
+                            <ChromeExtensionStep
+                                onNext={handleNext}
                                 onBack={handleBack}
+                            />
+                        )}
+
+                        {/* Step 7: Choose Layout (last step) */}
+                        {currentStep === 7 && (
+                            <ChooseLayoutStep
+                                onNext={handleOnboardingComplete}
+                                onBack={handleBack}
+                                isLastStep
                                 loading={completeOnboarding.isPending}
                             />
                         )}
