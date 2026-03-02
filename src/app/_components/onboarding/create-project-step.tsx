@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -35,6 +35,7 @@ export function CreateProjectStep({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!name.trim() || createProject.isPending) return;
         createProject.mutate({
             name,
             description,
@@ -42,6 +43,22 @@ export function CreateProjectStep({
             startDate: new Date().toISOString(),
         });
     };
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (!name.trim() || createProject.isPending) return;
+                createProject.mutate({
+                    name,
+                    description,
+                    status: "active",
+                    startDate: new Date().toISOString(),
+                });
+            }
+        },
+        [name, description, createProject],
+    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -69,6 +86,7 @@ export function CreateProjectStep({
 
             <motion.form
                 onSubmit={handleSubmit}
+                onKeyDown={handleKeyDown}
                 className="flex flex-col gap-4"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}

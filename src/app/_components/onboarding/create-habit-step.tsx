@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -33,8 +33,11 @@ export function CreateHabitStep({
         },
     });
 
+    const isLoading = createHabit.isPending || loading;
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!title.trim() || isLoading) return;
         createHabit.mutate({
             title,
             description,
@@ -42,7 +45,20 @@ export function CreateHabitStep({
         });
     };
 
-    const isLoading = createHabit.isPending || loading;
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (!title.trim() || isLoading) return;
+                createHabit.mutate({
+                    title,
+                    description,
+                    frequency: "daily",
+                });
+            }
+        },
+        [title, description, isLoading, createHabit],
+    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -72,6 +88,7 @@ export function CreateHabitStep({
 
             <motion.form
                 onSubmit={handleSubmit}
+                onKeyDown={handleKeyDown}
                 className="flex flex-col gap-4"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}

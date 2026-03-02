@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -59,6 +59,7 @@ export function CreateGoalStep({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!title.trim() || createGoal.isPending) return;
         createGoal.mutate({
             title,
             priority,
@@ -66,6 +67,22 @@ export function CreateGoalStep({
             projectId: projectId ?? undefined,
         });
     };
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (!title.trim() || createGoal.isPending) return;
+                createGoal.mutate({
+                    title,
+                    priority,
+                    impact,
+                    projectId: projectId ?? undefined,
+                });
+            }
+        },
+        [title, priority, impact, projectId, createGoal],
+    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -93,6 +110,7 @@ export function CreateGoalStep({
 
             <motion.form
                 onSubmit={handleSubmit}
+                onKeyDown={handleKeyDown}
                 className="flex flex-col gap-4"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
