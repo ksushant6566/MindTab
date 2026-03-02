@@ -3,6 +3,7 @@ import { Flag, Zap, FolderOpen } from "lucide-react";
 import React, { useRef, KeyboardEvent } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 import {
     Select,
     SelectContent,
@@ -88,6 +89,7 @@ export const CreateGoal: React.FC<CreateGoalProps> = ({
     return (
         <form
             onSubmit={handleSubmit}
+            onKeyDown={handleCmdEnterSubmit}
             className="flex flex-col gap-2 rounded-lg border p-6"
         >
             <div className="space-y-2">

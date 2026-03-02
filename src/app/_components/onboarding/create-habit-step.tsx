@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -9,6 +9,7 @@ import { ArrowLeft, Repeat, Sparkles } from "lucide-react";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 
 type CreateHabitStepProps = {
     onComplete: () => void;
@@ -45,20 +46,6 @@ export function CreateHabitStep({
         });
     };
 
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                e.preventDefault();
-                if (!title.trim() || isLoading) return;
-                createHabit.mutate({
-                    title,
-                    description,
-                    frequency: "daily",
-                });
-            }
-        },
-        [title, description, isLoading, createHabit],
-    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -88,7 +75,7 @@ export function CreateHabitStep({
 
             <motion.form
                 onSubmit={handleSubmit}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleCmdEnterSubmit}
                 className="flex flex-col gap-4"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}

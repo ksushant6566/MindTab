@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -16,6 +16,7 @@ import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { goalPriorityEnum, goalImpactEnum } from "~/server/db/schema";
 import { motion } from "framer-motion";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 
 type Priority = (typeof goalPriorityEnum.enumValues)[number];
 type Impact = (typeof goalImpactEnum.enumValues)[number];
@@ -68,21 +69,6 @@ export function CreateGoalStep({
         });
     };
 
-    const handleKeyDown = useCallback(
-        (e: React.KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                e.preventDefault();
-                if (!title.trim() || createGoal.isPending) return;
-                createGoal.mutate({
-                    title,
-                    priority,
-                    impact,
-                    projectId: projectId ?? undefined,
-                });
-            }
-        },
-        [title, priority, impact, projectId, createGoal],
-    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -110,7 +96,7 @@ export function CreateGoalStep({
 
             <motion.form
                 onSubmit={handleSubmit}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleCmdEnterSubmit}
                 className="flex flex-col gap-4"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}

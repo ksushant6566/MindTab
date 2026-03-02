@@ -21,6 +21,7 @@ import {
 } from "~/components/ui/select";
 import { UpdateProjectDto } from "~/server/api/dtos/projects";
 import { projectStatusEnum } from "~/server/db/schema";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 
 type Project = {
     id: string;
@@ -108,7 +109,7 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                 <DialogHeader>
                     <DialogTitle>Edit Project</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} onKeyDown={handleCmdEnterSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="name">Project Name</Label>
                         <Input

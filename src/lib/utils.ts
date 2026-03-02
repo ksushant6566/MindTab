@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { habitTracker } from "~/server/db/schema";
 import { formatDistanceToNow } from "date-fns";
+import type React from "react";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -61,3 +62,10 @@ export const getTimeAgo = (date: Date | string) => {
     const targetDate = typeof date === "string" ? new Date(date) : date;
     return formatDistanceToNow(targetDate, { addSuffix: true });
 };
+
+export function handleCmdEnterSubmit(e: React.KeyboardEvent<HTMLFormElement>) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        e.currentTarget.requestSubmit();
+    }
+}

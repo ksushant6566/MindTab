@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
 import { habits } from "~/server/db/schema";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 
 const ZInsertHabit = createInsertSchema(habits).omit({ userId: true });
 
@@ -61,6 +62,7 @@ export const EditHabit: React.FC<EditHabitProps> = ({
     return (
         <form
             onSubmit={handleSubmit}
+            onKeyDown={handleCmdEnterSubmit}
             className="flex flex-col gap-2 rounded-lg border p-6"
         >
             <div className="space-y-2">

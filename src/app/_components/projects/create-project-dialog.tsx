@@ -21,6 +21,7 @@ import {
 } from "~/components/ui/select";
 import { CreateProjectDto } from "~/server/api/dtos/projects";
 import { projectStatusEnum } from "~/server/db/schema";
+import { handleCmdEnterSubmit } from "~/lib/utils";
 
 type CreateProjectDialogProps = {
     open: boolean;
@@ -89,7 +90,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
                 <DialogHeader>
                     <DialogTitle>Create New Project</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} onKeyDown={handleCmdEnterSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="name">Project Name</Label>
                         <Input
