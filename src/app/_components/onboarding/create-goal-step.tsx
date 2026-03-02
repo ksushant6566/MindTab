@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { ArrowLeft, Flag, Zap } from "lucide-react";
+import { ArrowLeft, Flag, Zap, Target } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -15,6 +15,7 @@ import {
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { goalPriorityEnum, goalImpactEnum } from "~/server/db/schema";
+import { motion } from "framer-motion";
 
 type Priority = (typeof goalPriorityEnum.enumValues)[number];
 type Impact = (typeof goalImpactEnum.enumValues)[number];
@@ -68,15 +69,35 @@ export function CreateGoalStep({
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Set your first goal</h2>
-                <p className="text-muted-foreground">
-                    What do you want to accomplish? Goals can be tracked from pending
-                    to completed.
-                </p>
+            <div className="space-y-3">
+                <motion.div
+                    className="flex items-center gap-3"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.05 }}
+                >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                        <Target className="h-5 w-5 text-amber-400" strokeWidth={1.75} />
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight">Set your first goal</h2>
+                </motion.div>
+                <motion.p
+                    className="text-muted-foreground text-sm leading-relaxed pl-[52px]"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.12 }}
+                >
+                    Goals can be tracked from pending to completed. What do you want to accomplish?
+                </motion.p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <motion.form
+                onSubmit={handleSubmit}
+                className="flex flex-col gap-4"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.2 }}
+            >
                 <div className="space-y-2">
                     <Label htmlFor="goal-title">Goal Title</Label>
                     <Input
@@ -186,7 +207,7 @@ export function CreateGoalStep({
                         Create Goal
                     </Button>
                 </div>
-            </form>
+            </motion.form>
         </div>
     );
 }

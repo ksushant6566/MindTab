@@ -5,9 +5,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Repeat, Sparkles } from "lucide-react";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 type CreateHabitStepProps = {
     onComplete: () => void;
@@ -45,15 +46,37 @@ export function CreateHabitStep({
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Build your first habit</h2>
-                <p className="text-muted-foreground">
-                    Track daily habits and build streaks. You earn 10 XP every time
-                    you complete one!
-                </p>
+            <div className="space-y-3">
+                <motion.div
+                    className="flex items-center gap-3"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.05 }}
+                >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
+                        <Repeat className="h-5 w-5 text-emerald-400" strokeWidth={1.75} />
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight">Build your first habit</h2>
+                </motion.div>
+                <motion.p
+                    className="text-muted-foreground text-sm leading-relaxed pl-[52px]"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.12 }}
+                >
+                    Track daily habits and build streaks. You earn{" "}
+                    <span className="text-amber-400 font-medium">10 XP</span>{" "}
+                    every time you complete one!
+                </motion.p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <motion.form
+                onSubmit={handleSubmit}
+                className="flex flex-col gap-4"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.2 }}
+            >
                 <div className="space-y-2">
                     <Label htmlFor="habit-title">Habit Title</Label>
                     <Input
@@ -99,10 +122,11 @@ export function CreateHabitStep({
                         disabled={!title.trim() || isLoading}
                         loading={isLoading}
                     >
-                        Create Habit & Finish Setup
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Finish Setup
                     </Button>
                 </div>
-            </form>
+            </motion.form>
         </div>
     );
 }
